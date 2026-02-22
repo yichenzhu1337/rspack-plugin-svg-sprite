@@ -11,10 +11,7 @@ export default function Buttons({ filterIcon, saveIcon, deleteIcon }) {
         <button className="btn btn-primary">
           <BaseIcon icon={filterIcon} size={16} /> Filter
         </button>
-        <button
-          className={`btn ${saved ? 'btn-liked' : ''}`}
-          onClick={() => setSaved(!saved)}
-        >
+        <button className={`btn ${saved ? 'btn-liked' : ''}`} onClick={() => setSaved(!saved)}>
           <BaseIcon icon={saveIcon} size={16} />
           {saved ? 'Saved!' : 'Save'}
         </button>

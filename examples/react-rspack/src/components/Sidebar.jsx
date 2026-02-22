@@ -27,9 +27,8 @@ export default function Sidebar({ navItems, starIcon }) {
         <div className="sidebar-content">
           <h3>{active}</h3>
           <p>
-            This sidebar uses SVG sprite icons loaded via{' '}
-            <code>rspack-plugin-svg-sprite</code> in extract mode.
-            Each icon is a <code>&lt;use&gt;</code> reference to a{' '}
+            This sidebar uses SVG sprite icons loaded via <code>rspack-plugin-svg-sprite</code> in
+            extract mode. Each icon is a <code>&lt;use&gt;</code> reference to a{' '}
             <code>&lt;symbol&gt;</code> inside the extracted <code>sprite.svg</code>.
           </p>
           <p className="active-info">

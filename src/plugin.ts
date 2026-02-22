@@ -73,18 +73,26 @@ class SvgSpritePlugin {
           s.id +
           '-usage" xlink:href="#' +
           s.id +
-          '" width="100%" height="100%" class="sprite-symbol-usage" />'
+          '" width="100%" height="100%" class="sprite-symbol-usage" />',
       )
       .join('\n');
 
-    return '<svg ' + attrs + '>\n<defs>\n' + styles + '\n' + symbolsContent + '\n</defs>\n' + usages + '\n</svg>';
+    return (
+      '<svg ' +
+      attrs +
+      '>\n<defs>\n' +
+      styles +
+      '\n' +
+      symbolsContent +
+      '\n</defs>\n' +
+      usages +
+      '\n</svg>'
+    );
   }
 
-  apply(compiler: Compiler): void {
-    const plugin = this;
-
+  apply = (compiler: Compiler): void => {
     compiler.hooks.thisCompilation.tap(NAMESPACE, (compilation: Compilation) => {
-      (compilation as any)[NAMESPACE] = plugin;
+      (compilation as any)[NAMESPACE] = this;
 
       compilation.hooks.processAssets.tap(
         {
@@ -94,17 +102,17 @@ class SvgSpritePlugin {
             : 0,
         },
         () => {
-          if (plugin.symbols.length === 0) return;
+          if (this.symbols.length === 0) return;
 
           const symbolsByFile: Record<string, SymbolData[]> = {};
-          plugin.symbols.forEach((sym) => {
+          this.symbols.forEach((sym) => {
             const filename = sym.spriteFilename || 'sprite.svg';
             if (!symbolsByFile[filename]) symbolsByFile[filename] = [];
             symbolsByFile[filename].push(sym);
           });
 
           Object.keys(symbolsByFile).forEach((filename) => {
-            const content = plugin.generateSprite(symbolsByFile[filename]);
+            const content = this.generateSprite(symbolsByFile[filename]);
 
             let RawSource: any;
             if ((compiler as any).rspack && (compiler as any).rspack.sources) {
@@ -126,14 +134,14 @@ class SvgSpritePlugin {
 
             compilation.emitAsset(filename, new RawSource(content));
           });
-        }
+        },
       );
     });
 
     compiler.hooks.afterCompile.tap(NAMESPACE, () => {
-      plugin.symbols = [];
+      this.symbols = [];
     });
-  }
+  };
 }
 
 export = SvgSpritePlugin;

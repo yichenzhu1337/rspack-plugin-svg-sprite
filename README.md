@@ -51,7 +51,7 @@ import logo from './logo.svg';
 // In JSX:
 <svg viewBox={logo.viewBox}>
   <use xlinkHref={logo.url} />
-</svg>
+</svg>;
 
 // In plain HTML template string:
 const html = `
@@ -104,25 +104,25 @@ import icon from './icon.svg';
 
 <svg viewBox={icon.viewBox}>
   <use xlinkHref={icon.url} />
-</svg>
+</svg>;
 ```
 
 ## Loader Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `symbolId` | `string \| function` | `'[name]'` | Pattern for generating symbol IDs. Supports `[name]`, `[folder]`, `[ext]` placeholders. Can be a function `(filePath) => id`. |
-| `esModule` | `boolean` | `true` | Use ES module export (`export default`) vs CommonJS (`module.exports`). |
-| `extract` | `boolean` | `false` | Enable extract mode to generate an external sprite file. |
-| `spriteFilename` | `string` | `'sprite.svg'` | Filename for the extracted sprite (extract mode only). |
-| `publicPath` | `string` | `''` | Public path prefix for sprite URL (extract mode only). |
+| Option           | Type                 | Default        | Description                                                                                                                   |
+| ---------------- | -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `symbolId`       | `string \| function` | `'[name]'`     | Pattern for generating symbol IDs. Supports `[name]`, `[folder]`, `[ext]` placeholders. Can be a function `(filePath) => id`. |
+| `esModule`       | `boolean`            | `true`         | Use ES module export (`export default`) vs CommonJS (`module.exports`).                                                       |
+| `extract`        | `boolean`            | `false`        | Enable extract mode to generate an external sprite file.                                                                      |
+| `spriteFilename` | `string`             | `'sprite.svg'` | Filename for the extracted sprite (extract mode only).                                                                        |
+| `publicPath`     | `string`             | `''`           | Public path prefix for sprite URL (extract mode only).                                                                        |
 
 ## Plugin Options (Extract Mode Only)
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `plainSprite` | `boolean` | `false` | Generate a plain sprite without styles and usages. |
-| `spriteAttrs` | `object` | `{}` | Additional attributes to add to the `<svg>` sprite element. |
+| Option        | Type      | Default | Description                                                 |
+| ------------- | --------- | ------- | ----------------------------------------------------------- |
+| `plainSprite` | `boolean` | `false` | Generate a plain sprite without styles and usages.          |
+| `spriteAttrs` | `object`  | `{}`    | Additional attributes to add to the `<svg>` sprite element. |
 
 ## Migration from svg-sprite-loader
 
@@ -159,12 +159,14 @@ The exported symbol object has the same shape (`id`, `viewBox`, `url`, `content`
 ## How It Works
 
 ### Inline Mode
+
 1. The loader reads each SVG file and wraps its content into an SVG `<symbol>` element.
 2. It generates JavaScript that imports a browser-side sprite manager.
 3. At runtime, the sprite manager creates a hidden `<svg>` element in `document.body` and appends all symbols to it.
 4. You reference symbols via `<use xlink:href="#symbolId" />`.
 
 ### Extract Mode
+
 1. The loader reads each SVG and wraps it as a `<symbol>`, then registers it with the plugin.
 2. During the `processAssets` compilation stage, the plugin collects all registered symbols and emits a combined `.svg` sprite file.
 3. The exported module points to the external file URL (`/path/sprite.svg#symbolId`).
@@ -179,7 +181,7 @@ The exported symbol object has the same shape (`id`, `viewBox`, `url`, `content`
 The `examples/` directory contains two demo apps you can run locally:
 
 - **`examples/react-rspack`** — React app bundled with Rspack, using `rspack-plugin-svg-sprite` in extract mode (port 3000)
-- **`examples/react-webpack`** — React app bundled with Webpack 5, using the original `svg-sprite-loader` for comparison (port 4001)
+- **`examples/react-webpack`** — React app bundled with Webpack 5, using the original `svg-sprite-loader` for comparison (port 4000)
 
 ```bash
 # React + Rspack example

@@ -21,7 +21,8 @@ export default function IconGallery({ icons }) {
       </div>
       {selected && (
         <div className="selection-info">
-          Selected: <code>{selected}</code> — URL: <code>{icons.find(i => i.name === selected)?.symbol.url}</code>
+          Selected: <code>{selected}</code> — URL:{' '}
+          <code>{icons.find((i) => i.name === selected)?.symbol.url}</code>
         </div>
       )}
     </section>

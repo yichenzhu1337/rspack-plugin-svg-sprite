@@ -13,7 +13,10 @@ interface MockLoaderContext {
   _compilation: Record<string, unknown>;
 }
 
-function createMockLoaderContext(resourcePath: string, options: Record<string, unknown> = {}): MockLoaderContext {
+function createMockLoaderContext(
+  resourcePath: string,
+  options: Record<string, unknown> = {},
+): MockLoaderContext {
   return {
     resourcePath,
     cacheable() {},
@@ -128,7 +131,9 @@ describe('Loader', () => {
       const content = fs.readFileSync(fullPath, 'utf-8');
       const pluginMock = {
         symbols: [] as Array<{ id: string; content: string }>,
-        addSymbol(data: { id: string; content: string }) { this.symbols.push(data); },
+        addSymbol(data: { id: string; content: string }) {
+          this.symbols.push(data);
+        },
       };
       const ctx = createMockLoaderContext(fullPath, { extract: true });
       ctx._compilation[loader.NAMESPACE] = pluginMock;

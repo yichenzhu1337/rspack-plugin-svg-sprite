@@ -53,14 +53,14 @@ import homeIcon from './icons/home.svg';
 
 <svg viewBox={homeIcon.viewBox}>
   <use xlinkHref={homeIcon.url} />
-</svg>
+</svg>;
 ```
 
 The `BaseIcon` component wraps this pattern for reuse:
 
 ```jsx
 import BaseIcon from './components/BaseIcon';
-<BaseIcon icon={homeIcon} size={24} />
+<BaseIcon icon={homeIcon} size={24} />;
 ```
 
 ### What the demo shows

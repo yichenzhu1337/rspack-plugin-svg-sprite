@@ -19,7 +19,7 @@ class SpriteSymbol {
   }
 
   get url(): string {
-    return this._url || ('#' + this.id);
+    return this._url || '#' + this.id;
   }
 
   set url(val: string) {
