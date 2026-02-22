@@ -179,7 +179,7 @@ The exported symbol object has the same shape (`id`, `viewBox`, `url`, `content`
 The `examples/` directory contains two demo apps you can run locally:
 
 - **`examples/react-rspack`** — React app bundled with Rspack, using `rspack-plugin-svg-sprite` in extract mode (port 3000)
-- **`examples/webpack-legacy`** — Vanilla JS app bundled with Webpack 5, using the original `svg-sprite-loader` for comparison (port 4001)
+- **`examples/react-webpack`** — React app bundled with Webpack 5, using the original `svg-sprite-loader` for comparison (port 4001)
 
 ```bash
 # React + Rspack example
@@ -187,8 +187,8 @@ cd examples/react-rspack
 pnpm install
 pnpm dev
 
-# Webpack legacy example
-cd examples/webpack-legacy
+# React + Webpack example
+cd examples/react-webpack
 pnpm install
 pnpm dev
 ```

@@ -4,7 +4,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/index.jsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.[contenthash:8].js',
@@ -14,19 +14,31 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              ['@babel/preset-react', { runtime: 'automatic' }],
+            ],
+          },
+        },
+      },
+      {
         test: /\.css$/i,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
-      // svg-sprite-loader in extract mode
       {
         test: /\.svg$/,
-        include: [path.resolve(__dirname, 'src/images/icons')],
+        include: [path.resolve(__dirname, 'src/icons')],
         use: [
           {
             loader: 'svg-sprite-loader',
             options: {
               extract: true,
-              spriteFilename: (svgPath) => `sprite${svgPath.substr(-4)}`,
+              spriteFilename: 'sprite.svg',
             },
           },
           {
@@ -42,14 +54,16 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html',
-      title: 'SVG Sprite Demo (Old Pattern)',
+      title: 'SVG Sprite Demo — React + Webpack',
     }),
     new MiniCssExtractPlugin({
       filename: 'styles.[contenthash:8].css',
     }),
-    // SpriteLoaderPlugin collects all extracted symbols and emits sprite.svg
     new SpriteLoaderPlugin(),
   ],
+  resolve: {
+    extensions: ['.js', '.jsx'],
+  },
   devServer: {
     port: 4001,
     hot: true,
