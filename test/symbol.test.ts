@@ -1,6 +1,6 @@
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-const SpriteSymbol = require('../runtime/symbol');
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import SpriteSymbol from '../dist/runtime/symbol';
 
 describe('SpriteSymbol', () => {
   it('stores id, viewBox, and content from constructor data', () => {
@@ -12,7 +12,7 @@ describe('SpriteSymbol', () => {
 
     assert.equal(sym.id, 'icon-arrow');
     assert.equal(sym.viewBox, '0 0 24 24');
-    assert.ok(sym.content.includes('<symbol'));
+    assert.ok(sym.content!.includes('<symbol'));
   });
 
   it('.url returns a fragment reference "#id"', () => {

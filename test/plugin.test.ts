@@ -1,52 +1,62 @@
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-const SvgSpritePlugin = require('../plugin');
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import SvgSpritePlugin from '../dist/index';
+
+interface MockSource {
+  _content: string;
+  source(): string;
+  size(): number;
+  buffer(): Buffer;
+  map(): null;
+  sourceAndMap(): { source: string; map: null };
+}
 
 function createMockCompiler() {
-  const processAssetsTaps = [];
-  const afterCompileTaps = [];
+  const processAssetsTaps: Array<(assets: Record<string, MockSource>) => void> = [];
+  const afterCompileTaps: Array<(compilation: any) => void> = [];
 
   const compiler = {
     rspack: {
       Compilation: { PROCESS_ASSETS_STAGE_ADDITIONAL: -2000 },
       sources: {
-        RawSource: class RawSource {
-          constructor(content) {
+        RawSource: class RawSource implements MockSource {
+          _content: string;
+          constructor(content: string) {
             this._content = content;
           }
           source() { return this._content; }
           size() { return this._content.length; }
           buffer() { return Buffer.from(this._content); }
           map() { return null; }
-          sourceAndMap() { return { source: this._content, map: null }; }
+          sourceAndMap() { return { source: this._content, map: null as null }; }
         },
       },
     },
     hooks: {
       thisCompilation: {
-        tap(name, fn) {
+        tap(_name: string, fn: (compilation: any) => void) {
           compiler._thisCompilationFn = fn;
         },
       },
       afterCompile: {
-        tap(name, fn) {
+        tap(_name: string, fn: (compilation: any) => void) {
           afterCompileTaps.push(fn);
         },
       },
     },
-    _thisCompilationFn: null,
+    _thisCompilationFn: null as ((compilation: any) => void) | null,
     _afterCompileTaps: afterCompileTaps,
   };
 
   function runCompilation() {
-    const emittedAssets = {};
+    const emittedAssets: Record<string, MockSource> = {};
     const compilation = {
-      emitAsset(name, source) {
+      emitAsset(name: string, source: MockSource) {
         emittedAssets[name] = source;
       },
       hooks: {
         processAssets: {
-          tap(opts, fn) {
+          tap(_opts: any, fn: (assets: Record<string, MockSource>) => void) {
             processAssetsTaps.push(fn);
           },
         },
@@ -92,10 +102,10 @@ describe('SvgSpritePlugin', () => {
   it('registers itself on compilation[NAMESPACE] during thisCompilation', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
-    plugin.apply(compiler);
+    plugin.apply(compiler as any);
 
     const { compilation } = runCompilation();
-    assert.strictEqual(compilation['rspack-plugin-svg-sprite'], plugin);
+    assert.strictEqual((compilation as any)['rspack-plugin-svg-sprite'], plugin);
   });
 
   it('collects symbols via addSymbol()', () => {
@@ -116,7 +126,7 @@ describe('SvgSpritePlugin', () => {
   it('emits a sprite.svg asset during processAssets', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
-    plugin.apply(compiler);
+    plugin.apply(compiler as any);
 
     plugin.addSymbol({
       id: 'icon-star',
@@ -139,7 +149,7 @@ describe('SvgSpritePlugin', () => {
   it('groups symbols into separate sprite files by spriteFilename', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
-    plugin.apply(compiler);
+    plugin.apply(compiler as any);
 
     plugin.addSymbol({ id: 'a', content: '<symbol id="a"/>', spriteFilename: 'icons.svg' });
     plugin.addSymbol({ id: 'b', content: '<symbol id="b"/>', spriteFilename: 'logos.svg' });
@@ -156,7 +166,7 @@ describe('SvgSpritePlugin', () => {
   it('includes custom spriteAttrs in the generated SVG', () => {
     const plugin = new SvgSpritePlugin({ spriteAttrs: { id: 'my-sprite', class: 'hidden' } });
     const { compiler, runCompilation } = createMockCompiler();
-    plugin.apply(compiler);
+    plugin.apply(compiler as any);
 
     plugin.addSymbol({ id: 'x', content: '<symbol id="x"/>', spriteFilename: 'sprite.svg' });
 
@@ -171,7 +181,7 @@ describe('SvgSpritePlugin', () => {
   it('clears symbols after compilation (afterCompile hook)', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
-    plugin.apply(compiler);
+    plugin.apply(compiler as any);
 
     plugin.addSymbol({ id: 'temp', content: '<symbol/>', spriteFilename: 'sprite.svg' });
     assert.equal(plugin.symbols.length, 1);
@@ -185,7 +195,7 @@ describe('SvgSpritePlugin', () => {
   it('does not emit anything when no symbols are registered', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
-    plugin.apply(compiler);
+    plugin.apply(compiler as any);
 
     const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
