@@ -117,10 +117,6 @@ class SvgSpritePlugin {
         },
       );
     });
-
-    compiler.hooks.afterCompile.tap(NAMESPACE, () => {
-      this.symbols = [];
-    });
   };
 }
 

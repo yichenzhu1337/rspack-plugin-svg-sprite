@@ -11,9 +11,6 @@ interface MockSource {
 }
 
 function createMockCompiler() {
-  const processAssetsTaps: Array<(assets: Record<string, MockSource>) => void> = [];
-  const afterCompileTaps: Array<(compilation: any) => void> = [];
-
   const compiler = {
     rspack: {
       Compilation: { PROCESS_ASSETS_STAGE_ADDITIONAL: -2000 },
@@ -47,17 +44,12 @@ function createMockCompiler() {
           compiler._thisCompilationFn = fn;
         },
       },
-      afterCompile: {
-        tap(_name: string, fn: (compilation: any) => void) {
-          afterCompileTaps.push(fn);
-        },
-      },
     },
     _thisCompilationFn: null as ((compilation: any) => void) | null,
-    _afterCompileTaps: afterCompileTaps,
   };
 
   function runCompilation() {
+    const processAssetsTaps: Array<(assets: Record<string, MockSource>) => void> = [];
     const emittedAssets: Record<string, MockSource> = {};
     const compilation = {
       emitAsset(name: string, source: MockSource) {
@@ -81,9 +73,6 @@ function createMockCompiler() {
       emittedAssets,
       runProcessAssets() {
         processAssetsTaps.forEach((fn) => fn(emittedAssets));
-      },
-      runAfterCompile() {
-        afterCompileTaps.forEach((fn) => fn(compilation));
       },
     };
   }
@@ -92,9 +81,6 @@ function createMockCompiler() {
 }
 
 function createMockWebpackCompiler() {
-  const processAssetsTaps: Array<(assets: Record<string, MockSource>) => void> = [];
-  const afterCompileTaps: Array<(compilation: any) => void> = [];
-
   const compiler = {
     hooks: {
       thisCompilation: {
@@ -102,17 +88,12 @@ function createMockWebpackCompiler() {
           compiler._thisCompilationFn = fn;
         },
       },
-      afterCompile: {
-        tap(_name: string, fn: (compilation: any) => void) {
-          afterCompileTaps.push(fn);
-        },
-      },
     },
     _thisCompilationFn: null as ((compilation: any) => void) | null,
-    _afterCompileTaps: afterCompileTaps,
   };
 
   function runCompilation() {
+    const processAssetsTaps: Array<(assets: Record<string, MockSource>) => void> = [];
     const emittedAssets: Record<string, MockSource> = {};
     const compilation = {
       emitAsset(name: string, source: MockSource) {
@@ -136,9 +117,6 @@ function createMockWebpackCompiler() {
       emittedAssets,
       runProcessAssets() {
         processAssetsTaps.forEach((fn) => fn(emittedAssets));
-      },
-      runAfterCompile() {
-        afterCompileTaps.forEach((fn) => fn(compilation));
       },
     };
   }
@@ -254,18 +232,26 @@ describe('SvgSpritePlugin', () => {
     expect(output).toContain('class="hidden"');
   });
 
-  it('clears symbols after compilation (afterCompile hook)', () => {
+  it('persists symbols across compilations for HMR compatibility', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
-    plugin.addSymbol({ id: 'temp', content: '<symbol/>', spriteFilename: 'sprite.svg' });
-    expect(plugin.symbols.length).toBe(1);
+    plugin.addSymbol({
+      id: 'icon-a',
+      content: '<symbol id="icon-a"/>',
+      spriteFilename: 'sprite.svg',
+    });
 
-    const { runAfterCompile } = runCompilation();
-    runAfterCompile();
+    const first = runCompilation();
+    first.runProcessAssets();
+    expect(first.emittedAssets).toHaveProperty('sprite.svg');
+    expect(first.emittedAssets['sprite.svg'].source()).toContain('icon-a');
 
-    expect(plugin.symbols.length).toBe(0);
+    const second = runCompilation();
+    second.runProcessAssets();
+    expect(second.emittedAssets).toHaveProperty('sprite.svg');
+    expect(second.emittedAssets['sprite.svg'].source()).toContain('icon-a');
   });
 
   it('does not emit anything when no symbols are registered', () => {
