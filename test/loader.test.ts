@@ -1,12 +1,20 @@
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-const path = require('path');
-const fs = require('fs');
-const loader = require('../loader');
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import path from 'path';
+import fs from 'fs';
+import loader from '../dist/loader';
 
 const FIXTURES = path.resolve(__dirname, 'fixtures');
 
-function createMockLoaderContext(resourcePath, options = {}) {
+interface MockLoaderContext {
+  resourcePath: string;
+  cacheable(): void;
+  getOptions(): Record<string, unknown>;
+  _compiler: { context: string };
+  _compilation: Record<string, unknown>;
+}
+
+function createMockLoaderContext(resourcePath: string, options: Record<string, unknown> = {}): MockLoaderContext {
   return {
     resourcePath,
     cacheable() {},
@@ -18,11 +26,11 @@ function createMockLoaderContext(resourcePath, options = {}) {
   };
 }
 
-function runLoader(svgPath, options = {}) {
+function runLoader(svgPath: string, options: Record<string, unknown> = {}): string {
   const fullPath = path.resolve(FIXTURES, svgPath);
   const content = fs.readFileSync(fullPath, 'utf-8');
   const ctx = createMockLoaderContext(fullPath, options);
-  return loader.call(ctx, content);
+  return loader.call(ctx as any, content);
 }
 
 describe('Loader', () => {
@@ -41,7 +49,6 @@ describe('Loader', () => {
 
     it('preserves stroke/fill attributes from the original SVG', () => {
       const output = runLoader('arrow.svg');
-      // Attributes are inside a JSON.stringify'd string, so quotes are escaped
       assert.ok(output.includes('stroke=\\"currentColor\\"'));
       assert.ok(output.includes('stroke-width=\\"2\\"'));
     });
@@ -71,7 +78,7 @@ describe('Loader', () => {
 
     it('supports a function for symbolId', () => {
       const output = runLoader('arrow.svg', {
-        symbolId: (filePath) => 'custom-' + path.basename(filePath, '.svg'),
+        symbolId: (filePath: string) => 'custom-' + path.basename(filePath, '.svg'),
       });
       assert.ok(output.includes('custom-arrow'));
     });
@@ -121,13 +128,13 @@ describe('Loader', () => {
       const fullPath = path.resolve(FIXTURES, 'star.svg');
       const content = fs.readFileSync(fullPath, 'utf-8');
       const pluginMock = {
-        symbols: [],
-        addSymbol(data) { this.symbols.push(data); },
+        symbols: [] as Array<{ id: string; content: string }>,
+        addSymbol(data: { id: string; content: string }) { this.symbols.push(data); },
       };
       const ctx = createMockLoaderContext(fullPath, { extract: true });
       ctx._compilation[loader.NAMESPACE] = pluginMock;
 
-      loader.call(ctx, content);
+      loader.call(ctx as any, content);
 
       assert.equal(pluginMock.symbols.length, 1);
       assert.equal(pluginMock.symbols[0].id, 'star');
@@ -139,7 +146,7 @@ describe('Loader', () => {
     it('throws when content has no <svg tag', () => {
       const ctx = createMockLoaderContext('/fake/not-svg.svg');
       assert.throws(
-        () => loader.call(ctx, '<div>not an svg</div>'),
+        () => loader.call(ctx as any, '<div>not an svg</div>'),
         /Invalid SVG content/
       );
     });

@@ -3,24 +3,39 @@
   "version": "1.0.0",
   "packageManager": "pnpm@10.29.3",
   "description": "Rspack loader and plugin for creating SVG sprites, compatible replacement for svg-sprite-loader",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./index.js",
-    "./plugin": "./plugin.js",
-    "./loader": "./loader.js",
-    "./runtime/browser-sprite": "./runtime/browser-sprite.js",
-    "./runtime/symbol": "./runtime/symbol.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "default": "./dist/plugin.js"
+    },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "default": "./dist/loader.js"
+    },
+    "./runtime/browser-sprite": {
+      "types": "./dist/runtime/browser-sprite.d.ts",
+      "default": "./dist/runtime/browser-sprite.js"
+    },
+    "./runtime/symbol": {
+      "types": "./dist/runtime/symbol.d.ts",
+      "default": "./dist/runtime/symbol.js"
+    }
   },
   "scripts": {
-    "test": "node --test test/loader.test.js test/plugin.test.js test/symbol.test.js test/browser-sprite.test.js",
+    "build": "tsc",
+    "test": "tsc && tsx --test test/loader.test.ts test/plugin.test.ts test/symbol.test.ts test/browser-sprite.test.ts",
+    "prepublishOnly": "pnpm build",
     "dev:rspack": "pnpm --filter svg-sprite-consumer-demo dev",
     "dev:webpack": "pnpm --filter svg-sprite-webpack-demo dev"
   },
   "files": [
-    "index.js",
-    "loader.js",
-    "plugin.js",
-    "runtime/",
+    "dist/",
     "README.md",
     "LICENSE"
   ],
@@ -52,6 +67,8 @@
     }
   },
   "devDependencies": {
-    "@rspack/core": "^1.0.0"
+    "@rspack/core": "^1.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
