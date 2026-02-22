@@ -74,6 +74,17 @@
     "url": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/issues"
   },
   "homepage": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite#readme",
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
+  },
   "peerDependencies": {
     "@rspack/core": ">=0.5.0"
   },
@@ -92,6 +103,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
+    "semantic-release": "^25.0.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.0"
   }
