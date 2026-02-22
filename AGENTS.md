@@ -110,9 +110,9 @@ pnpm dev:webpack    # Start react-webpack example on :4000
 
 The GitHub Actions workflow (`ci.yml`) has four jobs:
 
-1. **lint** — typecheck, eslint, prettier check (runs in parallel with test)
-2. **test** — build, run tests with coverage, upload to Codecov
-3. **build-examples** — builds both example apps (depends on test)
+1. **lint** — typecheck, eslint, prettier check (runs in parallel with test and build-examples)
+2. **test** — run tests with coverage, upload to Codecov (runs in parallel with lint and build-examples)
+3. **build-examples** — builds both example apps (runs in parallel with lint and test)
 4. **release** — runs `semantic-release` on pushes to `main` after all other jobs pass. Publishes to npm and creates GitHub releases automatically.
 
 Branch protection on `main` requires PRs with passing CI status checks.

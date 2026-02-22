@@ -9,7 +9,7 @@ cd examples/react-rspack
 pnpm install
 ```
 
-This installs Rspack, React, and links the local `rspack-plugin-svg-sprite` package via `file:../..`.
+This installs Rspack, React, and links the local `rspack-plugin-svg-sprite` package via `workspace:*`.
 
 ## Scripts
 

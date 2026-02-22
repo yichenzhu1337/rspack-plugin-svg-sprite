@@ -187,17 +187,24 @@ The `examples/` directory contains two demo apps you can run locally:
 - **`examples/react-rspack`** — React app bundled with Rspack, using `rspack-plugin-svg-sprite` in extract mode (port 3000)
 - **`examples/react-webpack`** — React app bundled with Webpack 5, using the original `svg-sprite-loader` for comparison (port 4000)
 
-```bash
-# React + Rspack example
-cd examples/react-rspack
-pnpm install
-pnpm dev
+A live demo of the Rspack example is available at [yichenzhu1337.github.io/rspack-plugin-svg-sprite](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/).
 
-# React + Webpack example
-cd examples/react-webpack
+Both examples are part of the pnpm workspace, so you can run them from the project root:
+
+```bash
+# Install all dependencies (plugin + examples)
 pnpm install
-pnpm dev
+
+# Start the React + Rspack example
+pnpm dev:rspack
+
+# Start the React + Webpack example
+pnpm dev:webpack
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, project structure, and guidelines.
 
 ## License
 
