@@ -1,30 +1,44 @@
 # rspack-plugin-svg-sprite
 
+> SVG sprite loader and plugin for Rspack — a drop-in replacement for [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader) that works natively with [Rspack](https://rspack.dev/).
+
 [![CI](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml/badge.svg)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite/graph/badge.svg)](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite)
-[![npm](https://img.shields.io/npm/v/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
+[![npm version](https://img.shields.io/npm/v/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
+[![npm downloads](https://img.shields.io/npm/dm/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
+[![license](https://img.shields.io/npm/l/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 
-Rspack loader and plugin for creating SVG sprites. A compatible replacement for [svg-sprite-loader](https://github.com/JetBrains/svg-sprite-loader) that works natively with [Rspack](https://rspack.dev/).
+---
 
-## Why?
+## What is this?
 
-The original `svg-sprite-loader` relies on webpack-specific internal APIs (`NormalModule.getCompilationHooks`, `compilation.hooks.additionalAssets`, `compilation.hooks.afterOptimizeChunks`, etc.) that are not available in Rspack. This package reimplements the same functionality using Rspack-compatible APIs.
+`rspack-plugin-svg-sprite` lets you import `.svg` files in your Rspack (or Webpack 5) project and automatically combine them into an SVG sprite sheet — either inlined in the DOM or extracted as an external `.svg` file.
 
-## Installation
+It was created because the popular [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader) depends on internal Webpack APIs (`NormalModule.getCompilationHooks`, `compilation.hooks.additionalAssets`, etc.) that do not exist in Rspack. This package reimplements the same functionality using Rspack-compatible APIs while keeping the exact same exported symbol shape (`id`, `viewBox`, `url`, `content`), so your existing component code works without changes.
+
+## Features
+
+- **Inline mode** (default) — SVG symbols are injected into the DOM at runtime via a hidden `<svg>` element. No plugin needed.
+- **Extract mode** — SVG symbols are emitted as an external `.svg` sprite file at build time. Great for caching and performance.
+- **Drop-in replacement** for `svg-sprite-loader` — same config options, same export shape.
+- **Works with both Rspack and Webpack 5** — auto-detects the bundler at runtime.
+- **TypeScript** — fully typed, ships with `.d.ts` declarations.
+- **Lightweight** — zero runtime dependencies.
+- **Customizable symbol IDs** — use `[name]`, `[folder]`, or a custom function.
+
+## Quick Start
+
+### Install
 
 ```bash
-pnpm add rspack-plugin-svg-sprite -D
-# or
 npm install rspack-plugin-svg-sprite -D
+# or
+pnpm add rspack-plugin-svg-sprite -D
 # or
 yarn add rspack-plugin-svg-sprite -D
 ```
 
-## Usage
-
-### Inline Mode (Default)
-
-SVG symbols are injected into the page DOM at runtime. This is the simplest setup and requires no plugin.
+### Configure (inline mode)
 
 ```js
 // rspack.config.js
@@ -43,31 +57,25 @@ module.exports = {
 };
 ```
 
-Then import SVGs and use them:
+### Use in your components
 
 ```jsx
 import logo from './logo.svg';
 
-// logo.id       -> 'logo'
-// logo.viewBox  -> '0 0 24 24'
-// logo.url      -> '#logo'
+// logo.id      → "logo"
+// logo.viewBox → "0 0 24 24"
+// logo.url     → "#logo"
 
-// In JSX:
 <svg viewBox={logo.viewBox}>
   <use xlinkHref={logo.url} />
 </svg>;
-
-// In plain HTML template string:
-const html = `
-  <svg viewBox="${logo.viewBox}">
-    <use xlink:href="${logo.url}" />
-  </svg>
-`;
 ```
 
-### Extract Mode
+That's it. Every imported SVG is automatically registered as a `<symbol>` in a hidden sprite and referenced by `#id`.
 
-Generates an external `.svg` sprite file. Requires both the loader and the plugin.
+## Extract Mode
+
+To emit SVGs as an external `.svg` sprite file instead of inlining them, enable extract mode and add the plugin:
 
 ```js
 // rspack.config.js
@@ -91,46 +99,57 @@ module.exports = {
   plugins: [
     new SvgSpritePlugin({
       plainSprite: true,
-      spriteAttrs: {
-        id: 'svg-sprite',
-      },
+      spriteAttrs: { id: 'svg-sprite' },
     }),
   ],
 };
 ```
 
-In extract mode, the exported symbol includes the full URL:
+In extract mode, the exported `url` points to the external file:
 
 ```jsx
 import icon from './icon.svg';
 
-// icon.url -> '/assets/sprites/icons.svg#icon-icon'
+// icon.url → "/assets/sprites/icons.svg#icon-icon"
 
 <svg viewBox={icon.viewBox}>
   <use xlinkHref={icon.url} />
 </svg>;
 ```
 
-## Loader Options
+## API Reference
 
-| Option           | Type                 | Default        | Description                                                                                                                   |
-| ---------------- | -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `symbolId`       | `string \| function` | `'[name]'`     | Pattern for generating symbol IDs. Supports `[name]`, `[folder]`, `[ext]` placeholders. Can be a function `(filePath) => id`. |
-| `esModule`       | `boolean`            | `true`         | Use ES module export (`export default`) vs CommonJS (`module.exports`).                                                       |
-| `extract`        | `boolean`            | `false`        | Enable extract mode to generate an external sprite file.                                                                      |
-| `spriteFilename` | `string`             | `'sprite.svg'` | Filename for the extracted sprite (extract mode only).                                                                        |
-| `publicPath`     | `string`             | `''`           | Public path prefix for sprite URL (extract mode only).                                                                        |
+### Loader Options
 
-## Plugin Options (Extract Mode Only)
+| Option           | Type                 | Default        | Description                                                                                                               |
+| ---------------- | -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `symbolId`       | `string \| function` | `'[name]'`     | Pattern for generating symbol IDs. Supports `[name]`, `[folder]`, `[ext]` placeholders, or a function `(filePath) => id`. |
+| `esModule`       | `boolean`            | `true`         | Use ES module export (`export default`) vs CommonJS (`module.exports`).                                                   |
+| `extract`        | `boolean`            | `false`        | Enable extract mode to emit an external sprite file instead of inlining.                                                  |
+| `spriteFilename` | `string`             | `'sprite.svg'` | Output filename for the extracted sprite (extract mode only).                                                             |
+| `publicPath`     | `string`             | `''`           | Public URL prefix for the sprite file (extract mode only).                                                                |
 
-| Option        | Type      | Default | Description                                                 |
-| ------------- | --------- | ------- | ----------------------------------------------------------- |
-| `plainSprite` | `boolean` | `false` | Generate a plain sprite without styles and usages.          |
-| `spriteAttrs` | `object`  | `{}`    | Additional attributes to add to the `<svg>` sprite element. |
+### Plugin Options (Extract Mode)
 
-## Migration from svg-sprite-loader
+| Option        | Type      | Default | Description                                                             |
+| ------------- | --------- | ------- | ----------------------------------------------------------------------- |
+| `plainSprite` | `boolean` | `false` | Generate a plain sprite without preview styles and `<use>` elements.    |
+| `spriteAttrs` | `object`  | `{}`    | Additional attributes to add to the root `<svg>` element of the sprite. |
 
-Replace the loader and plugin references:
+### Exported Symbol Shape
+
+Every `import icon from './icon.svg'` returns an object with:
+
+| Property  | Type     | Example                                            | Description                                        |
+| --------- | -------- | -------------------------------------------------- | -------------------------------------------------- |
+| `id`      | `string` | `"icon-home"`                                      | The symbol ID inside the sprite.                   |
+| `viewBox` | `string` | `"0 0 24 24"`                                      | The original SVG `viewBox` attribute.              |
+| `url`     | `string` | `"#icon-home"` or `"/sprites/icons.svg#icon-home"` | Fragment reference (inline) or full URL (extract). |
+| `content` | `string` | `"<symbol id=\"icon-home\" ...>...</symbol>"`      | Raw `<symbol>` markup.                             |
+
+This matches `svg-sprite-loader`'s export shape exactly, so migrating requires no component changes.
+
+## Migrating from svg-sprite-loader
 
 ```diff
 // rspack.config.js
@@ -158,47 +177,53 @@ module.exports = {
 };
 ```
 
-The exported symbol object has the same shape (`id`, `viewBox`, `url`, `content`), so your component code should work without changes.
+Your component code stays the same — the exported symbol object has the identical shape (`id`, `viewBox`, `url`, `content`).
 
 ## How It Works
 
 ### Inline Mode
 
-1. The loader reads each SVG file and wraps its content into an SVG `<symbol>` element.
-2. It generates JavaScript that imports a browser-side sprite manager.
-3. At runtime, the sprite manager creates a hidden `<svg>` element in `document.body` and appends all symbols to it.
+1. The loader parses each `.svg` file and wraps its content in an SVG `<symbol>` element.
+2. It generates a JS module that imports a browser-side sprite manager.
+3. At runtime, the sprite manager creates a hidden `<svg>` element in `document.body` and appends all symbols.
 4. You reference symbols via `<use xlink:href="#symbolId" />`.
 
 ### Extract Mode
 
-1. The loader reads each SVG and wraps it as a `<symbol>`, then registers it with the plugin.
-2. During the `processAssets` compilation stage, the plugin collects all registered symbols and emits a combined `.svg` sprite file.
-3. The exported module points to the external file URL (`/path/sprite.svg#symbolId`).
+1. The loader wraps each SVG as a `<symbol>` and registers it with the plugin via the compilation object.
+2. During Rspack's `processAssets` stage, the plugin collects all registered symbols and emits a combined `.svg` sprite file.
+3. The exported JS module contains the external file URL (e.g., `/sprites/icons.svg#symbolId`).
 
 ## Compatibility
 
-- Rspack >= 0.5.0
-- Also works with webpack 5 (uses `compiler.rspack` detection with webpack-sources fallback)
+| Bundler                            | Version  | Status                                   |
+| ---------------------------------- | -------- | ---------------------------------------- |
+| [Rspack](https://rspack.dev/)      | >= 0.5.0 | Fully supported (primary target)         |
+| [Webpack](https://webpack.js.org/) | 5.x      | Supported via `webpack-sources` fallback |
 
 ## Examples
 
-The `examples/` directory contains two demo apps you can run locally:
+The repository includes two runnable demo apps:
 
-- **`examples/react-rspack`** — React app bundled with Rspack, using `rspack-plugin-svg-sprite` in extract mode (port 3000)
-- **`examples/react-webpack`** — React app bundled with Webpack 5, using the original `svg-sprite-loader` for comparison (port 4000)
+| Example                                    | Bundler   | Plugin                     | Port | Description                                          |
+| ------------------------------------------ | --------- | -------------------------- | ---- | ---------------------------------------------------- |
+| [`react-rspack`](examples/react-rspack/)   | Rspack    | `rspack-plugin-svg-sprite` | 3000 | Extract mode with icon gallery, sidebar, and buttons |
+| [`react-webpack`](examples/react-webpack/) | Webpack 5 | `svg-sprite-loader`        | 4000 | Same UI using the original loader (for comparison)   |
+
+**[Live demo (Rspack)](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** — see the plugin in action.
+
+Run locally from the project root:
 
 ```bash
-# React + Rspack example
-cd examples/react-rspack
 pnpm install
-pnpm dev
-
-# React + Webpack example
-cd examples/react-webpack
-pnpm install
-pnpm dev
+pnpm dev:rspack   # http://localhost:3000
+pnpm dev:webpack  # http://localhost:4000
 ```
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, project structure, and guidelines.
 
 ## License
 
-MIT
+[MIT](LICENSE)
