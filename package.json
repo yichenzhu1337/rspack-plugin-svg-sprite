@@ -1,8 +1,26 @@
 {
   "name": "rspack-plugin-svg-sprite",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.29.3",
   "description": "Rspack loader and plugin for creating SVG sprites, compatible replacement for svg-sprite-loader",
+  "author": "Yichen Zhu",
+  "license": "MIT",
+  "homepage": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yichenzhu1337/rspack-plugin-svg-sprite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/issues"
+  },
+  "keywords": [
+    "rspack",
+    "svg",
+    "sprite",
+    "svg-sprite",
+    "loader",
+    "plugin",
+    "icon"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -27,53 +45,25 @@
       "default": "./dist/runtime/symbol.js"
     }
   },
-  "scripts": {
-    "build": "tsc",
-    "test": "tsc && rstest run",
-    "test:ci": "tsc && rstest run --coverage",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm build",
-    "dev:rspack": "pnpm --filter svg-sprite-consumer-demo dev",
-    "dev:webpack": "pnpm --filter svg-sprite-webpack-demo dev",
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yaml,yml}": [
-      "prettier --write"
-    ]
-  },
   "files": [
     "dist/",
     "README.md",
     "LICENSE"
   ],
-  "keywords": [
-    "rspack",
-    "svg",
-    "sprite",
-    "svg-sprite",
-    "loader",
-    "plugin",
-    "icon"
-  ],
-  "author": "Yichen Zhu",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/yichenzhu1337/rspack-plugin-svg-sprite.git"
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && rstest run",
+    "test:ci": "tsc && rstest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "dev:rspack": "pnpm --filter svg-sprite-consumer-demo dev",
+    "dev:webpack": "pnpm --filter svg-sprite-webpack-demo dev",
+    "prepublishOnly": "pnpm build",
+    "prepare": "husky"
   },
-  "bugs": {
-    "url": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/issues"
-  },
-  "homepage": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite#readme",
   "peerDependencies": {
     "@rspack/core": ">=0.5.0"
   },
@@ -92,7 +82,20 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
+    "semantic-release": "^25.0.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.0"
+  },
+  "packageManager": "pnpm@10.29.3",
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
   }
 }
