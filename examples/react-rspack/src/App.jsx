@@ -42,6 +42,7 @@ module.exports = {
     rules: [
       {
         test: /\\.svg$/,
+        type: 'javascript/auto',
         loader: 'rspack-plugin-svg-sprite/loader',
         options: {
           extract: true,
