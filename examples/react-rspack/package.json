@@ -10,7 +10,7 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "rspack-plugin-svg-sprite": "file:../.."
+    "rspack-plugin-svg-sprite": "workspace:*"
   },
   "devDependencies": {
     "@rspack/cli": "^1.0.0",
