@@ -8,6 +8,8 @@
 [![npm downloads](https://img.shields.io/npm/dm/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
 [![license](https://img.shields.io/github/license/yichenzhu1337/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 
+**[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)**
+
 ---
 
 ## What is this?
