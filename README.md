@@ -32,10 +32,6 @@ It was created because the popular [`svg-sprite-loader`](https://github.com/JetB
 
 ```bash
 npm install rspack-plugin-svg-sprite -D
-# or
-pnpm add rspack-plugin-svg-sprite -D
-# or
-yarn add rspack-plugin-svg-sprite -D
 ```
 
 ### Configure (inline mode)
