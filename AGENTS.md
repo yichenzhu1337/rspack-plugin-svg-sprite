@@ -117,6 +117,19 @@ The GitHub Actions workflow (`ci.yml`) has four jobs:
 
 Branch protection on `main` requires PRs with passing CI status checks.
 
+## Pre-Push Checklist
+
+**You MUST run these commands locally and confirm they all pass before pushing or creating a PR.** These mirror the CI pipeline — if they pass locally, CI will pass.
+
+```bash
+pnpm typecheck        # TypeScript type checking (no emit)
+pnpm lint             # ESLint on src/
+pnpm format:check     # Prettier formatting check on ALL files
+pnpm test             # Build + run all tests with coverage
+```
+
+If `pnpm format:check` fails, run `pnpm format` to auto-fix, then stage the changes before committing.
+
 ## Common Tasks
 
 ### Adding a new loader option
