@@ -12,7 +12,9 @@
     "./runtime/symbol": "./runtime/symbol.js"
   },
   "scripts": {
-    "test": "node --test test/loader.test.js test/plugin.test.js test/symbol.test.js test/browser-sprite.test.js"
+    "test": "node --test test/loader.test.js test/plugin.test.js test/symbol.test.js test/browser-sprite.test.js",
+    "dev:rspack": "pnpm --filter svg-sprite-consumer-demo dev",
+    "dev:webpack": "pnpm --filter svg-sprite-webpack-demo dev"
   },
   "files": [
     "index.js",
