@@ -55,7 +55,7 @@ export default function App() {
       <IconGallery icons={allIcons} />
       <Sidebar navItems={navItems} brandIcon={approvedIcon} />
       <Buttons filterIcon={filterIcon} saveIcon={saveIcon} deleteIcon={deleteIcon} />
-      <Notifications iconMap={iconMap} />
+      <Notifications iconMap={iconMap} dismissIcon={closeIcon} />
 
       <section className="section">
         <h2>How It Works</h2>

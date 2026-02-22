@@ -1,16 +1,16 @@
-import { describe, it, expect, afterEach } from '@rstest/core';
-
-declare const __non_webpack_require__: NodeRequire;
+import { describe, it, expect, beforeEach, afterEach } from '@rstest/core';
+import sprite from '../runtime/browser-sprite';
 
 interface MockElement {
   tagName: string;
   attributes: Record<string, string>;
   style: Record<string, string>;
-  innerHTML: string;
+  _children: Array<{ id: string; html: string }>;
   setAttribute(k: string, v: string): void;
   getAttribute(k: string): string | undefined;
   querySelector(selector: string): { outerHTML: string } | null;
   insertAdjacentHTML(pos: string, html: string): void;
+  readonly innerHTML: string;
 }
 
 interface MockBody {
@@ -27,8 +27,7 @@ interface MockDocument {
   createElementNS(ns: string, tag: string): MockElement;
 }
 
-function createMockDOM(): MockDocument {
-  const elements: Record<string, { outerHTML: string }> = {};
+function createMockDOM(readyState = 'complete'): MockDocument {
   const body: MockBody = {
     firstChild: null,
     childNodes: [],
@@ -39,7 +38,7 @@ function createMockDOM(): MockDocument {
   };
 
   const mockDocument: MockDocument = {
-    readyState: 'complete',
+    readyState,
     body,
     _listeners: {},
     addEventListener(event: string, fn: () => void) {
@@ -51,7 +50,7 @@ function createMockDOM(): MockDocument {
         tagName: tag.toUpperCase(),
         attributes: {},
         style: {},
-        innerHTML: '',
+        _children: [],
         setAttribute(k: string, v: string) {
           this.attributes[k] = v;
         },
@@ -61,14 +60,26 @@ function createMockDOM(): MockDocument {
         querySelector(selector: string) {
           const idMatch = selector.match(/^#(.+)/);
           if (idMatch) {
-            return elements[idMatch[1]] || null;
+            const child = this._children.find((c) => c.id === idMatch[1]);
+            if (child) {
+              return {
+                get outerHTML() {
+                  return child.html;
+                },
+                set outerHTML(val: string) {
+                  child.html = val;
+                },
+              };
+            }
           }
           return null;
         },
         insertAdjacentHTML(_pos: string, html: string) {
-          this.innerHTML += html;
           const idMatch = html.match(/id="([^"]+)"/);
-          if (idMatch) elements[idMatch[1]] = { outerHTML: html };
+          this._children.push({ id: idMatch ? idMatch[1] : '', html });
+        },
+        get innerHTML() {
+          return this._children.map((c) => c.html).join('');
         },
       };
       return el;
@@ -78,24 +89,20 @@ function createMockDOM(): MockDocument {
   return mockDocument;
 }
 
-const SPRITE_MODULE = 'rspack-plugin-svg-sprite/runtime/browser-sprite';
-
-function requireFreshSprite() {
-  const resolved = __non_webpack_require__.resolve(SPRITE_MODULE);
-  delete __non_webpack_require__.cache[resolved];
-  return __non_webpack_require__(SPRITE_MODULE);
-}
-
 describe('browser-sprite', () => {
+  beforeEach(() => {
+    sprite._reset();
+  });
+
   afterEach(() => {
     delete (globalThis as any).document;
   });
 
-  it('auto-mounts a hidden SVG element into document.body when DOM is ready', () => {
+  it('mounts a hidden SVG element into document.body when mount() is called', () => {
     const mockDoc = createMockDOM();
     (globalThis as any).document = mockDoc;
 
-    requireFreshSprite();
+    sprite.mount();
 
     expect(mockDoc.body.childNodes.length).toBe(1);
     const svgEl = mockDoc.body.childNodes[0];
@@ -106,12 +113,21 @@ describe('browser-sprite', () => {
     expect(svgEl.attributes['aria-hidden']).toBe('true');
   });
 
-  it('appends symbol content to the sprite when add() is called', () => {
+  it('mount() is idempotent — calling it twice does not duplicate the sprite', () => {
     const mockDoc = createMockDOM();
     (globalThis as any).document = mockDoc;
 
-    const sprite = requireFreshSprite();
+    sprite.mount();
+    sprite.mount();
 
+    expect(mockDoc.body.childNodes.length).toBe(1);
+  });
+
+  it('appends symbol content to the sprite when add() is called after mount', () => {
+    const mockDoc = createMockDOM();
+    (globalThis as any).document = mockDoc;
+
+    sprite.mount();
     sprite.add({
       id: 'icon-arrow',
       content: '<symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>',
@@ -122,12 +138,26 @@ describe('browser-sprite', () => {
     expect(svgEl.innerHTML).toContain('<path');
   });
 
+  it('queues symbols added before mount and flushes on mount', () => {
+    const mockDoc = createMockDOM();
+    (globalThis as any).document = mockDoc;
+
+    sprite.add({
+      id: 'queued-icon',
+      content: '<symbol id="queued-icon" viewBox="0 0 24 24"><rect/></symbol>',
+    });
+
+    sprite.mount();
+
+    const svgEl = mockDoc.body.childNodes[0];
+    expect(svgEl.innerHTML).toContain('queued-icon');
+  });
+
   it('can add multiple symbols', () => {
     const mockDoc = createMockDOM();
     (globalThis as any).document = mockDoc;
 
-    const sprite = requireFreshSprite();
-
+    sprite.mount();
     sprite.add({
       id: 'icon-star',
       content: '<symbol id="icon-star" viewBox="0 0 32 32"><polygon points="16,2"/></symbol>',
@@ -143,25 +173,67 @@ describe('browser-sprite', () => {
     expect(svgEl.innerHTML).toContain('icon-circle');
   });
 
-  it('defers mounting when document is still loading', () => {
+  it('replaces existing symbol content when adding a symbol with the same id', () => {
     const mockDoc = createMockDOM();
-    mockDoc.readyState = 'loading';
     (globalThis as any).document = mockDoc;
 
-    const sprite = requireFreshSprite();
-
-    expect(mockDoc.body.childNodes.length).toBe(0);
-
+    sprite.mount();
     sprite.add({
-      id: 'deferred-icon',
-      content: '<symbol id="deferred-icon" viewBox="0 0 24 24"><rect/></symbol>',
+      id: 'icon-dup',
+      content: '<symbol id="icon-dup">v1</symbol>',
+    });
+    sprite.add({
+      id: 'icon-dup',
+      content: '<symbol id="icon-dup">v2</symbol>',
     });
 
-    expect(mockDoc._listeners['DOMContentLoaded']).toBeTruthy();
-    mockDoc._listeners['DOMContentLoaded'].forEach((fn) => fn());
+    const svgEl = mockDoc.body.childNodes[0];
+    expect(svgEl.innerHTML).toContain('v2');
+  });
+
+  it('does not append when sprite is null (add before mount, no flush)', () => {
+    sprite.add({
+      id: 'no-mount',
+      content: '<symbol id="no-mount"><rect/></symbol>',
+    });
+  });
+});
+
+describe('autoMount', () => {
+  beforeEach(() => {
+    sprite._reset();
+  });
+
+  afterEach(() => {
+    delete (globalThis as any).document;
+  });
+
+  it('auto-mounts immediately when document.readyState is complete', () => {
+    const mockDoc = createMockDOM('complete');
+    (globalThis as any).document = mockDoc;
+
+    sprite.autoMount();
 
     expect(mockDoc.body.childNodes.length).toBe(1);
-    const svgEl = mockDoc.body.childNodes[0];
-    expect(svgEl.innerHTML).toContain('deferred-icon');
+  });
+
+  it('defers mount when document.readyState is loading', () => {
+    const mockDoc = createMockDOM('loading');
+    (globalThis as any).document = mockDoc;
+
+    sprite.autoMount();
+
+    expect(mockDoc.body.childNodes.length).toBe(0);
+    expect(mockDoc._listeners['DOMContentLoaded']).toBeDefined();
+    expect(mockDoc._listeners['DOMContentLoaded'].length).toBe(1);
+
+    mockDoc._listeners['DOMContentLoaded'][0]();
+
+    expect(mockDoc.body.childNodes.length).toBe(1);
+  });
+
+  it('does nothing when document is undefined', () => {
+    delete (globalThis as any).document;
+    sprite.autoMount();
   });
 });

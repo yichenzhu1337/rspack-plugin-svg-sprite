@@ -6,6 +6,7 @@ import mailIcon from './icons/mail.svg';
 import heartIcon from './icons/heart.svg';
 import bellIcon from './icons/bell.svg';
 import starIcon from './icons/star.svg';
+import closeIcon from './icons/close.svg';
 
 import IconGallery from './components/IconGallery';
 import Sidebar from './components/Sidebar';
@@ -41,6 +42,7 @@ const iconMap = {
   heart: heartIcon,
   bell: bellIcon,
   star: starIcon,
+  close: closeIcon,
 };
 
 export default function App() {
@@ -54,9 +56,9 @@ export default function App() {
       </header>
 
       <IconGallery icons={allIcons} />
-      <Sidebar navItems={navItems} starIcon={starIcon} />
+      <Sidebar navItems={navItems} brandIcon={starIcon} />
       <Buttons searchIcon={searchIcon} settingsIcon={settingsIcon} heartIcon={heartIcon} />
-      <Notifications iconMap={iconMap} />
+      <Notifications iconMap={iconMap} dismissIcon={closeIcon} />
 
       <section className="section">
         <h2>How It Works</h2>

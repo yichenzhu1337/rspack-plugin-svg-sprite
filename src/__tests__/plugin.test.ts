@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@rstest/core';
-import SvgSpritePlugin from 'rspack-plugin-svg-sprite';
+import SvgSpritePlugin, { FallbackRawSource, resolveRawSource } from '../plugin';
 
 interface MockSource {
   _content: string;
@@ -91,6 +91,61 @@ function createMockCompiler() {
   return { compiler, runCompilation };
 }
 
+function createMockWebpackCompiler() {
+  const processAssetsTaps: Array<(assets: Record<string, MockSource>) => void> = [];
+  const afterCompileTaps: Array<(compilation: any) => void> = [];
+
+  const compiler = {
+    hooks: {
+      thisCompilation: {
+        tap(_name: string, fn: (compilation: any) => void) {
+          compiler._thisCompilationFn = fn;
+        },
+      },
+      afterCompile: {
+        tap(_name: string, fn: (compilation: any) => void) {
+          afterCompileTaps.push(fn);
+        },
+      },
+    },
+    _thisCompilationFn: null as ((compilation: any) => void) | null,
+    _afterCompileTaps: afterCompileTaps,
+  };
+
+  function runCompilation() {
+    const emittedAssets: Record<string, MockSource> = {};
+    const compilation = {
+      emitAsset(name: string, source: MockSource) {
+        emittedAssets[name] = source;
+      },
+      hooks: {
+        processAssets: {
+          tap(_opts: any, fn: (assets: Record<string, MockSource>) => void) {
+            processAssetsTaps.push(fn);
+          },
+        },
+      },
+    };
+
+    if (compiler._thisCompilationFn) {
+      compiler._thisCompilationFn(compilation);
+    }
+
+    return {
+      compilation,
+      emittedAssets,
+      runProcessAssets() {
+        processAssetsTaps.forEach((fn) => fn(emittedAssets));
+      },
+      runAfterCompile() {
+        afterCompileTaps.forEach((fn) => fn(compilation));
+      },
+    };
+  }
+
+  return { compiler, runCompilation };
+}
+
 describe('SvgSpritePlugin', () => {
   it('can be instantiated with default config', () => {
     const plugin = new SvgSpritePlugin();
@@ -101,6 +156,16 @@ describe('SvgSpritePlugin', () => {
   it('accepts custom spriteAttrs', () => {
     const plugin = new SvgSpritePlugin({ spriteAttrs: { id: 'my-sprite' } });
     expect(plugin.config.spriteAttrs.id).toBe('my-sprite');
+  });
+
+  it('accepts plainSprite option', () => {
+    const plugin = new SvgSpritePlugin({ plainSprite: true });
+    expect(plugin.config.plainSprite).toBe(true);
+  });
+
+  it('merges only provided config keys', () => {
+    const plugin = new SvgSpritePlugin({ plainSprite: true });
+    expect(plugin.config.spriteAttrs).toEqual({});
   });
 
   it('exposes the NAMESPACE constant', () => {
@@ -173,7 +238,9 @@ describe('SvgSpritePlugin', () => {
   });
 
   it('includes custom spriteAttrs in the generated SVG', () => {
-    const plugin = new SvgSpritePlugin({ spriteAttrs: { id: 'my-sprite', class: 'hidden' } });
+    const plugin = new SvgSpritePlugin({
+      spriteAttrs: { id: 'my-sprite', class: 'hidden' },
+    });
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
@@ -210,5 +277,93 @@ describe('SvgSpritePlugin', () => {
     runProcessAssets();
 
     expect(Object.keys(emittedAssets).length).toBe(0);
+  });
+
+  it('falls back to inline RawSource when webpack-sources is unavailable', () => {
+    const plugin = new SvgSpritePlugin();
+    const { compiler, runCompilation } = createMockWebpackCompiler();
+    plugin.apply(compiler as any);
+
+    plugin.addSymbol({
+      id: 'fb',
+      content: '<symbol id="fb"/>',
+      spriteFilename: 'sprite.svg',
+    });
+
+    const { emittedAssets, runProcessAssets } = runCompilation();
+    runProcessAssets();
+
+    expect(emittedAssets).toHaveProperty('sprite.svg');
+    const src = emittedAssets['sprite.svg'];
+    expect(src.source()).toContain('<svg');
+    expect(src.size()).toBeGreaterThan(0);
+    expect(src.buffer()).toBeInstanceOf(Buffer);
+    expect(src.map()).toBeNull();
+    expect(src.sourceAndMap()).toEqual({ source: src.source(), map: null });
+  });
+
+  it('uses default sprite.svg filename when spriteFilename is omitted', () => {
+    const plugin = new SvgSpritePlugin();
+    const { compiler, runCompilation } = createMockCompiler();
+    plugin.apply(compiler as any);
+
+    plugin.addSymbol({ id: 'nofile', content: '<symbol id="nofile"/>' });
+
+    const { emittedAssets, runProcessAssets } = runCompilation();
+    runProcessAssets();
+
+    expect(emittedAssets).toHaveProperty('sprite.svg');
+  });
+});
+
+describe('FallbackRawSource', () => {
+  it('returns source content via source()', () => {
+    const src = new (FallbackRawSource as any)('hello');
+    expect(src.source()).toBe('hello');
+  });
+
+  it('returns content length via size()', () => {
+    const src = new (FallbackRawSource as any)('test');
+    expect(src.size()).toBe(4);
+  });
+
+  it('returns a Buffer via buffer()', () => {
+    const src = new (FallbackRawSource as any)('buf');
+    expect(src.buffer()).toBeInstanceOf(Buffer);
+    expect(src.buffer().toString()).toBe('buf');
+  });
+
+  it('returns null from map()', () => {
+    const src = new (FallbackRawSource as any)('x');
+    expect(src.map()).toBeNull();
+  });
+
+  it('returns source and null map from sourceAndMap()', () => {
+    const src = new (FallbackRawSource as any)('content');
+    expect(src.sourceAndMap()).toEqual({ source: 'content', map: null });
+  });
+});
+
+describe('resolveRawSource', () => {
+  it('returns rspack RawSource when compiler.rspack.sources is available', () => {
+    const MockRawSource = class {};
+    const compiler = { rspack: { sources: { RawSource: MockRawSource } } };
+    expect(resolveRawSource(compiler)).toBe(MockRawSource);
+  });
+
+  it('returns webpack-sources RawSource when available via requireFn', () => {
+    const WpRawSource = class {};
+    const fakeRequire = () => ({ RawSource: WpRawSource });
+    expect(resolveRawSource({}, fakeRequire)).toBe(WpRawSource);
+  });
+
+  it('falls back to FallbackRawSource when requireFn throws', () => {
+    const failingRequire = () => {
+      throw new Error('not found');
+    };
+    const RawSource = resolveRawSource({}, failingRequire);
+    expect(RawSource).toBe(FallbackRawSource);
+    const instance = new RawSource('test');
+    expect(instance.source()).toBe('test');
   });
 });
