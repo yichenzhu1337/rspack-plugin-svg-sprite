@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite/graph/badge.svg)](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite)
 [![npm version](https://img.shields.io/npm/v/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
 [![npm downloads](https://img.shields.io/npm/dm/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
-[![license](https://img.shields.io/npm/l/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
+[![license](https://img.shields.io/github/license/yichenzhu1337/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 
 ---
 
