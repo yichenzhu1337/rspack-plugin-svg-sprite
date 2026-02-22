@@ -1,10 +1,9 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, it, expect } from '@rstest/core';
 import path from 'path';
 import fs from 'fs';
-import loader from '../dist/loader';
+import loader from 'rspack-plugin-svg-sprite/loader';
 
-const FIXTURES = path.resolve(__dirname, 'fixtures');
+const FIXTURES = path.resolve(process.cwd(), 'src/__tests__/fixtures');
 
 interface MockLoaderContext {
   resourcePath: string;
@@ -37,82 +36,82 @@ describe('Loader', () => {
   describe('SVG parsing', () => {
     it('generates a <symbol> wrapping the SVG inner content', () => {
       const output = runLoader('arrow.svg');
-      assert.ok(output.includes('<symbol'));
-      assert.ok(output.includes('</symbol>'));
-      assert.ok(output.includes('<path'));
+      expect(output).toContain('<symbol');
+      expect(output).toContain('</symbol>');
+      expect(output).toContain('<path');
     });
 
     it('extracts the viewBox from the source SVG', () => {
       const output = runLoader('arrow.svg');
-      assert.ok(output.includes('0 0 24 24'));
+      expect(output).toContain('0 0 24 24');
     });
 
     it('preserves stroke/fill attributes from the original SVG', () => {
       const output = runLoader('arrow.svg');
-      assert.ok(output.includes('stroke=\\"currentColor\\"'));
-      assert.ok(output.includes('stroke-width=\\"2\\"'));
+      expect(output).toContain('stroke=\\"currentColor\\"');
+      expect(output).toContain('stroke-width=\\"2\\"');
     });
 
     it('strips width/height from the generated symbol', () => {
       const output = runLoader('arrow.svg');
-      assert.ok(!output.includes('width="24"'));
-      assert.ok(!output.includes('height="24"'));
+      expect(output).not.toContain('width="24"');
+      expect(output).not.toContain('height="24"');
     });
   });
 
   describe('symbolId generation', () => {
     it('defaults to [name] pattern (filename without extension)', () => {
       const output = runLoader('star.svg');
-      assert.ok(output.includes('id":"star"') || output.includes('id\\":\\"star\\"'));
+      expect(output).toMatch(/id["\\":]+star/);
     });
 
     it('supports custom string patterns like "icon-[name]"', () => {
       const output = runLoader('star.svg', { symbolId: 'icon-[name]' });
-      assert.ok(output.includes('icon-star'));
+      expect(output).toContain('icon-star');
     });
 
     it('supports [folder] placeholder', () => {
       const output = runLoader('circle.svg', { symbolId: '[folder]-[name]' });
-      assert.ok(output.includes('fixtures-circle'));
+      expect(output).toContain('fixtures-circle');
     });
 
     it('supports a function for symbolId', () => {
       const output = runLoader('arrow.svg', {
         symbolId: (filePath: string) => 'custom-' + path.basename(filePath, '.svg'),
       });
-      assert.ok(output.includes('custom-arrow'));
+      expect(output).toContain('custom-arrow');
     });
   });
 
   describe('inline mode (default)', () => {
     it('generates require() calls for SpriteSymbol and browser-sprite', () => {
       const output = runLoader('star.svg');
-      assert.ok(output.includes('require('));
-      assert.ok(output.includes('symbol.js'));
-      assert.ok(output.includes('browser-sprite.js'));
+      expect(output).toContain('require(');
+      expect(output).toContain('symbol.js');
+      expect(output).toContain('browser-sprite.js');
     });
 
     it('calls sprite.add(symbol) to register the symbol', () => {
       const output = runLoader('star.svg');
-      assert.ok(output.includes('sprite.add(symbol)'));
+      expect(output).toContain('sprite.add(symbol)');
     });
 
     it('uses "export default" by default (esModule: true)', () => {
       const output = runLoader('star.svg');
-      assert.ok(output.includes('export default'));
+      expect(output).toContain('export default');
     });
 
     it('uses "module.exports" when esModule is false', () => {
       const output = runLoader('star.svg', { esModule: false });
-      assert.ok(output.includes('module.exports ='));
-      assert.ok(!output.includes('export default'));
+      expect(output).toContain('module.exports =');
+      expect(output).not.toContain('export default');
     });
   });
 
   describe('extract mode', () => {
     it('does NOT include browser-sprite runtime', () => {
       const output = runLoader('star.svg', { extract: true });
-      assert.ok(!output.includes('browser-sprite'));
+      expect(output).not.toContain('browser-sprite');
     });
 
     it('generates a URL pointing to the sprite file with fragment', () => {
@@ -121,7 +120,7 @@ describe('Loader', () => {
         spriteFilename: 'icons.svg',
         publicPath: '/assets/',
       });
-      assert.ok(output.includes('/assets/icons.svg#star'));
+      expect(output).toContain('/assets/icons.svg#star');
     });
 
     it('registers the symbol with the plugin via _compilation', () => {
@@ -136,19 +135,16 @@ describe('Loader', () => {
 
       loader.call(ctx as any, content);
 
-      assert.equal(pluginMock.symbols.length, 1);
-      assert.equal(pluginMock.symbols[0].id, 'star');
-      assert.ok(pluginMock.symbols[0].content.includes('<symbol'));
+      expect(pluginMock.symbols.length).toBe(1);
+      expect(pluginMock.symbols[0].id).toBe('star');
+      expect(pluginMock.symbols[0].content).toContain('<symbol');
     });
   });
 
   describe('error handling', () => {
     it('throws when content has no <svg tag', () => {
       const ctx = createMockLoaderContext('/fake/not-svg.svg');
-      assert.throws(
-        () => loader.call(ctx as any, '<div>not an svg</div>'),
-        /Invalid SVG content/
-      );
+      expect(() => loader.call(ctx as any, '<div>not an svg</div>')).toThrow(/Invalid SVG content/);
     });
   });
 });

@@ -1,6 +1,5 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
-import SvgSpritePlugin from '../dist/index';
+import { describe, it, expect } from '@rstest/core';
+import SvgSpritePlugin from 'rspack-plugin-svg-sprite';
 
 interface MockSource {
   _content: string;
@@ -85,18 +84,18 @@ function createMockCompiler() {
 describe('SvgSpritePlugin', () => {
   it('can be instantiated with default config', () => {
     const plugin = new SvgSpritePlugin();
-    assert.equal(plugin.config.plainSprite, false);
-    assert.deepEqual(plugin.config.spriteAttrs, {});
+    expect(plugin.config.plainSprite).toBe(false);
+    expect(plugin.config.spriteAttrs).toEqual({});
   });
 
   it('accepts custom spriteAttrs', () => {
     const plugin = new SvgSpritePlugin({ spriteAttrs: { id: 'my-sprite' } });
-    assert.equal(plugin.config.spriteAttrs.id, 'my-sprite');
+    expect(plugin.config.spriteAttrs.id).toBe('my-sprite');
   });
 
   it('exposes the NAMESPACE constant', () => {
     const plugin = new SvgSpritePlugin();
-    assert.equal(plugin.NAMESPACE, 'rspack-plugin-svg-sprite');
+    expect(plugin.NAMESPACE).toBe('rspack-plugin-svg-sprite');
   });
 
   it('registers itself on compilation[NAMESPACE] during thisCompilation', () => {
@@ -105,22 +104,22 @@ describe('SvgSpritePlugin', () => {
     plugin.apply(compiler as any);
 
     const { compilation } = runCompilation();
-    assert.strictEqual((compilation as any)['rspack-plugin-svg-sprite'], plugin);
+    expect((compilation as any)['rspack-plugin-svg-sprite']).toBe(plugin);
   });
 
   it('collects symbols via addSymbol()', () => {
     const plugin = new SvgSpritePlugin();
     plugin.addSymbol({ id: 'a', viewBox: '0 0 1 1', content: '<symbol id="a"/>' });
     plugin.addSymbol({ id: 'b', viewBox: '0 0 2 2', content: '<symbol id="b"/>' });
-    assert.equal(plugin.symbols.length, 2);
+    expect(plugin.symbols.length).toBe(2);
   });
 
   it('deduplicates symbols with the same id', () => {
     const plugin = new SvgSpritePlugin();
     plugin.addSymbol({ id: 'dup', viewBox: '0 0 1 1', content: '<symbol id="dup">v1</symbol>' });
     plugin.addSymbol({ id: 'dup', viewBox: '0 0 1 1', content: '<symbol id="dup">v2</symbol>' });
-    assert.equal(plugin.symbols.length, 1);
-    assert.ok(plugin.symbols[0].content.includes('v2'));
+    expect(plugin.symbols.length).toBe(1);
+    expect(plugin.symbols[0].content).toContain('v2');
   });
 
   it('emits a sprite.svg asset during processAssets', () => {
@@ -138,12 +137,12 @@ describe('SvgSpritePlugin', () => {
     const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
-    assert.ok('sprite.svg' in emittedAssets);
+    expect(emittedAssets).toHaveProperty('sprite.svg');
     const spriteContent = emittedAssets['sprite.svg'].source();
-    assert.ok(spriteContent.includes('<svg'));
-    assert.ok(spriteContent.includes('icon-star'));
-    assert.ok(spriteContent.includes('<polygon'));
-    assert.ok(spriteContent.includes('</svg>'));
+    expect(spriteContent).toContain('<svg');
+    expect(spriteContent).toContain('icon-star');
+    expect(spriteContent).toContain('<polygon');
+    expect(spriteContent).toContain('</svg>');
   });
 
   it('groups symbols into separate sprite files by spriteFilename', () => {
@@ -157,10 +156,10 @@ describe('SvgSpritePlugin', () => {
     const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
-    assert.ok('icons.svg' in emittedAssets);
-    assert.ok('logos.svg' in emittedAssets);
-    assert.ok(emittedAssets['icons.svg'].source().includes('id="a"'));
-    assert.ok(emittedAssets['logos.svg'].source().includes('id="b"'));
+    expect(emittedAssets).toHaveProperty('icons.svg');
+    expect(emittedAssets).toHaveProperty('logos.svg');
+    expect(emittedAssets['icons.svg'].source()).toContain('id="a"');
+    expect(emittedAssets['logos.svg'].source()).toContain('id="b"');
   });
 
   it('includes custom spriteAttrs in the generated SVG', () => {
@@ -174,8 +173,8 @@ describe('SvgSpritePlugin', () => {
     runProcessAssets();
 
     const output = emittedAssets['sprite.svg'].source();
-    assert.ok(output.includes('id="my-sprite"'));
-    assert.ok(output.includes('class="hidden"'));
+    expect(output).toContain('id="my-sprite"');
+    expect(output).toContain('class="hidden"');
   });
 
   it('clears symbols after compilation (afterCompile hook)', () => {
@@ -184,12 +183,12 @@ describe('SvgSpritePlugin', () => {
     plugin.apply(compiler as any);
 
     plugin.addSymbol({ id: 'temp', content: '<symbol/>', spriteFilename: 'sprite.svg' });
-    assert.equal(plugin.symbols.length, 1);
+    expect(plugin.symbols.length).toBe(1);
 
     const { runAfterCompile } = runCompilation();
     runAfterCompile();
 
-    assert.equal(plugin.symbols.length, 0);
+    expect(plugin.symbols.length).toBe(0);
   });
 
   it('does not emit anything when no symbols are registered', () => {
@@ -200,6 +199,6 @@ describe('SvgSpritePlugin', () => {
     const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
-    assert.equal(Object.keys(emittedAssets).length, 0);
+    expect(Object.keys(emittedAssets).length).toBe(0);
   });
 });
