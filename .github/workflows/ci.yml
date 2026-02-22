@@ -37,7 +37,6 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
       - run: pnpm test:ci
       - uses: codecov/codecov-action@v5
         if: always()
@@ -49,7 +48,6 @@ jobs:
   build-examples:
     name: Build Examples
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
