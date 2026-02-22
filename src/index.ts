@@ -1,4 +1,4 @@
-import SvgSpritePlugin = require('./plugin');
+import SvgSpritePlugin from './plugin';
 
 export = Object.assign(SvgSpritePlugin, {
   SvgSpritePlugin,

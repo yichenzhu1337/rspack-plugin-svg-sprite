@@ -45,4 +45,4 @@ class SpriteSymbol {
   }
 }
 
-export = SpriteSymbol;
+export default SpriteSymbol;

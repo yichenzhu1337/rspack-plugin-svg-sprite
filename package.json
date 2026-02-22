@@ -30,6 +30,7 @@
   "scripts": {
     "build": "tsc",
     "test": "tsc && rstest run",
+    "test:ci": "tsc && rstest run --coverage",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write .",
@@ -83,8 +84,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@rspack/core": "^1.0.0",
+    "@rspack/core": "^1.7.6",
     "@rstest/core": "^0.8.5",
+    "@rstest/coverage-istanbul": "^0.2.1",
     "eslint": "^10.0.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",

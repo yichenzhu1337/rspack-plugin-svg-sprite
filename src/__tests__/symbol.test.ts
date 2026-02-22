@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@rstest/core';
-import SpriteSymbol from 'rspack-plugin-svg-sprite/runtime/symbol';
+import SpriteSymbol from '../runtime/symbol';
 
 describe('SpriteSymbol', () => {
   it('stores id, viewBox, and content from constructor data', () => {
@@ -17,6 +17,22 @@ describe('SpriteSymbol', () => {
   it('.url returns a fragment reference "#id"', () => {
     const sym = new SpriteSymbol({ id: 'star', viewBox: '0 0 32 32', content: '' });
     expect(sym.url).toBe('#star');
+  });
+
+  it('.url returns a custom url when set', () => {
+    const sym = new SpriteSymbol({ id: 'star', viewBox: '0 0 32 32', content: '' });
+    sym.url = '/sprite.svg#star';
+    expect(sym.url).toBe('/sprite.svg#star');
+  });
+
+  it('.url returns the constructor url if provided', () => {
+    const sym = new SpriteSymbol({
+      id: 'x',
+      viewBox: '0 0 1 1',
+      content: '',
+      url: '/icons.svg#x',
+    });
+    expect(sym.url).toBe('/icons.svg#x');
   });
 
   it('.useUrl returns the same fragment reference as .url', () => {

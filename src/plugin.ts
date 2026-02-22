@@ -52,11 +52,9 @@ class SvgSpritePlugin {
   generateSprite(symbols: SymbolData[]): string {
     let attrs = 'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"';
 
-    if (this.config.spriteAttrs) {
-      Object.keys(this.config.spriteAttrs).forEach((key) => {
-        attrs += ' ' + key + '="' + this.config.spriteAttrs[key] + '"';
-      });
-    }
+    Object.keys(this.config.spriteAttrs).forEach((key) => {
+      attrs += ' ' + key + '="' + this.config.spriteAttrs[key] + '"';
+    });
 
     const styles =
       '<style>\n' +
@@ -113,25 +111,7 @@ class SvgSpritePlugin {
 
           Object.keys(symbolsByFile).forEach((filename) => {
             const content = this.generateSprite(symbolsByFile[filename]);
-
-            let RawSource: any;
-            if ((compiler as any).rspack && (compiler as any).rspack.sources) {
-              RawSource = (compiler as any).rspack.sources.RawSource;
-            } else {
-              try {
-                RawSource = require('webpack-sources').RawSource;
-              } catch {
-                RawSource = function (this: any, str: string) {
-                  this._value = str;
-                  this.source = () => str;
-                  this.size = () => str.length;
-                  this.buffer = () => Buffer.from(str);
-                  this.map = () => null;
-                  this.sourceAndMap = () => ({ source: str, map: null });
-                };
-              }
-            }
-
+            const RawSource = resolveRawSource(compiler);
             compilation.emitAsset(filename, new RawSource(content));
           });
         },
@@ -144,4 +124,24 @@ class SvgSpritePlugin {
   };
 }
 
-export = SvgSpritePlugin;
+export function FallbackRawSource(this: any, str: string) {
+  this._value = str;
+  this.source = () => str;
+  this.size = () => str.length;
+  this.buffer = () => Buffer.from(str);
+  this.map = () => null;
+  this.sourceAndMap = () => ({ source: str, map: null });
+}
+
+export function resolveRawSource(compiler: any, requireFn: (id: string) => any = require): any {
+  if (compiler.rspack && compiler.rspack.sources) {
+    return compiler.rspack.sources.RawSource;
+  }
+  try {
+    return requireFn('webpack-sources').RawSource;
+  } catch {
+    return FallbackRawSource;
+  }
+}
+
+export default SvgSpritePlugin;

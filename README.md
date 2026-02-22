@@ -1,5 +1,8 @@
 # rspack-plugin-svg-sprite
 
+[![CI](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml/badge.svg)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite/graph/badge.svg)](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite)
+
 Rspack loader and plugin for creating SVG sprites. A compatible replacement for [svg-sprite-loader](https://github.com/JetBrains/svg-sprite-loader) that works natively with [Rspack](https://rspack.dev/).
 
 ## Why?

@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-const NAMESPACE = 'rspack-plugin-svg-sprite';
+export const NAMESPACE = 'rspack-plugin-svg-sprite';
 
 interface LoaderOptions {
   symbolId?: string | ((resourcePath: string) => string);
@@ -17,17 +17,17 @@ interface LoaderContext {
   _compilation?: any;
 }
 
-function parseViewBox(svgContent: string): string {
+export function parseViewBox(svgContent: string): string {
   const match = svgContent.match(/viewBox=["']([^"']+)["']/);
   return match ? match[1] : '0 0 24 24';
 }
 
-function extractSvgInner(svgContent: string): string {
+export function extractSvgInner(svgContent: string): string {
   const innerMatch = svgContent.match(/<svg[^>]*>([\s\S]*)<\/svg>/i);
   return innerMatch ? innerMatch[1].trim() : svgContent;
 }
 
-function extractSvgAttrs(svgContent: string): Record<string, string> {
+export function extractSvgAttrs(svgContent: string): Record<string, string> {
   const attrs: Record<string, string> = {};
   const svgTagMatch = svgContent.match(/<svg([^>]*)>/i);
   if (!svgTagMatch) return attrs;
@@ -44,7 +44,7 @@ function extractSvgAttrs(svgContent: string): Record<string, string> {
   return attrs;
 }
 
-function generateSymbolId(resourcePath: string, options: LoaderOptions): string {
+export function generateSymbolId(resourcePath: string, options: LoaderOptions): string {
   if (typeof options.symbolId === 'function') {
     return options.symbolId(resourcePath);
   }
@@ -59,6 +59,23 @@ function generateSymbolId(resourcePath: string, options: LoaderOptions): string 
     .replace(/\[name\]/g, basename)
     .replace(/\[folder\]/g, dirBasename)
     .replace(/\[ext\]/g, path.extname(resourcePath).slice(1));
+}
+
+function interopRequire(varName: string, modulePath: string): string {
+  return (
+    'var _' +
+    varName +
+    ' = require("' +
+    modulePath +
+    '");\n' +
+    'var ' +
+    varName +
+    ' = _' +
+    varName +
+    '.default || _' +
+    varName +
+    ';\n'
+  );
 }
 
 function svgSpriteLoader(this: LoaderContext, content: string): string {
@@ -79,10 +96,7 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
   const extract = options.extract || false;
   const esModule = options.esModule !== undefined ? options.esModule : true;
 
-  let attrString = 'id="' + symbolId + '"';
-  if (viewBox) {
-    attrString += ' viewBox="' + viewBox + '"';
-  }
+  let attrString = 'id="' + symbolId + '" viewBox="' + viewBox + '"';
   Object.keys(svgAttrs).forEach((key) => {
     if (key !== 'viewbox' && key !== 'id' && key !== 'width' && key !== 'height') {
       attrString += ' ' + key + '="' + svgAttrs[key] + '"';
@@ -90,6 +104,10 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
   });
 
   const symbolContent = '<symbol ' + attrString + '>' + innerContent + '</symbol>';
+
+  const runtimeDir = path.resolve(__dirname, 'runtime');
+  const symbolModulePath = path.join(runtimeDir, 'symbol').replace(/\\/g, '\\\\');
+  const spriteModulePath = path.join(runtimeDir, 'browser-sprite').replace(/\\/g, '\\\\');
 
   if (extract) {
     const spriteFilename = options.spriteFilename || 'sprite.svg';
@@ -109,8 +127,7 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
 
     const url = publicPath + spriteFilename + '#' + symbolId;
 
-    const symbolModulePath = require.resolve('./runtime/symbol').replace(/\\/g, '\\\\');
-    let runtime = 'var SpriteSymbol = require("' + symbolModulePath + '");\n';
+    let runtime = interopRequire('SpriteSymbol', symbolModulePath);
     runtime +=
       'var symbol = new SpriteSymbol(' +
       JSON.stringify({ id: symbolId, viewBox: viewBox, content: symbolContent }) +
@@ -121,11 +138,9 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
     return runtime;
   }
 
-  const symbolModulePath = require.resolve('./runtime/symbol').replace(/\\/g, '\\\\');
-  const spriteModulePath = require.resolve('./runtime/browser-sprite').replace(/\\/g, '\\\\');
   let runtime = '';
-  runtime += 'var SpriteSymbol = require("' + symbolModulePath + '");\n';
-  runtime += 'var sprite = require("' + spriteModulePath + '");\n';
+  runtime += interopRequire('SpriteSymbol', symbolModulePath);
+  runtime += interopRequire('sprite', spriteModulePath);
   runtime +=
     'var symbol = new SpriteSymbol(' +
     JSON.stringify({ id: symbolId, viewBox: viewBox, content: symbolContent }) +
@@ -136,4 +151,5 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
   return runtime;
 }
 
-export = Object.assign(svgSpriteLoader, { NAMESPACE });
+const loader = Object.assign(svgSpriteLoader, { NAMESPACE });
+export default loader;

@@ -15,10 +15,22 @@ export default function BaseIcon({ icon, size = 16, className = '', title, onCli
       viewBox={sym.viewBox}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick(e);
+              }
+            }
+          : undefined
+      }
       style={onClick ? { cursor: 'pointer' } : undefined}
+      aria-hidden={!title}
     >
       {title && <title>{title}</title>}
-      <use xlinkHref={sym.url} />
+      <use href={sym.url} />
     </svg>
   );
 }
