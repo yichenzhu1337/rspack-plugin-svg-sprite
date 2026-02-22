@@ -45,6 +45,7 @@ module.exports = {
     rules: [
       {
         test: /\.svg$/,
+        type: 'javascript/auto',
         loader: 'rspack-plugin-svg-sprite/loader',
         options: {
           symbolId: '[name]',
@@ -54,6 +55,8 @@ module.exports = {
   },
 };
 ```
+
+> **Important:** The `type: 'javascript/auto'` is required to prevent rspack/webpack's built-in asset module handling from intercepting `.svg` files before the loader runs. Without it, the loader may silently fail to process your SVGs.
 
 ### Use in your components
 
@@ -84,6 +87,7 @@ module.exports = {
     rules: [
       {
         test: /\.svg$/,
+        type: 'javascript/auto',
         loader: 'rspack-plugin-svg-sprite/loader',
         options: {
           extract: true,
@@ -159,6 +163,7 @@ module.exports = {
     rules: [
       {
         test: /\.svg$/,
++       type: 'javascript/auto',
 -       loader: 'svg-sprite-loader',
 +       loader: 'rspack-plugin-svg-sprite/loader',
         options: {
@@ -176,6 +181,45 @@ module.exports = {
 ```
 
 Your component code stays the same — the exported symbol object has the identical shape (`id`, `viewBox`, `url`, `content`).
+
+## Migrating from `asset/resource`
+
+If you're currently using rspack/webpack's built-in `asset/resource` type to handle SVGs (common in webpack 5+ / rspack projects), you can replace it with this plugin to get proper SVG sprite support:
+
+```diff
+// rspack.config.js
++const { SvgSpritePlugin } = require('rspack-plugin-svg-sprite');
+
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.svg$/,
+-       type: 'asset/resource',
+-       generator: {
+-         filename: 'images/icons/[name].[contenthash][ext]',
+-       },
++       type: 'javascript/auto',
++       loader: 'rspack-plugin-svg-sprite/loader',
++       options: {
++         extract: true,
++         symbolId: '[name]',
++         spriteFilename: 'sprite.svg',
++       },
+      },
+    ],
+  },
++ plugins: [
++   new SvgSpritePlugin({ plainSprite: true }),
++ ],
+};
+```
+
+**Key points:**
+
+- `type: 'javascript/auto'` is **required** — it overrides the previous `asset/resource` handling and lets the loader process SVGs as JavaScript modules.
+- The sprite file is emitted to your output directory (e.g., `dist/sprite.svg`).
+- If you were using a separate CLI tool (like `svg-sprite`) to generate sprites as a post-build step, you can remove that — the plugin handles everything inside the rspack build pipeline.
 
 ## How It Works
 
@@ -216,6 +260,45 @@ Run locally from the project root:
 pnpm install
 pnpm dev:rspack   # http://localhost:3000
 pnpm dev:webpack  # http://localhost:4000
+```
+
+## Troubleshooting
+
+### Sprite file not emitted / icons not rendering
+
+**Symptom:** The build succeeds with no errors, but `sprite.svg` is not in the output directory and SVG icons don't render.
+
+**Cause:** rspack/webpack's built-in asset module handling is intercepting `.svg` files before the loader runs.
+
+**Fix:** Add `type: 'javascript/auto'` to your SVG rule:
+
+```js
+{
+  test: /\.svg$/,
+  type: 'javascript/auto', // ← Add this
+  loader: 'rspack-plugin-svg-sprite/loader',
+  options: { extract: true, symbolId: '[name]' },
+}
+```
+
+### Warning: "SvgSpritePlugin is registered but no SVG symbols were collected"
+
+This means the plugin is in your `plugins` array but no SVGs went through the loader. Common causes:
+
+1. **Missing `type: 'javascript/auto'`** on the loader rule (see above).
+2. **`include`/`exclude` filters** on the rule don't match your SVG file paths.
+3. **No SVG imports** in your code — at least one `.svg` file must be imported for the loader to process it.
+
+### Warning: "Extract mode is enabled but SvgSpritePlugin was not found"
+
+This means the loader is running in extract mode (`extract: true`) but `SvgSpritePlugin` isn't in the `plugins` array. Add it:
+
+```js
+const { SvgSpritePlugin } = require('rspack-plugin-svg-sprite');
+
+module.exports = {
+  plugins: [new SvgSpritePlugin()],
+};
 ```
 
 ## Contributing

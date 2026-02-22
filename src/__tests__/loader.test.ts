@@ -264,9 +264,21 @@ describe('Loader', () => {
       expect(pluginMock.symbols[0].content).toContain('<symbol');
     });
 
-    it('skips addSymbol when _compilation has no plugin reference', () => {
+    it('warns when _compilation has no plugin reference', () => {
+      const warnings: string[] = [];
+      const originalWarn = console.warn;
+      console.warn = (...args: any[]) => {
+        warnings.push(args.join(' '));
+      };
+
       const output = runLoader('star.svg', { extract: true });
+
+      console.warn = originalWarn;
+
       expect(output).toContain('SpriteSymbol');
+      expect(warnings.length).toBe(1);
+      expect(warnings[0]).toContain('SvgSpritePlugin was not found');
+      expect(warnings[0]).toContain('new SvgSpritePlugin()');
     });
   });
 

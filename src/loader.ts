@@ -123,6 +123,15 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
 
     if (this._compilation && this._compilation[NAMESPACE]) {
       this._compilation[NAMESPACE].addSymbol(symbolData);
+    } else {
+      console.warn(
+        '[rspack-plugin-svg-sprite] Extract mode is enabled but SvgSpritePlugin was not found' +
+          ' on the compilation.\n' +
+          'Add `new SvgSpritePlugin()` to your plugins array for extract mode to work.\n' +
+          'Example:\n' +
+          "  const { SvgSpritePlugin } = require('rspack-plugin-svg-sprite');\n" +
+          '  plugins: [new SvgSpritePlugin()]',
+      );
     }
 
     const url = publicPath + spriteFilename + '#' + symbolId;
