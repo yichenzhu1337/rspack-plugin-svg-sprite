@@ -9,11 +9,11 @@ The original `svg-sprite-loader` relies on webpack-specific internal APIs (`Norm
 ## Installation
 
 ```bash
+pnpm add rspack-plugin-svg-sprite -D
+# or
 npm install rspack-plugin-svg-sprite -D
 # or
 yarn add rspack-plugin-svg-sprite -D
-# or
-pnpm add rspack-plugin-svg-sprite -D
 ```
 
 ## Usage
@@ -184,13 +184,13 @@ The `examples/` directory contains two demo apps you can run locally:
 ```bash
 # React + Rspack example
 cd examples/react-rspack
-npm install
-npm run dev
+pnpm install
+pnpm dev
 
 # Webpack legacy example
 cd examples/webpack-legacy
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ## License

@@ -75,18 +75,18 @@ These hooks don't exist in Rspack, which is why `rspack-plugin-svg-sprite` was c
 ## Setup
 
 ```bash
-cd consumer-old
-npm install
+cd examples/webpack-legacy
+pnpm install
 ```
 
 ## Scripts
 
 ```bash
 # Start webpack dev server at http://localhost:3001
-npm run dev
+pnpm dev
 
 # Production build to dist/
-npm run build
+pnpm build
 ```
 
 ## Project structure
