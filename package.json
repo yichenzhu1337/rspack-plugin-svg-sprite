@@ -1,7 +1,7 @@
 {
   "name": "rspack-plugin-svg-sprite",
   "version": "1.0.0",
-  "description": "Rspack loader and plugin for creating SVG sprites, compatible replacement for svg-sprite-loader",
+  "description": "SVG sprite loader and plugin for Rspack — drop-in replacement for svg-sprite-loader with inline and extract mode support",
   "author": "Yichen Zhu",
   "license": "MIT",
   "homepage": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite#readme",
@@ -14,12 +14,22 @@
   },
   "keywords": [
     "rspack",
+    "rspack-plugin",
+    "rspack-loader",
     "svg",
-    "sprite",
     "svg-sprite",
+    "svg-sprite-loader",
+    "svg-icon",
+    "sprite",
+    "sprite-sheet",
+    "icon",
     "loader",
     "plugin",
-    "icon"
+    "webpack",
+    "webpack5",
+    "extract",
+    "inline",
+    "symbol"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
