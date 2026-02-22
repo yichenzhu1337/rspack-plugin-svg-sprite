@@ -1,0 +1,21 @@
+{
+  "name": "svg-sprite-consumer-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "React demo app consuming rspack-plugin-svg-sprite",
+  "scripts": {
+    "dev": "rspack serve",
+    "build": "rspack build"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rspack-plugin-svg-sprite": "file:../.."
+  },
+  "devDependencies": {
+    "@rspack/cli": "^1.0.0",
+    "@rspack/core": "^1.0.0",
+    "@rspack/plugin-react-refresh": "^1.0.0",
+    "react-refresh": "^0.14.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "svg-sprite-consumer-old-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo showing the OLD webpack + svg-sprite-loader pattern for comparison",
+  "scripts": {
+    "dev": "webpack serve --mode development",
+    "build": "webpack --mode production"
+  },
+  "devDependencies": {
+    "css-loader": "^6.7.1",
+    "html-webpack-plugin": "^5.5.0",
+    "mini-css-extract-plugin": "^2.6.1",
+    "svg-sprite-loader": "6.0.11",
+    "svgo": "^2.8.0",
+    "svgo-loader": "^3.0.1",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.9.3"
+  }
+}
