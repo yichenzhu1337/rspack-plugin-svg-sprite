@@ -100,7 +100,22 @@ class SvgSpritePlugin {
             : 0,
         },
         () => {
-          if (this.symbols.length === 0) return;
+          if (this.symbols.length === 0) {
+            console.warn(
+              '[rspack-plugin-svg-sprite] SvgSpritePlugin is registered but no SVG symbols were' +
+                ' collected during compilation.\n' +
+                'Ensure your SVG loader rule includes `type: "javascript/auto"` to prevent' +
+                " rspack/webpack's built-in asset modules from intercepting .svg files.\n" +
+                'Example:\n' +
+                '  {\n' +
+                '    test: /\\.svg$/,\n' +
+                '    type: "javascript/auto",\n' +
+                "    loader: 'rspack-plugin-svg-sprite/loader',\n" +
+                '    options: { extract: true },\n' +
+                '  }',
+            );
+            return;
+          }
 
           const symbolsByFile: Record<string, SymbolData[]> = {};
           this.symbols.forEach((sym) => {
