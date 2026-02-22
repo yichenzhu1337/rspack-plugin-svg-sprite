@@ -3,7 +3,7 @@ interface SymbolEntry {
   content: string;
 }
 
-const symbols: Record<string, SymbolEntry> = {};
+let symbols: Record<string, SymbolEntry> = {};
 let sprite: SVGSVGElement | null = null;
 let isMounted = false;
 
@@ -31,12 +31,11 @@ function mount(): void {
 }
 
 function appendSymbolToSprite(symbolData: SymbolEntry): void {
-  if (!sprite) return;
-  const existing = sprite.querySelector('#' + symbolData.id);
+  const existing = sprite!.querySelector('#' + symbolData.id);
   if (existing) {
     existing.outerHTML = symbolData.content;
   } else {
-    sprite.insertAdjacentHTML('beforeend', symbolData.content);
+    sprite!.insertAdjacentHTML('beforeend', symbolData.content);
   }
 }
 
@@ -47,12 +46,24 @@ function add(symbolData: SymbolEntry): void {
   }
 }
 
-if (typeof document !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mount);
-  } else {
-    mount();
+/** @internal Reset all state — for testing only. */
+function _reset(): void {
+  symbols = {};
+  sprite = null;
+  isMounted = false;
+}
+
+/** @internal Perform auto-mount based on document readiness. */
+function autoMount(): void {
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', mount);
+    } else {
+      mount();
+    }
   }
 }
 
-export = { add, mount };
+autoMount();
+
+export default { add, mount, _reset, autoMount };

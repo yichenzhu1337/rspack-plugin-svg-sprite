@@ -2,26 +2,27 @@ import { useState } from 'react';
 import BaseIcon from './BaseIcon';
 
 export default function Sidebar({ navItems, brandIcon }) {
-  const [active, setActive] = useState('Approvals');
+  const [active, setActive] = useState(navItems[0]?.label);
 
   return (
     <section className="section">
       <h2>Sidebar Navigation</h2>
       <div className="sidebar-demo">
-        <nav className="sidebar">
+        <nav className="sidebar" aria-label="Main navigation">
           <div className="sidebar-brand">
             <BaseIcon icon={brandIcon} size={20} />
             Acme App
           </div>
           {navItems.map(({ symbol, label }) => (
-            <div
+            <button
               key={label}
               className={`nav-item ${active === label ? 'active' : ''}`}
               onClick={() => setActive(label)}
+              aria-current={active === label ? 'page' : undefined}
             >
               <BaseIcon icon={symbol} size={18} />
               <span>{label}</span>
-            </div>
+            </button>
           ))}
         </nav>
         <div className="sidebar-content">
