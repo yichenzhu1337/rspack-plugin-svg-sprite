@@ -80,7 +80,7 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <h1>rspack-plugin-svg-sprite</h1>
+        <h1>🧩 rspack-plugin-svg-sprite</h1>
         <p>
           Drop-in <code>svg-sprite-loader</code> replacement for Rspack. SVGs are compiled into a
           single sprite sheet and referenced via <code>&lt;use&gt;</code>.
