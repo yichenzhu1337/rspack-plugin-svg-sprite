@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from '@rstest/core';
+import { describe, it, expect, afterEach } from '@rstest/core';
 
 declare const __non_webpack_require__: NodeRequire;
 
@@ -32,7 +32,7 @@ function createMockDOM(): MockDocument {
   const body: MockBody = {
     firstChild: null,
     childNodes: [],
-    insertBefore(el: MockElement, _ref: MockElement | null) {
+    insertBefore(el: MockElement) {
       this.childNodes.unshift(el);
       this.firstChild = this.childNodes[0];
     },
@@ -52,8 +52,12 @@ function createMockDOM(): MockDocument {
         attributes: {},
         style: {},
         innerHTML: '',
-        setAttribute(k: string, v: string) { this.attributes[k] = v; },
-        getAttribute(k: string) { return this.attributes[k]; },
+        setAttribute(k: string, v: string) {
+          this.attributes[k] = v;
+        },
+        getAttribute(k: string) {
+          return this.attributes[k];
+        },
         querySelector(selector: string) {
           const idMatch = selector.match(/^#(.+)/);
           if (idMatch) {
@@ -130,7 +134,8 @@ describe('browser-sprite', () => {
     });
     sprite.add({
       id: 'icon-circle',
-      content: '<symbol id="icon-circle" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"/></symbol>',
+      content:
+        '<symbol id="icon-circle" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"/></symbol>',
     });
 
     const svgEl = mockDoc.body.childNodes[0];

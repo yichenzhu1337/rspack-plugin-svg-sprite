@@ -54,26 +54,35 @@ export default function App() {
 
       <IconGallery icons={allIcons} />
       <Sidebar navItems={navItems} brandIcon={approvedIcon} />
-      <Buttons
-        filterIcon={filterIcon}
-        saveIcon={saveIcon}
-        deleteIcon={deleteIcon}
-      />
+      <Buttons filterIcon={filterIcon} saveIcon={saveIcon} deleteIcon={deleteIcon} />
       <Notifications iconMap={iconMap} />
 
       <section className="section">
         <h2>How It Works</h2>
         <div className="code-block">
-          <span className="cmt">{'// 1. Import SVGs — svg-sprite-loader turns them into sprite symbols'}</span><br />
-          <span className="kw">import</span> approvedIcon <span className="kw">from</span> <span className="str">'./icons/approved.svg'</span>;<br />
+          <span className="cmt">
+            {'// 1. Import SVGs — svg-sprite-loader turns them into sprite symbols'}
+          </span>
           <br />
-          <span className="cmt">{'// 2. Each import gives you { id, viewBox, url }'}</span><br />
-          approvedIcon.id;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span className="cmt">{'// "approved"'}</span><br />
-          approvedIcon.viewBox; <span className="cmt">{'// "0 0 24 24"'}</span><br />
-          approvedIcon.url;&nbsp;&nbsp;&nbsp;&nbsp; <span className="cmt">{'// "sprite.svg#approved"'}</span><br />
+          <span className="kw">import</span> approvedIcon <span className="kw">from</span>{' '}
+          <span className="str">'./icons/approved.svg'</span>;<br />
           <br />
-          <span className="cmt">{'// 3. Use the BaseIcon component'}</span><br />
-          {'<'}<span className="fn">BaseIcon</span> <span className="fn">icon</span>={'{'}approvedIcon{'}'} <span className="fn">size</span>={'{'}24{'}'} {'/>'}
+          <span className="cmt">{'// 2. Each import gives you { id, viewBox, url }'}</span>
+          <br />
+          approvedIcon.id;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{' '}
+          <span className="cmt">{'// "approved"'}</span>
+          <br />
+          approvedIcon.viewBox; <span className="cmt">{'// "0 0 24 24"'}</span>
+          <br />
+          approvedIcon.url;&nbsp;&nbsp;&nbsp;&nbsp;{' '}
+          <span className="cmt">{'// "sprite.svg#approved"'}</span>
+          <br />
+          <br />
+          <span className="cmt">{'// 3. Use the BaseIcon component'}</span>
+          <br />
+          {'<'}
+          <span className="fn">BaseIcon</span> <span className="fn">icon</span>={'{'}approvedIcon
+          {'}'} <span className="fn">size</span>={'{'}24{'}'} {'/>'}
         </div>
       </section>
     </div>

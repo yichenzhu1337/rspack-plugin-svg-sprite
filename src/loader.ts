@@ -67,9 +67,7 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
   }
 
   if (!content.includes('<svg')) {
-    throw new Error(
-      'rspack-plugin-svg-sprite: Invalid SVG content in ' + this.resourcePath
-    );
+    throw new Error('rspack-plugin-svg-sprite: Invalid SVG content in ' + this.resourcePath);
   }
 
   const options: LoaderOptions = this.getOptions ? this.getOptions() : {};
@@ -113,7 +111,10 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
 
     const symbolModulePath = require.resolve('./runtime/symbol').replace(/\\/g, '\\\\');
     let runtime = 'var SpriteSymbol = require("' + symbolModulePath + '");\n';
-    runtime += 'var symbol = new SpriteSymbol(' + JSON.stringify({ id: symbolId, viewBox: viewBox, content: symbolContent }) + ');\n';
+    runtime +=
+      'var symbol = new SpriteSymbol(' +
+      JSON.stringify({ id: symbolId, viewBox: viewBox, content: symbolContent }) +
+      ');\n';
     runtime += 'symbol.url = ' + JSON.stringify(url) + ';\n';
     runtime += (esModule ? 'export default' : 'module.exports =') + ' symbol;\n';
 
@@ -125,7 +126,10 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
   let runtime = '';
   runtime += 'var SpriteSymbol = require("' + symbolModulePath + '");\n';
   runtime += 'var sprite = require("' + spriteModulePath + '");\n';
-  runtime += 'var symbol = new SpriteSymbol(' + JSON.stringify({ id: symbolId, viewBox: viewBox, content: symbolContent }) + ');\n';
+  runtime +=
+    'var symbol = new SpriteSymbol(' +
+    JSON.stringify({ id: symbolId, viewBox: viewBox, content: symbolContent }) +
+    ');\n';
   runtime += 'sprite.add(symbol);\n';
   runtime += (esModule ? 'export default' : 'module.exports =') + ' symbol;\n';
 

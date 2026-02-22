@@ -343,10 +343,18 @@ header p {
   line-height: 1.8;
 }
 
-.code-block .kw { color: #c084fc; }
-.code-block .str { color: #34d399; }
-.code-block .cmt { color: #475569; }
-.code-block .fn { color: #60a5fa; }
+.code-block .kw {
+  color: #c084fc;
+}
+.code-block .str {
+  color: #34d399;
+}
+.code-block .cmt {
+  color: #475569;
+}
+.code-block .fn {
+  color: #60a5fa;
+}
 
 /* --- React-specific additions --- */
 .icon-card.selected {
@@ -400,6 +408,12 @@ header p {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
