@@ -1,6 +1,7 @@
 {
   "name": "rspack-plugin-svg-sprite",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.29.3",
   "description": "Rspack loader and plugin for creating SVG sprites, compatible replacement for svg-sprite-loader",
   "main": "index.js",
   "exports": {

@@ -6,7 +6,7 @@ A React application bundled with [Rspack](https://rspack.dev/) that demonstrates
 
 ```bash
 cd examples/react-rspack
-npm install
+pnpm install
 ```
 
 This installs Rspack, React, and links the local `rspack-plugin-svg-sprite` package via `file:../..`.
@@ -15,10 +15,10 @@ This installs Rspack, React, and links the local `rspack-plugin-svg-sprite` pack
 
 ```bash
 # Start the dev server at http://localhost:3000
-npm run dev
+pnpm dev
 
 # Production build to dist/
-npm run build
+pnpm build
 ```
 
 ## How it works
