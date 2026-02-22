@@ -6,14 +6,10 @@ import mailIcon from './icons/mail.svg';
 import heartIcon from './icons/heart.svg';
 import bellIcon from './icons/bell.svg';
 import starIcon from './icons/star.svg';
-import closeIcon from './icons/close.svg';
 
-import IconGallery from './components/IconGallery';
-import Sidebar from './components/Sidebar';
-import Buttons from './components/Buttons';
-import Notifications from './components/Notifications';
+import BaseIcon from './components/BaseIcon';
 
-const allIcons = [
+const icons = [
   { symbol: homeIcon, name: 'home' },
   { symbol: searchIcon, name: 'search' },
   { symbol: userIcon, name: 'user' },
@@ -24,69 +20,76 @@ const allIcons = [
   { symbol: starIcon, name: 'star' },
 ];
 
-const navItems = [
-  { symbol: homeIcon, label: 'Dashboard' },
-  { symbol: searchIcon, label: 'Search' },
-  { symbol: mailIcon, label: 'Messages' },
-  { symbol: bellIcon, label: 'Notifications' },
-  { symbol: userIcon, label: 'Profile' },
-  { symbol: settingsIcon, label: 'Settings' },
-];
-
-const iconMap = {
-  home: homeIcon,
-  search: searchIcon,
-  user: userIcon,
-  settings: settingsIcon,
-  mail: mailIcon,
-  heart: heartIcon,
-  bell: bellIcon,
-  star: starIcon,
-  close: closeIcon,
-};
-
 export default function App() {
   return (
     <div className="app">
       <header>
         <h1>
-          rspack-plugin-svg-sprite <span className="badge">React + extract mode</span>
+          rspack-plugin-svg-sprite
         </h1>
-        <p>A React app consuming the SVG sprite plugin with Rspack</p>
+        <p>
+          Drop-in <code>svg-sprite-loader</code> replacement for Rspack. SVGs are compiled into a
+          single sprite sheet and referenced via <code>&lt;use&gt;</code>.
+        </p>
       </header>
 
-      <IconGallery icons={allIcons} />
-      <Sidebar navItems={navItems} brandIcon={starIcon} />
-      <Buttons searchIcon={searchIcon} settingsIcon={settingsIcon} heartIcon={heartIcon} />
-      <Notifications iconMap={iconMap} dismissIcon={closeIcon} />
+      <div className="main">
+        <section className="icons-section">
+          <h2>Icons from sprite</h2>
+          <div className="icon-grid">
+            {icons.map(({ symbol, name }) => (
+              <div className="icon-card" key={name}>
+                <BaseIcon icon={symbol} size={28} />
+                <span>{name}</span>
+              </div>
+            ))}
+          </div>
+          <div className="sprite-url">
+            Sprite URL:{' '}
+            <a href={homeIcon.url.replace(/#.*/, '')} target="_blank" rel="noreferrer">
+              <code>{new URL(homeIcon.url.replace(/#.*/, ''), window.location.href).href}</code>
+            </a>
+          </div>
+        </section>
 
-      <section className="section">
-        <h2>How It Works</h2>
-        <div className="code-block">
-          <span className="cmt">
-            {'// 1. Import SVGs — the loader turns them into sprite symbols'}
-          </span>
-          <br />
-          <span className="kw">import</span> homeIcon <span className="kw">from</span>{' '}
-          <span className="str">'./icons/home.svg'</span>;<br />
-          <br />
-          <span className="cmt">{'// 2. Each import gives you { id, viewBox, url }'}</span>
-          <br />
-          homeIcon.id;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span className="cmt">{'// "icon-home"'}</span>
-          <br />
-          homeIcon.viewBox; <span className="cmt">{'// "0 0 24 24"'}</span>
-          <br />
-          homeIcon.url;&nbsp;&nbsp;&nbsp;&nbsp;{' '}
-          <span className="cmt">{'// "sprite.svg#icon-home"'}</span>
-          <br />
-          <br />
-          <span className="cmt">{'// 3. Use the BaseIcon component'}</span>
-          <br />
-          {'<'}
-          <span className="fn">BaseIcon</span> <span className="fn">icon</span>={'{'}homeIcon{'}'}{' '}
-          <span className="fn">size</span>={'{'}24{'}'} {'/>'}
-        </div>
-      </section>
+        <section className="code-section">
+          <h2>How It Works</h2>
+          <div className="code-block">
+            <span className="cmt">{'// 1. Import — loader converts SVGs to sprite symbols'}</span>
+            <br />
+            <span className="kw">import</span> homeIcon <span className="kw">from</span>{' '}
+            <span className="str">&apos;./icons/home.svg&apos;</span>;
+            <br />
+            <br />
+            <span className="cmt">{'// 2. Each import returns { id, viewBox, url }'}</span>
+            <br />
+            {'homeIcon.id;      '}<span className="cmt">{'// "icon-home"'}</span>
+            <br />
+            {'homeIcon.viewBox; '}<span className="cmt">{'// "0 0 24 24"'}</span>
+            <br />
+            {'homeIcon.url;     '}<span className="cmt">{'// "sprite.svg#icon-home"'}</span>
+            <br />
+            <br />
+            <span className="cmt">{'// 3. Render with <use>'}</span>
+            <br />
+            {'<'}<span className="fn">svg</span>{' '}<span className="fn">viewBox</span>={'="0 0 24 24">'}
+            <br />
+            {'  <'}<span className="fn">use</span>{' '}<span className="fn">href</span>={'={homeIcon.url} />'}
+            <br />
+            {'</'}<span className="fn">svg</span>{'>'}
+          </div>
+        </section>
+      </div>
+
+      <footer>
+        <a href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite" target="_blank" rel="noreferrer">
+          GitHub
+        </a>
+        <span className="sep">·</span>
+        <a href="https://www.npmjs.com/package/rspack-plugin-svg-sprite" target="_blank" rel="noreferrer">
+          npm
+        </a>
+      </footer>
     </div>
   );
 }
