@@ -1,0 +1,139 @@
+import type { Compiler, Compilation } from '@rspack/core';
+
+const NAMESPACE = 'rspack-plugin-svg-sprite';
+
+interface PluginConfig {
+  plainSprite?: boolean;
+  spriteAttrs?: Record<string, string>;
+}
+
+interface SymbolData {
+  id: string;
+  viewBox?: string;
+  content: string;
+  resourcePath?: string;
+  spriteFilename?: string;
+}
+
+const defaultConfig: Required<PluginConfig> = {
+  plainSprite: false,
+  spriteAttrs: {},
+};
+
+function merge(target: Required<PluginConfig>, source: PluginConfig): Required<PluginConfig> {
+  const result = { ...target };
+  if (source.plainSprite !== undefined) result.plainSprite = source.plainSprite;
+  if (source.spriteAttrs !== undefined) result.spriteAttrs = source.spriteAttrs;
+  return result;
+}
+
+class SvgSpritePlugin {
+  public config: Required<PluginConfig>;
+  public symbols: SymbolData[];
+
+  constructor(cfg?: PluginConfig) {
+    this.config = merge(defaultConfig, cfg || {});
+    this.symbols = [];
+  }
+
+  get NAMESPACE(): string {
+    return NAMESPACE;
+  }
+
+  addSymbol(symbolData: SymbolData): void {
+    const existing = this.symbols.findIndex((s) => s.id === symbolData.id);
+    if (existing >= 0) {
+      this.symbols[existing] = symbolData;
+    } else {
+      this.symbols.push(symbolData);
+    }
+  }
+
+  generateSprite(symbols: SymbolData[]): string {
+    let attrs = 'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"';
+
+    if (this.config.spriteAttrs) {
+      Object.keys(this.config.spriteAttrs).forEach((key) => {
+        attrs += ' ' + key + '="' + this.config.spriteAttrs[key] + '"';
+      });
+    }
+
+    const styles =
+      '<style>\n' +
+      '    .sprite-symbol-usage {display: none;}\n' +
+      '    .sprite-symbol-usage:target {display: inline;}\n' +
+      '  </style>';
+
+    const symbolsContent = symbols.map((s) => s.content).join('\n');
+
+    const usages = symbols
+      .map(
+        (s) =>
+          '<use id="' +
+          s.id +
+          '-usage" xlink:href="#' +
+          s.id +
+          '" width="100%" height="100%" class="sprite-symbol-usage" />'
+      )
+      .join('\n');
+
+    return '<svg ' + attrs + '>\n<defs>\n' + styles + '\n' + symbolsContent + '\n</defs>\n' + usages + '\n</svg>';
+  }
+
+  apply(compiler: Compiler): void {
+    const plugin = this;
+
+    compiler.hooks.thisCompilation.tap(NAMESPACE, (compilation: Compilation) => {
+      (compilation as any)[NAMESPACE] = plugin;
+
+      compilation.hooks.processAssets.tap(
+        {
+          name: NAMESPACE,
+          stage: (compiler as any).rspack
+            ? (compiler as any).rspack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
+            : 0,
+        },
+        () => {
+          if (plugin.symbols.length === 0) return;
+
+          const symbolsByFile: Record<string, SymbolData[]> = {};
+          plugin.symbols.forEach((sym) => {
+            const filename = sym.spriteFilename || 'sprite.svg';
+            if (!symbolsByFile[filename]) symbolsByFile[filename] = [];
+            symbolsByFile[filename].push(sym);
+          });
+
+          Object.keys(symbolsByFile).forEach((filename) => {
+            const content = plugin.generateSprite(symbolsByFile[filename]);
+
+            let RawSource: any;
+            if ((compiler as any).rspack && (compiler as any).rspack.sources) {
+              RawSource = (compiler as any).rspack.sources.RawSource;
+            } else {
+              try {
+                RawSource = require('webpack-sources').RawSource;
+              } catch {
+                RawSource = function (this: any, str: string) {
+                  this._value = str;
+                  this.source = () => str;
+                  this.size = () => str.length;
+                  this.buffer = () => Buffer.from(str);
+                  this.map = () => null;
+                  this.sourceAndMap = () => ({ source: str, map: null });
+                };
+              }
+            }
+
+            compilation.emitAsset(filename, new RawSource(content));
+          });
+        }
+      );
+    });
+
+    compiler.hooks.afterCompile.tap(NAMESPACE, () => {
+      plugin.symbols = [];
+    });
+  }
+}
+
+export = SvgSpritePlugin;

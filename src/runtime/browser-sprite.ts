@@ -1,11 +1,14 @@
-'use strict';
+interface SymbolEntry {
+  id: string;
+  content: string;
+}
 
-var symbols = {};
-var sprite = null;
-var isMounted = false;
+const symbols: Record<string, SymbolEntry> = {};
+let sprite: SVGSVGElement | null = null;
+let isMounted = false;
 
-function createSpriteElement() {
-  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+function createSpriteElement(): SVGSVGElement {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
   svg.style.position = 'absolute';
@@ -16,20 +19,20 @@ function createSpriteElement() {
   return svg;
 }
 
-function mount() {
+function mount(): void {
   if (isMounted) return;
   sprite = createSpriteElement();
   document.body.insertBefore(sprite, document.body.firstChild);
   isMounted = true;
 
-  Object.keys(symbols).forEach(function (id) {
+  Object.keys(symbols).forEach((id) => {
     appendSymbolToSprite(symbols[id]);
   });
 }
 
-function appendSymbolToSprite(symbolData) {
+function appendSymbolToSprite(symbolData: SymbolEntry): void {
   if (!sprite) return;
-  var existing = sprite.querySelector('#' + symbolData.id);
+  const existing = sprite.querySelector('#' + symbolData.id);
   if (existing) {
     existing.outerHTML = symbolData.content;
   } else {
@@ -37,7 +40,7 @@ function appendSymbolToSprite(symbolData) {
   }
 }
 
-function add(symbolData) {
+function add(symbolData: SymbolEntry): void {
   symbols[symbolData.id] = symbolData;
   if (isMounted) {
     appendSymbolToSprite(symbolData);
@@ -52,4 +55,4 @@ if (typeof document !== 'undefined') {
   }
 }
 
-module.exports = { add: add, mount: mount };
+export = { add, mount };
