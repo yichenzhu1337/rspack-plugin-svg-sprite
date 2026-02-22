@@ -4,7 +4,7 @@ Thanks for your interest in contributing to `rspack-plugin-svg-sprite`!
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) >= 18
+- [Node.js](https://nodejs.org/) >= 22
 - [pnpm](https://pnpm.io/) >= 10
 
 ## Getting started
@@ -92,6 +92,14 @@ pnpm test
 ```
 
 This compiles the TypeScript first (`tsc`), then runs the test files.
+
+To run with coverage (Istanbul, 95% thresholds enforced):
+
+```bash
+pnpm test:ci
+```
+
+Coverage reports are generated in `coverage/` (HTML + LCOV). Coverage is also uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
 
 ## Code style
 
