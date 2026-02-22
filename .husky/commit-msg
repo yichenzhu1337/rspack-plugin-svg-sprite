@@ -1,0 +1,1 @@
+sed -i '/Co-authored-by: Cursor/d' "$1"
