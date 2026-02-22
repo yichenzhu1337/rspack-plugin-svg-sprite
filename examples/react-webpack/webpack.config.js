@@ -19,10 +19,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: [
-              '@babel/preset-env',
-              ['@babel/preset-react', { runtime: 'automatic' }],
-            ],
+            presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }]],
           },
         },
       },
@@ -65,7 +62,7 @@ module.exports = {
     extensions: ['.js', '.jsx'],
   },
   devServer: {
-    port: 4001,
+    port: 4000,
     hot: true,
     open: true,
   },

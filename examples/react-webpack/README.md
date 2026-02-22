@@ -12,7 +12,7 @@ pnpm install
 ## Scripts
 
 ```bash
-# Start the dev server at http://localhost:4001
+# Start the dev server at http://localhost:4000
 pnpm dev
 
 # Production build to dist/
@@ -49,7 +49,7 @@ The `SpriteLoaderPlugin` collects all extracted symbols and emits the sprite fil
 
 ```js
 const SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
-plugins: [new SpriteLoaderPlugin()]
+plugins: [new SpriteLoaderPlugin()];
 ```
 
 ### Importing and using icons
@@ -63,14 +63,14 @@ import approvedIcon from './icons/approved.svg';
 
 <svg viewBox={approvedIcon.viewBox}>
   <use xlinkHref={approvedIcon.url} />
-</svg>
+</svg>;
 ```
 
 The `BaseIcon` component wraps this pattern for reuse:
 
 ```jsx
 import BaseIcon from './components/BaseIcon';
-<BaseIcon icon={approvedIcon} size={24} />
+<BaseIcon icon={approvedIcon} size={24} />;
 ```
 
 ### What the demo shows
@@ -85,11 +85,11 @@ import BaseIcon from './components/BaseIcon';
 
 `svg-sprite-loader` relies on several webpack-only internal APIs:
 
-| API | Purpose |
-|-----|---------|
-| `NormalModule.getCompilationHooks(compilation).loader` | Injects plugin into loader context |
-| `compilation.hooks.additionalAssets` | Emits the sprite file |
-| `compilation.hooks.afterOptimizeChunks` | Replaces placeholders in module source |
+| API                                                    | Purpose                                |
+| ------------------------------------------------------ | -------------------------------------- |
+| `NormalModule.getCompilationHooks(compilation).loader` | Injects plugin into loader context     |
+| `compilation.hooks.additionalAssets`                   | Emits the sprite file                  |
+| `compilation.hooks.afterOptimizeChunks`                | Replaces placeholders in module source |
 
 These hooks don't exist in Rspack, which is why `rspack-plugin-svg-sprite` was created as a compatible replacement.
 

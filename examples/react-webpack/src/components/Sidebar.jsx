@@ -27,10 +27,9 @@ export default function Sidebar({ navItems, brandIcon }) {
         <div className="sidebar-content">
           <h3>{active}</h3>
           <p>
-            This sidebar uses SVG sprite icons loaded via{' '}
-            <code>svg-sprite-loader</code> in extract mode.
-            Each icon is a <code>&lt;use&gt;</code> reference to a{' '}
-            <code>&lt;symbol&gt;</code> inside the extracted <code>sprite.svg</code>.
+            This sidebar uses SVG sprite icons loaded via <code>svg-sprite-loader</code> in extract
+            mode. Each icon is a <code>&lt;use&gt;</code> reference to a <code>&lt;symbol&gt;</code>{' '}
+            inside the extracted <code>sprite.svg</code>.
           </p>
           <p className="active-info">
             Active route: <code>{active}</code>

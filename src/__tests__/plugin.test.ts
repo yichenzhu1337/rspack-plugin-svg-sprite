@@ -23,11 +23,21 @@ function createMockCompiler() {
           constructor(content: string) {
             this._content = content;
           }
-          source() { return this._content; }
-          size() { return this._content.length; }
-          buffer() { return Buffer.from(this._content); }
-          map() { return null; }
-          sourceAndMap() { return { source: this._content, map: null as null }; }
+          source() {
+            return this._content;
+          }
+          size() {
+            return this._content.length;
+          }
+          buffer() {
+            return Buffer.from(this._content);
+          }
+          map() {
+            return null;
+          }
+          sourceAndMap() {
+            return { source: this._content, map: null as null };
+          }
         },
       },
     },
