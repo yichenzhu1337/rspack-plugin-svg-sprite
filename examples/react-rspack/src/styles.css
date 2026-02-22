@@ -15,26 +15,23 @@
   --text-muted: #94a3b8;
   --accent: #3b82f6;
   --accent-hover: #60a5fa;
-  --danger: #ef4444;
-  --success: #22c55e;
-  --warning: #eab308;
-  --radius: 12px;
+  --radius: 10px;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
-  min-height: 100vh;
   line-height: 1.6;
 }
 
 .app {
-  max-width: 960px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 56px 24px 32px;
 }
 
+/* --- Header --- */
 header {
   text-align: center;
   margin-bottom: 48px;
@@ -43,8 +40,8 @@ header {
 header h1 {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 8px;
   letter-spacing: -0.02em;
+  margin-bottom: 8px;
 }
 
 header p {
@@ -52,65 +49,67 @@ header p {
   font-size: 1.05rem;
 }
 
-.badge {
-  display: inline-block;
-  background: var(--accent);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 2px 10px;
-  border-radius: 999px;
-  margin-left: 8px;
-  vertical-align: middle;
+header code {
+  color: var(--accent-hover);
+  font-size: 1rem;
 }
 
-/* --- Icon Gallery --- */
-.section {
+/* --- Sections --- */
+section {
   margin-bottom: 48px;
 }
 
-.section h2 {
-  font-size: 1.25rem;
+section h2 {
+  font-size: 0.85rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
   margin-bottom: 16px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
 }
 
+section h2 a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+section h2 a:hover {
+  color: var(--accent-hover);
+}
+
+/* --- Icon Grid --- */
 .icon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
 }
 
 .icon-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 24px 16px;
+  gap: 8px;
+  padding: 16px 8px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  cursor: pointer;
   transition: all 0.2s ease;
+  color: var(--text);
 }
 
 .icon-card:hover {
   background: var(--surface-hover);
   border-color: var(--accent);
   transform: translateY(-2px);
+  color: var(--accent-hover);
 }
 
 .icon-card svg {
-  width: 32px;
-  height: 32px;
-  stroke: var(--text);
-  transition: stroke 0.2s ease;
-}
-
-.icon-card:hover svg {
-  stroke: var(--accent-hover);
+  width: 24px;
+  height: 24px;
 }
 
 .icon-card span {
@@ -119,362 +118,115 @@ header p {
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
-.icon-card.selected {
-  border-color: var(--accent);
-  background: var(--surface-hover);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-}
-
-.icon-card.selected svg {
-  stroke: var(--accent-hover);
-}
-
-.selection-info {
+.sprite-url {
   margin-top: 16px;
-  padding: 12px 16px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 10px 14px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
 }
 
-.selection-info code {
+.sprite-url a {
   color: var(--accent-hover);
+  text-decoration: none;
 }
 
-/* --- Sidebar Demo --- */
-.sidebar-demo {
-  display: flex;
-  gap: 24px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  min-height: 320px;
+.sprite-url a:hover {
+  text-decoration: underline;
 }
 
-.sidebar {
-  width: 220px;
-  background: #0f172a;
-  padding: 20px 0;
-  border-right: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.sidebar-brand {
-  padding: 0 20px 20px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sidebar-brand svg {
-  width: 20px;
-  height: 20px;
-  stroke: var(--accent);
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-size: 0.9rem;
-  width: 100%;
-  background: none;
-  border: none;
-  font-family: inherit;
-  text-align: left;
-}
-
-.nav-item:hover,
-.nav-item.active {
-  color: var(--text);
-  background: var(--surface);
-}
-
-.nav-item.active {
-  border-right: 3px solid var(--accent);
-}
-
-.nav-item svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.sidebar-content {
-  flex: 1;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.sidebar-content h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.sidebar-content p {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-.active-info {
-  margin-top: 12px;
-  padding: 8px 12px;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 6px;
-  font-size: 0.82rem;
+.sprite-url code {
   color: var(--accent-hover);
-}
-
-/* --- Buttons Demo --- */
-.button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--accent);
-}
-
-.btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.btn-primary:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-}
-
-.btn-danger {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
-.btn-danger:hover {
-  background: var(--danger);
-  color: white;
-}
-
-.btn-liked {
-  border-color: var(--success);
-  color: var(--success);
-}
-
-.btn-liked:hover {
-  background: var(--success);
-  color: white;
-}
-
-.like-feedback {
-  margin-top: 12px;
-  font-size: 0.85rem;
-  color: var(--success);
-  animation: fadeIn 0.2s ease;
-}
-
-/* --- Notification Cards --- */
-.notification-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.notification {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.notification-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.notification-icon svg {
-  width: 18px;
-  height: 18px;
-}
-
-.notification-icon.blue {
-  background: rgba(59, 130, 246, 0.15);
-}
-.notification-icon.blue svg {
-  stroke: var(--accent);
-}
-
-.notification-icon.red {
-  background: rgba(239, 68, 68, 0.15);
-}
-.notification-icon.red svg {
-  stroke: var(--danger);
-}
-
-.notification-icon.green {
-  background: rgba(34, 197, 94, 0.15);
-}
-.notification-icon.green svg {
-  stroke: var(--success);
-}
-
-.notification-icon.yellow {
-  background: rgba(234, 179, 8, 0.15);
-}
-.notification-icon.yellow svg {
-  stroke: var(--warning);
-}
-
-.notification-body h4 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.notification-body p {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.notification-time {
-  margin-left: auto;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  white-space: nowrap;
 }
 
 /* --- Code Block --- */
 .code-block {
-  background: #0f172a;
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-size: 0.85rem;
+  padding: 20px 24px;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.9rem;
   color: var(--text-muted);
+  line-height: 1.7;
   overflow-x: auto;
-  line-height: 1.8;
+  white-space: pre;
+  margin: 0;
 }
 
-.code-block .kw {
-  color: #c084fc;
+/* --- Prism token colors (dark theme) --- */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #6b7280;
 }
-.code-block .str {
+
+.token.punctuation {
+  color: #9ca3af;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol {
+  color: #f59e0b;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
   color: #34d399;
 }
-.code-block .cmt {
-  color: #475569;
+
+.token.operator,
+.token.entity,
+.token.url {
+  color: #9ca3af;
 }
-.code-block .fn {
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #c084fc;
+}
+
+.token.function,
+.token.class-name {
   color: #60a5fa;
 }
 
-/* --- Notification Dismiss --- */
-.notification-dismiss {
-  background: none;
-  border: none;
-  padding: 4px;
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 0;
-  transition:
-    opacity 0.15s ease,
-    background 0.15s ease;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.token.regex,
+.token.important,
+.token.variable {
+  color: #f59e0b;
 }
 
-.notification-dismiss svg {
-  stroke: var(--text-muted);
-}
-
-.notification:hover .notification-dismiss {
-  opacity: 1;
-}
-
-.notification-dismiss:hover {
-  background: var(--surface-hover);
-}
-
-.notification-dismiss:hover svg {
-  stroke: var(--danger);
-}
-
-.empty-state {
-  padding: 32px;
+/* --- Footer --- */
+footer {
   text-align: center;
-  color: var(--text-muted);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
   font-size: 0.9rem;
 }
 
-/* --- Focus Styles --- */
-.icon-card:focus-visible,
-.nav-item:focus-visible,
-.btn:focus-visible,
-.notification-dismiss:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+footer a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
 }
 
-.icon-card:focus-visible {
-  border-color: var(--accent);
-  background: var(--surface-hover);
+footer a:hover {
+  color: var(--accent-hover);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.sep {
+  color: var(--border);
+  margin: 0 12px;
 }
