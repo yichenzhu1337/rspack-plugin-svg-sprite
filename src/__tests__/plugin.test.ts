@@ -259,10 +259,34 @@ describe('SvgSpritePlugin', () => {
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
+    const originalWarn = console.warn;
+    console.warn = () => {};
     const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
+    console.warn = originalWarn;
 
     expect(Object.keys(emittedAssets).length).toBe(0);
+  });
+
+  it('warns when no symbols are collected during processAssets', () => {
+    const plugin = new SvgSpritePlugin();
+    const { compiler, runCompilation } = createMockCompiler();
+    plugin.apply(compiler as any);
+
+    const warnings: string[] = [];
+    const originalWarn = console.warn;
+    console.warn = (...args: any[]) => {
+      warnings.push(args.join(' '));
+    };
+
+    const { runProcessAssets } = runCompilation();
+    runProcessAssets();
+
+    console.warn = originalWarn;
+
+    expect(warnings.length).toBe(1);
+    expect(warnings[0]).toContain('no SVG symbols were collected');
+    expect(warnings[0]).toContain('type: "javascript/auto"');
   });
 
   it('falls back to inline RawSource when webpack-sources is unavailable', () => {
