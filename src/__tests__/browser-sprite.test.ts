@@ -1,5 +1,6 @@
-import { describe, it, beforeEach } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, it, expect, beforeEach, afterEach } from '@rstest/core';
+
+declare const __non_webpack_require__: NodeRequire;
 
 interface MockElement {
   tagName: string;
@@ -73,35 +74,39 @@ function createMockDOM(): MockDocument {
   return mockDocument;
 }
 
-declare const global: { document?: MockDocument };
+const SPRITE_MODULE = 'rspack-plugin-svg-sprite/runtime/browser-sprite';
+
+function requireFreshSprite() {
+  const resolved = __non_webpack_require__.resolve(SPRITE_MODULE);
+  delete __non_webpack_require__.cache[resolved];
+  return __non_webpack_require__(SPRITE_MODULE);
+}
 
 describe('browser-sprite', () => {
-  beforeEach(() => {
-    delete require.cache[require.resolve('../dist/runtime/browser-sprite')];
+  afterEach(() => {
+    delete (globalThis as any).document;
   });
 
   it('auto-mounts a hidden SVG element into document.body when DOM is ready', () => {
     const mockDoc = createMockDOM();
-    (global as any).document = mockDoc;
+    (globalThis as any).document = mockDoc;
 
-    const sprite = require('../dist/runtime/browser-sprite');
+    requireFreshSprite();
 
-    assert.equal(mockDoc.body.childNodes.length, 1);
+    expect(mockDoc.body.childNodes.length).toBe(1);
     const svgEl = mockDoc.body.childNodes[0];
-    assert.equal(svgEl.tagName, 'SVG');
-    assert.equal(svgEl.style.position, 'absolute');
-    assert.equal(svgEl.style.width, '0');
-    assert.equal(svgEl.style.height, '0');
-    assert.equal(svgEl.attributes['aria-hidden'], 'true');
-
-    delete (global as any).document;
+    expect(svgEl.tagName).toBe('SVG');
+    expect(svgEl.style.position).toBe('absolute');
+    expect(svgEl.style.width).toBe('0');
+    expect(svgEl.style.height).toBe('0');
+    expect(svgEl.attributes['aria-hidden']).toBe('true');
   });
 
   it('appends symbol content to the sprite when add() is called', () => {
     const mockDoc = createMockDOM();
-    (global as any).document = mockDoc;
+    (globalThis as any).document = mockDoc;
 
-    const sprite = require('../dist/runtime/browser-sprite');
+    const sprite = requireFreshSprite();
 
     sprite.add({
       id: 'icon-arrow',
@@ -109,17 +114,15 @@ describe('browser-sprite', () => {
     });
 
     const svgEl = mockDoc.body.childNodes[0];
-    assert.ok(svgEl.innerHTML.includes('icon-arrow'));
-    assert.ok(svgEl.innerHTML.includes('<path'));
-
-    delete (global as any).document;
+    expect(svgEl.innerHTML).toContain('icon-arrow');
+    expect(svgEl.innerHTML).toContain('<path');
   });
 
   it('can add multiple symbols', () => {
     const mockDoc = createMockDOM();
-    (global as any).document = mockDoc;
+    (globalThis as any).document = mockDoc;
 
-    const sprite = require('../dist/runtime/browser-sprite');
+    const sprite = requireFreshSprite();
 
     sprite.add({
       id: 'icon-star',
@@ -131,33 +134,29 @@ describe('browser-sprite', () => {
     });
 
     const svgEl = mockDoc.body.childNodes[0];
-    assert.ok(svgEl.innerHTML.includes('icon-star'));
-    assert.ok(svgEl.innerHTML.includes('icon-circle'));
-
-    delete (global as any).document;
+    expect(svgEl.innerHTML).toContain('icon-star');
+    expect(svgEl.innerHTML).toContain('icon-circle');
   });
 
   it('defers mounting when document is still loading', () => {
     const mockDoc = createMockDOM();
     mockDoc.readyState = 'loading';
-    (global as any).document = mockDoc;
+    (globalThis as any).document = mockDoc;
 
-    const sprite = require('../dist/runtime/browser-sprite');
+    const sprite = requireFreshSprite();
 
-    assert.equal(mockDoc.body.childNodes.length, 0);
+    expect(mockDoc.body.childNodes.length).toBe(0);
 
     sprite.add({
       id: 'deferred-icon',
       content: '<symbol id="deferred-icon" viewBox="0 0 24 24"><rect/></symbol>',
     });
 
-    assert.ok(mockDoc._listeners['DOMContentLoaded']);
+    expect(mockDoc._listeners['DOMContentLoaded']).toBeTruthy();
     mockDoc._listeners['DOMContentLoaded'].forEach((fn) => fn());
 
-    assert.equal(mockDoc.body.childNodes.length, 1);
+    expect(mockDoc.body.childNodes.length).toBe(1);
     const svgEl = mockDoc.body.childNodes[0];
-    assert.ok(svgEl.innerHTML.includes('deferred-icon'));
-
-    delete (global as any).document;
+    expect(svgEl.innerHTML).toContain('deferred-icon');
   });
 });
