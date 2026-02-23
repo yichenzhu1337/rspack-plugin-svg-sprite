@@ -23,6 +23,7 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
 }
 
 .app {
@@ -54,6 +55,21 @@ header code {
   font-size: 1rem;
 }
 
+/* --- Install command --- */
+.install-cmd {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.9rem;
+  color: var(--accent-hover);
+  cursor: text;
+  user-select: all;
+}
+
 /* --- Sections --- */
 section {
   margin-bottom: 48px;
@@ -76,8 +92,10 @@ section h2 a {
   transition: color 0.15s ease;
 }
 
-section h2 a:hover {
-  color: var(--accent-hover);
+@media (hover: hover) {
+  section h2 a:hover {
+    color: var(--accent-hover);
+  }
 }
 
 /* --- Icon Grid --- */
@@ -100,11 +118,13 @@ section h2 a:hover {
   color: var(--text);
 }
 
-.icon-card:hover {
-  background: var(--surface-hover);
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  color: var(--accent-hover);
+@media (hover: hover) {
+  .icon-card:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    color: var(--accent-hover);
+  }
 }
 
 .icon-card svg {
@@ -116,6 +136,10 @@ section h2 a:hover {
   font-size: 0.8rem;
   color: var(--text-muted);
   font-family: 'SF Mono', 'Fira Code', monospace;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sprite-url {
@@ -126,6 +150,8 @@ section h2 a:hover {
   border-radius: 8px;
   font-size: 0.9rem;
   color: var(--text-muted);
+  overflow-wrap: break-word;
+  word-break: break-all;
 }
 
 .sprite-url a {
@@ -133,8 +159,10 @@ section h2 a:hover {
   text-decoration: none;
 }
 
-.sprite-url a:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .sprite-url a:hover {
+    text-decoration: underline;
+  }
 }
 
 .sprite-url code {
@@ -152,6 +180,7 @@ section h2 a:hover {
   color: var(--text-muted);
   line-height: 1.7;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   white-space: pre;
   margin: 0;
 }
@@ -222,11 +251,104 @@ footer a {
   transition: color 0.15s ease;
 }
 
-footer a:hover {
-  color: var(--accent-hover);
+@media (hover: hover) {
+  footer a:hover {
+    color: var(--accent-hover);
+  }
 }
 
 .sep {
   color: var(--border);
   margin: 0 12px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .icon-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app {
+    padding: 32px 16px 24px;
+  }
+
+  header {
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  header p {
+    font-size: 0.95rem;
+  }
+
+  .install-cmd {
+    font-size: 0.8rem;
+    padding: 8px 14px;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  section {
+    margin-bottom: 32px;
+  }
+
+  .icon-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .icon-card {
+    padding: 12px 4px;
+    gap: 6px;
+  }
+
+  .icon-card span {
+    font-size: 0.7rem;
+  }
+
+  .sprite-url {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+  }
+
+  .code-block {
+    padding: 14px 16px;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    border-radius: 8px;
+  }
+
+  footer {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .app {
+    padding: 24px 12px 20px;
+  }
+
+  header h1 {
+    font-size: 1.3rem;
+  }
+
+  .icon-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .icon-card {
+    padding: 10px 2px;
+  }
+
+  .code-block {
+    padding: 12px;
+    font-size: 0.72rem;
+  }
 }
