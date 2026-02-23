@@ -86,6 +86,7 @@ export default function App() {
           Drop-in <code>svg-sprite-loader</code> replacement for Rspack. SVGs are compiled into a
           single sprite sheet and referenced via <code>&lt;use&gt;</code>.
         </p>
+        <pre className="install-cmd">npm install rspack-plugin-svg-sprite -D</pre>
       </header>
 
       <section>
@@ -109,18 +110,18 @@ export default function App() {
       <section>
         <h2>
           <a
-            href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite?tab=readme-ov-file#configure-inline-mode"
+            href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite?tab=readme-ov-file#quick-start"
             target="_blank"
             rel="noreferrer"
           >
-            Combine Icons into a single sprite.svg File!
+            Configuration
           </a>
         </h2>
         <Code code={configCode} />
       </section>
 
       <section>
-        <h2>Watch it magically work!</h2>
+        <h2>Usage</h2>
         <Code code={usageCode} />
       </section>
 

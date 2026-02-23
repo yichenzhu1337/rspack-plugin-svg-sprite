@@ -7,16 +7,21 @@
 [![npm version](https://img.shields.io/npm/v/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
 [![npm downloads](https://img.shields.io/npm/dm/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
 [![license](https://img.shields.io/github/license/yichenzhu1337/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/rspack-plugin-svg-sprite)](https://bundlephobia.com/package/rspack-plugin-svg-sprite)
 
 **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)**
 
 ---
 
+## Why SVG sprites?
+
+Individual SVG files mean one HTTP request per icon — 50 icons = 50 requests. Inlining SVGs directly into JSX bloats your bundle with duplicated markup. SVG sprites solve both problems: all icons are combined into a single file (or a single hidden DOM element), and each icon is referenced by `<use href="#id" />` — one request, zero duplication, full CSS styling support, and resolution-independent rendering at any size.
+
 ## What is this?
 
 `rspack-plugin-svg-sprite` lets you import `.svg` files in your Rspack (or Webpack 5) project and automatically combine them into an SVG sprite sheet — either inlined in the DOM or extracted as an external `.svg` file.
 
-It was created because the popular [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader) depends on internal Webpack APIs (`NormalModule.getCompilationHooks`, `compilation.hooks.additionalAssets`, etc.) that do not exist in Rspack. This package reimplements the same functionality using Rspack-compatible APIs while keeping the exact same exported symbol shape (`id`, `viewBox`, `url`, `content`), so your existing component code works without changes.
+It was created because the popular [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader) depends on internal Webpack APIs (`NormalModule.getCompilationHooks`, `compilation.hooks.additionalAssets`, etc.) that do not exist in Rspack ([rspack#11609](https://github.com/web-infra-dev/rspack/issues/11609)). This package reimplements the same functionality using Rspack-compatible APIs while keeping the exact same exported symbol shape (`id`, `viewBox`, `url`, `content`), so your existing component code works without changes.
 
 ## Features
 
@@ -34,6 +39,10 @@ It was created because the popular [`svg-sprite-loader`](https://github.com/JetB
 
 ```bash
 npm install rspack-plugin-svg-sprite -D
+# or
+pnpm add rspack-plugin-svg-sprite -D
+# or
+yarn add rspack-plugin-svg-sprite -D
 ```
 
 ### Configure (inline mode)
@@ -73,6 +82,25 @@ import logo from './logo.svg';
 ```
 
 That's it. Every imported SVG is automatically registered as a `<symbol>` in a hidden sprite and referenced by `#id`.
+
+### TypeScript
+
+If you're using TypeScript, add a module declaration so `import icon from './icon.svg'` doesn't produce a type error. Create a `svg.d.ts` file (or add to an existing declarations file):
+
+```ts
+// svg.d.ts
+declare module '*.svg' {
+  const symbol: {
+    id: string;
+    viewBox: string;
+    url: string;
+    content: string;
+  };
+  export default symbol;
+}
+```
+
+Make sure this file is included by your `tsconfig.json` (e.g., in the `include` array or alongside your source files).
 
 ## Extract Mode
 
