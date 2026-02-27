@@ -312,6 +312,23 @@ describe('SvgSpritePlugin', () => {
     expect(src.sourceAndMap()).toEqual({ source: src.source(), map: null });
   });
 
+  it('groups multiple symbols with the same spriteFilename into one sprite', () => {
+    const plugin = new SvgSpritePlugin();
+    const { compiler, runCompilation } = createMockCompiler();
+    plugin.apply(compiler as any);
+
+    plugin.addSymbol({ id: 'a', content: '<symbol id="a"/>', spriteFilename: 'shared.svg' });
+    plugin.addSymbol({ id: 'b', content: '<symbol id="b"/>', spriteFilename: 'shared.svg' });
+
+    const { emittedAssets, runProcessAssets } = runCompilation();
+    runProcessAssets();
+
+    expect(emittedAssets).toHaveProperty('shared.svg');
+    const output = emittedAssets['shared.svg'].source();
+    expect(output).toContain('id="a"');
+    expect(output).toContain('id="b"');
+  });
+
   it('uses default sprite.svg filename when spriteFilename is omitted', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
