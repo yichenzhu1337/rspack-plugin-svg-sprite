@@ -71,9 +71,6 @@ class SvgSpritePlugin {
 
   generateSprite(symbols: SymbolData[]): string {
     let attrs = 'xmlns="http://www.w3.org/2000/svg"';
-    if (!this.config.plainSprite) {
-      attrs += ' xmlns:xlink="http://www.w3.org/1999/xlink"';
-    }
 
     Object.keys(this.config.spriteAttrs).forEach((key) => {
       attrs += ' ' + key + '="' + this.config.spriteAttrs[key] + '"';
@@ -96,7 +93,7 @@ class SvgSpritePlugin {
         (s) =>
           '<use id="' +
           s.id +
-          '-usage" xlink:href="#' +
+          '-usage" href="#' +
           s.id +
           '" width="100%" height="100%" class="sprite-symbol-usage" />',
       )
