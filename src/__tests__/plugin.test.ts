@@ -180,6 +180,8 @@ describe('SvgSpritePlugin', () => {
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
+    const { emittedAssets, runProcessAssets } = runCompilation();
+
     plugin.addSymbol({
       id: 'icon-star',
       viewBox: '0 0 32 32',
@@ -187,7 +189,6 @@ describe('SvgSpritePlugin', () => {
       spriteFilename: 'sprite.svg',
     });
 
-    const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
     expect(emittedAssets).toHaveProperty('sprite.svg');
@@ -203,10 +204,11 @@ describe('SvgSpritePlugin', () => {
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
+    const { emittedAssets, runProcessAssets } = runCompilation();
+
     plugin.addSymbol({ id: 'a', content: '<symbol id="a"/>', spriteFilename: 'icons.svg' });
     plugin.addSymbol({ id: 'b', content: '<symbol id="b"/>', spriteFilename: 'logos.svg' });
 
-    const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
     expect(emittedAssets).toHaveProperty('icons.svg');
@@ -222,9 +224,10 @@ describe('SvgSpritePlugin', () => {
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
+    const { emittedAssets, runProcessAssets } = runCompilation();
+
     plugin.addSymbol({ id: 'x', content: '<symbol id="x"/>', spriteFilename: 'sprite.svg' });
 
-    const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
     const output = emittedAssets['sprite.svg'].source();
@@ -232,26 +235,28 @@ describe('SvgSpritePlugin', () => {
     expect(output).toContain('class="hidden"');
   });
 
-  it('persists symbols across compilations for HMR compatibility', () => {
+  it('clears symbols between compilations so deleted SVGs do not persist', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
+    const first = runCompilation();
     plugin.addSymbol({
       id: 'icon-a',
       content: '<symbol id="icon-a"/>',
       spriteFilename: 'sprite.svg',
     });
-
-    const first = runCompilation();
     first.runProcessAssets();
     expect(first.emittedAssets).toHaveProperty('sprite.svg');
     expect(first.emittedAssets['sprite.svg'].source()).toContain('icon-a');
 
+    // Second compilation without re-adding symbols — should have empty symbols
+    const originalWarn = console.warn;
+    console.warn = () => {};
     const second = runCompilation();
     second.runProcessAssets();
-    expect(second.emittedAssets).toHaveProperty('sprite.svg');
-    expect(second.emittedAssets['sprite.svg'].source()).toContain('icon-a');
+    console.warn = originalWarn;
+    expect(Object.keys(second.emittedAssets).length).toBe(0);
   });
 
   it('does not emit anything when no symbols are registered', () => {
@@ -294,13 +299,14 @@ describe('SvgSpritePlugin', () => {
     const { compiler, runCompilation } = createMockWebpackCompiler();
     plugin.apply(compiler as any);
 
+    const { emittedAssets, runProcessAssets } = runCompilation();
+
     plugin.addSymbol({
       id: 'fb',
       content: '<symbol id="fb"/>',
       spriteFilename: 'sprite.svg',
     });
 
-    const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
     expect(emittedAssets).toHaveProperty('sprite.svg');
@@ -317,10 +323,11 @@ describe('SvgSpritePlugin', () => {
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
+    const { emittedAssets, runProcessAssets } = runCompilation();
+
     plugin.addSymbol({ id: 'a', content: '<symbol id="a"/>', spriteFilename: 'shared.svg' });
     plugin.addSymbol({ id: 'b', content: '<symbol id="b"/>', spriteFilename: 'shared.svg' });
 
-    const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
     expect(emittedAssets).toHaveProperty('shared.svg');
@@ -334,9 +341,10 @@ describe('SvgSpritePlugin', () => {
     const { compiler, runCompilation } = createMockCompiler();
     plugin.apply(compiler as any);
 
+    const { emittedAssets, runProcessAssets } = runCompilation();
+
     plugin.addSymbol({ id: 'nofile', content: '<symbol id="nofile"/>' });
 
-    const { emittedAssets, runProcessAssets } = runCompilation();
     runProcessAssets();
 
     expect(emittedAssets).toHaveProperty('sprite.svg');
@@ -349,9 +357,14 @@ describe('FallbackRawSource', () => {
     expect(src.source()).toBe('hello');
   });
 
-  it('returns content length via size()', () => {
+  it('returns byte length via size()', () => {
     const src = new (FallbackRawSource as any)('test');
     expect(src.size()).toBe(4);
+  });
+
+  it('returns correct byte length for multi-byte characters', () => {
+    const src = new (FallbackRawSource as any)('\u00e9'); // é = 2 bytes in UTF-8
+    expect(src.size()).toBe(2);
   });
 
   it('returns a Buffer via buffer()', () => {
