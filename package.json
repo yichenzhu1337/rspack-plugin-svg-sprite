@@ -1,6 +1,6 @@
 {
   "name": "rspack-plugin-svg-sprite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SVG sprite loader and plugin for Rspack — drop-in replacement for svg-sprite-loader with inline and extract mode support",
   "author": "Yichen Zhu",
   "license": "MIT",
