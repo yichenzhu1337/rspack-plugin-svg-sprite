@@ -19,7 +19,16 @@ interface LoaderContext {
 
 export function parseViewBox(svgContent: string): string {
   const match = svgContent.match(/viewBox=["']([^"']+)["']/);
-  return match ? match[1] : '0 0 24 24';
+  if (match) return match[1];
+
+  // Derive viewBox from width/height attributes when viewBox is missing
+  const widthMatch = svgContent.match(/\bwidth=["'](\d+(?:\.\d+)?)(?:px)?["']/);
+  const heightMatch = svgContent.match(/\bheight=["'](\d+(?:\.\d+)?)(?:px)?["']/);
+  if (widthMatch && heightMatch) {
+    return '0 0 ' + widthMatch[1] + ' ' + heightMatch[1];
+  }
+
+  return '0 0 24 24';
 }
 
 export function extractSvgInner(svgContent: string): string {
