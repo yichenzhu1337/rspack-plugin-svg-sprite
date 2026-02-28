@@ -261,6 +261,52 @@ describe('Loader', () => {
       expect(output).toContain('sprite.svg#star');
     });
 
+    it('auto-reads publicPath from compiler output config', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const ctx = createMockLoaderContext(fullPath, { extract: true });
+      ctx._compiler = {
+        context: FIXTURES,
+        options: { output: { publicPath: '/cdn/' } },
+      };
+      ctx._compilation[NAMESPACE] = { addSymbol() {} };
+
+      const output = loader.call(ctx as any, content);
+      expect(output).toContain('/cdn/sprite.svg#star');
+    });
+
+    it('prefers explicit publicPath over compiler config', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const ctx = createMockLoaderContext(fullPath, {
+        extract: true,
+        publicPath: '/explicit/',
+      });
+      ctx._compiler = {
+        context: FIXTURES,
+        options: { output: { publicPath: '/cdn/' } },
+      };
+      ctx._compilation[NAMESPACE] = { addSymbol() {} };
+
+      const output = loader.call(ctx as any, content);
+      expect(output).toContain('/explicit/sprite.svg#star');
+    });
+
+    it('ignores compiler publicPath set to "auto"', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const ctx = createMockLoaderContext(fullPath, { extract: true });
+      ctx._compiler = {
+        context: FIXTURES,
+        options: { output: { publicPath: 'auto' } },
+      };
+      ctx._compilation[NAMESPACE] = { addSymbol() {} };
+
+      const output = loader.call(ctx as any, content);
+      expect(output).toContain('sprite.svg#star');
+      expect(output).not.toContain('auto');
+    });
+
     it('registers the symbol with the plugin via _compilation', () => {
       const fullPath = path.resolve(FIXTURES, 'star.svg');
       const content = fs.readFileSync(fullPath, 'utf-8');
