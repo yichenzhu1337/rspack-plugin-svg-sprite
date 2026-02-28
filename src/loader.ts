@@ -15,6 +15,7 @@ interface LoaderContext {
   resourcePath: string;
   getOptions?: () => LoaderOptions;
   _compilation?: any;
+  _compiler?: any;
 }
 
 export function parseViewBox(svgContent: string): string {
@@ -120,7 +121,13 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
 
   if (extract) {
     const spriteFilename = options.spriteFilename || 'sprite.svg';
-    const publicPath = options.publicPath || '';
+    let publicPath = options.publicPath || '';
+    if (!publicPath && this._compiler && this._compiler.options && this._compiler.options.output) {
+      const outputPublicPath = this._compiler.options.output.publicPath;
+      if (typeof outputPublicPath === 'string' && outputPublicPath !== 'auto') {
+        publicPath = outputPublicPath;
+      }
+    }
 
     const symbolData = {
       id: symbolId,
