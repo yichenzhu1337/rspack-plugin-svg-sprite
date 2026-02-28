@@ -1,1 +1,1 @@
-sed -i '' '/Co-authored-by: Cursor/d' "$1"
+sed -i '' '/Co-[Aa]uthored-[Bb]y:.*Cursor/d; /Co-[Aa]uthored-[Bb]y:.*Claude/d' "$1"
