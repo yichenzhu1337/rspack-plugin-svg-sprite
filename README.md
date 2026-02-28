@@ -9,7 +9,11 @@
 [![license](https://img.shields.io/github/license/yichenzhu1337/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/rspack-plugin-svg-sprite)](https://bundlephobia.com/package/rspack-plugin-svg-sprite)
 
-**[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)**
+**[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npm trends](https://npmtrends.com/rspack-plugin-svg-sprite-vs-svg-sprite-loader)**
+
+```bash
+npm install rspack-plugin-svg-sprite -D
+```
 
 ---
 
@@ -85,10 +89,25 @@ That's it. Every imported SVG is automatically registered as a `<symbol>` in a h
 
 ### TypeScript
 
-If you're using TypeScript, add a module declaration so `import icon from './icon.svg'` doesn't produce a type error. Create a `svg.d.ts` file (or add to an existing declarations file):
+This package ships with a client type declaration. Add it to your `tsconfig.json` so `import icon from './icon.svg'` is fully typed:
+
+```jsonc
+// tsconfig.json
+{
+  "compilerOptions": {
+    "types": ["rspack-plugin-svg-sprite/client"],
+  },
+}
+```
+
+This gives you autocompletion for `id`, `viewBox`, `url`, and `content` on every SVG import.
+
+<details>
+<summary>Alternative: manual declaration file</summary>
+
+If you prefer, create a `svg.d.ts` file instead:
 
 ```ts
-// svg.d.ts
 declare module '*.svg' {
   const symbol: {
     id: string;
@@ -101,6 +120,8 @@ declare module '*.svg' {
 ```
 
 Make sure this file is included by your `tsconfig.json` (e.g., in the `include` array or alongside your source files).
+
+</details>
 
 ## Extract Mode
 
@@ -178,6 +199,86 @@ Every `import icon from './icon.svg'` returns an object with:
 | `content` | `string` | `"<symbol id=\"icon-home\" ...>...</symbol>"`      | Raw `<symbol>` markup.                             |
 
 This matches `svg-sprite-loader`'s export shape exactly, so migrating requires no component changes.
+
+## Rsbuild Integration
+
+If you're using [Rsbuild](https://rsbuild.dev/), use the built-in Rsbuild plugin for one-line setup:
+
+```js
+// rsbuild.config.js
+const { pluginSvgSprite } = require('rspack-plugin-svg-sprite/rsbuild');
+
+module.exports = {
+  plugins: [
+    pluginSvgSprite({
+      symbolId: 'icon-[name]',
+      extract: true,
+      spriteFilename: 'sprites/icons.svg',
+    }),
+  ],
+};
+```
+
+The Rsbuild plugin handles the loader rule, `type: 'javascript/auto'`, and the `SvgSpritePlugin` automatically.
+
+## Framework Recipes
+
+### Next.js (with next-rspack)
+
+```js
+// next.config.js
+const { SvgSpritePlugin } = require('rspack-plugin-svg-sprite');
+
+module.exports = {
+  webpack(config) {
+    // Remove Next.js default SVG handling
+    const fileLoaderRule = config.module.rules.find((rule) => rule.test?.test?.('.svg'));
+    if (fileLoaderRule) fileLoaderRule.exclude = /\.svg$/;
+
+    config.module.rules.push({
+      test: /\.svg$/,
+      type: 'javascript/auto',
+      loader: 'rspack-plugin-svg-sprite/loader',
+      options: { symbolId: 'icon-[name]', extract: true },
+    });
+
+    config.plugins.push(new SvgSpritePlugin({ plainSprite: true }));
+    return config;
+  },
+};
+```
+
+### Vue + Rspack
+
+```js
+// rspack.config.js
+const { SvgSpritePlugin } = require('rspack-plugin-svg-sprite');
+
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.svg$/,
+        type: 'javascript/auto',
+        loader: 'rspack-plugin-svg-sprite/loader',
+        options: { symbolId: '[name]' },
+      },
+    ],
+  },
+};
+```
+
+```vue
+<template>
+  <svg :viewBox="icon.viewBox">
+    <use :href="icon.url" />
+  </svg>
+</template>
+
+<script setup>
+import icon from './icon.svg';
+</script>
+```
 
 ## Migrating from svg-sprite-loader
 
@@ -263,6 +364,25 @@ module.exports = {
 1. The loader wraps each SVG as a `<symbol>` and registers it with the plugin via the compilation object.
 2. During Rspack's `processAssets` stage, the plugin collects all registered symbols and emits a combined `.svg` sprite file.
 3. The exported JS module contains the external file URL (e.g., `/sprites/icons.svg#symbolId`).
+
+## Alternatives & Comparison
+
+Looking for the right SVG solution for Rspack? Here's how the options compare:
+
+| Feature               | rspack-plugin-svg-sprite | svg-sprite-loader           | @svgr/webpack    | @rsbuild/plugin-svgr | vite-plugin-svg-icons |
+| --------------------- | ------------------------ | --------------------------- | ---------------- | -------------------- | --------------------- |
+| **Rspack support**    | Native                   | No (uses Webpack internals) | Via config       | Rsbuild only         | No (Vite only)        |
+| **Approach**          | SVG sprites (`<use>`)    | SVG sprites (`<use>`)       | React components | React components     | SVG sprites           |
+| **Inline mode**       | Yes                      | Yes                         | N/A              | N/A                  | Yes                   |
+| **Extract mode**      | Yes                      | Yes                         | N/A              | N/A                  | No                    |
+| **Webpack 5 support** | Yes                      | Yes                         | Yes              | No                   | No                    |
+| **Runtime deps**      | Zero                     | 1                           | Several          | Several              | Several               |
+| **Maintained**        | Yes                      | No (archived)               | Yes              | Yes                  | Yes                   |
+| **Drop-in migration** | —                        | Yes (same API)              | Different API    | Different API        | Different API         |
+
+**When to use SVG sprites** (this plugin): You want icons combined into a single file with `<use href="#id">` references — optimal for large icon sets, full CSS styling control, and caching. Best when migrating from `svg-sprite-loader`.
+
+**When to use SVGR**: You want each SVG as a React component with props for color, size, etc. Better for SVGs that need dynamic manipulation via React props rather than CSS.
 
 ## Compatibility
 

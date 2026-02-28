@@ -125,6 +125,34 @@ export default function App() {
         <Code code={usageCode} />
       </section>
 
+      <section>
+        <h2>Get Started</h2>
+        <div className="get-started">
+          <p>
+            Migrating from <code>svg-sprite-loader</code>? It&rsquo;s a 3-line config change &mdash;
+            your component code stays the same.
+          </p>
+          <div className="get-started-links">
+            <a
+              href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite?tab=readme-ov-file#migrating-from-svg-sprite-loader"
+              target="_blank"
+              rel="noreferrer"
+              className="btn"
+            >
+              Migration Guide
+            </a>
+            <a
+              href="https://npmtrends.com/rspack-plugin-svg-sprite-vs-svg-sprite-loader"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-secondary"
+            >
+              npm Trends
+            </a>
+          </div>
+        </div>
+      </section>
+
       <footer>
         <a
           href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite"
@@ -140,6 +168,14 @@ export default function App() {
           rel="noreferrer"
         >
           npm
+        </a>
+        <span className="sep">&middot;</span>
+        <a
+          href="https://npmtrends.com/rspack-plugin-svg-sprite-vs-svg-sprite-loader"
+          target="_blank"
+          rel="noreferrer"
+        >
+          npm trends
         </a>
       </footer>
     </div>
