@@ -237,6 +237,64 @@ section h2 a {
   color: #f59e0b;
 }
 
+/* --- Get Started --- */
+.get-started {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+}
+
+.get-started p {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+.get-started code {
+  color: var(--accent-hover);
+}
+
+.get-started-links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s ease;
+}
+
+@media (hover: hover) {
+  .btn:hover {
+    background: var(--accent-hover);
+  }
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+@media (hover: hover) {
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent-hover);
+    background: transparent;
+  }
+}
+
 /* --- Footer --- */
 footer {
   text-align: center;

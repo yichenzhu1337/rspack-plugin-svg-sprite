@@ -16,20 +16,29 @@
     "rspack",
     "rspack-plugin",
     "rspack-loader",
+    "rsbuild",
+    "rsbuild-plugin",
     "svg",
     "svg-sprite",
     "svg-sprite-loader",
     "svg-icon",
+    "svg-icons",
     "sprite",
     "sprite-sheet",
     "icon",
+    "icon-system",
     "loader",
     "plugin",
+    "bundler-plugin",
     "webpack",
     "webpack5",
     "extract",
     "inline",
-    "symbol"
+    "symbol",
+    "react",
+    "vue",
+    "migration",
+    "drop-in"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -53,10 +62,18 @@
     "./runtime/symbol": {
       "types": "./dist/runtime/symbol.d.ts",
       "default": "./dist/runtime/symbol.js"
+    },
+    "./rsbuild": {
+      "types": "./dist/rsbuild.d.ts",
+      "default": "./dist/rsbuild.js"
+    },
+    "./client": {
+      "types": "./client.d.ts"
     }
   },
   "files": [
     "dist/",
+    "client.d.ts",
     "README.md",
     "LICENSE"
   ],
@@ -75,10 +92,14 @@
     "prepare": "husky"
   },
   "peerDependencies": {
-    "@rspack/core": ">=0.5.0"
+    "@rspack/core": ">=0.5.0",
+    "@rsbuild/core": ">=1.0.0"
   },
   "peerDependenciesMeta": {
     "@rspack/core": {
+      "optional": true
+    },
+    "@rsbuild/core": {
       "optional": true
     }
   },
