@@ -43,6 +43,26 @@ class SvgSpritePlugin {
   addSymbol(symbolData: SymbolData): void {
     const existing = this.symbols.findIndex((s) => s.id === symbolData.id);
     if (existing >= 0) {
+      const prev = this.symbols[existing];
+      if (
+        prev.resourcePath &&
+        symbolData.resourcePath &&
+        prev.resourcePath !== symbolData.resourcePath
+      ) {
+        console.warn(
+          '[rspack-plugin-svg-sprite] Duplicate symbol ID "' +
+            symbolData.id +
+            '" from:\n' +
+            '  - ' +
+            prev.resourcePath +
+            '\n' +
+            '  - ' +
+            symbolData.resourcePath +
+            '\n' +
+            'The second file will overwrite the first. Use a symbolId pattern like ' +
+            '"[folder]-[name]" to avoid collisions.',
+        );
+      }
       this.symbols[existing] = symbolData;
     } else {
       this.symbols.push(symbolData);

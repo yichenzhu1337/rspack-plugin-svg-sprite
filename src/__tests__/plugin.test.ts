@@ -207,6 +207,55 @@ describe('SvgSpritePlugin', () => {
     expect(plugin.symbols[0].content).toContain('v2');
   });
 
+  it('warns when duplicate symbol IDs come from different files', () => {
+    const plugin = new SvgSpritePlugin();
+    const warnings: string[] = [];
+    const originalWarn = console.warn;
+    console.warn = (...args: any[]) => warnings.push(args.join(' '));
+
+    plugin.addSymbol({
+      id: 'close',
+      content: '<symbol id="close"/>',
+      resourcePath: '/icons/close.svg',
+    });
+    plugin.addSymbol({
+      id: 'close',
+      content: '<symbol id="close"/>',
+      resourcePath: '/nav/close.svg',
+    });
+
+    console.warn = originalWarn;
+
+    expect(warnings.length).toBe(1);
+    expect(warnings[0]).toContain('Duplicate symbol ID "close"');
+    expect(warnings[0]).toContain('/icons/close.svg');
+    expect(warnings[0]).toContain('/nav/close.svg');
+    expect(warnings[0]).toContain('[folder]-[name]');
+  });
+
+  it('does not warn when the same file re-registers its symbol (HMR)', () => {
+    const plugin = new SvgSpritePlugin();
+    const warnings: string[] = [];
+    const originalWarn = console.warn;
+    console.warn = (...args: any[]) => warnings.push(args.join(' '));
+
+    plugin.addSymbol({
+      id: 'icon',
+      content: '<symbol id="icon">v1</symbol>',
+      resourcePath: '/icons/icon.svg',
+    });
+    plugin.addSymbol({
+      id: 'icon',
+      content: '<symbol id="icon">v2</symbol>',
+      resourcePath: '/icons/icon.svg',
+    });
+
+    console.warn = originalWarn;
+
+    expect(warnings.length).toBe(0);
+    expect(plugin.symbols[0].content).toContain('v2');
+  });
+
   it('emits a sprite.svg asset during processAssets', () => {
     const plugin = new SvgSpritePlugin();
     const { compiler, runCompilation } = createMockCompiler();
