@@ -54,6 +54,22 @@ describe('parseViewBox', () => {
     expect(parseViewBox('<svg><rect/></svg>')).toBe('0 0 24 24');
   });
 
+  it('derives viewBox from width and height when viewBox is missing', () => {
+    expect(parseViewBox('<svg width="16" height="16">')).toBe('0 0 16 16');
+  });
+
+  it('derives viewBox from width/height with px units', () => {
+    expect(parseViewBox('<svg width="32px" height="32px">')).toBe('0 0 32 32');
+  });
+
+  it('derives viewBox from decimal width/height', () => {
+    expect(parseViewBox('<svg width="24.5" height="24.5">')).toBe('0 0 24.5 24.5');
+  });
+
+  it('returns default when only width is present', () => {
+    expect(parseViewBox('<svg width="16">')).toBe('0 0 24 24');
+  });
+
   it('returns default for empty string', () => {
     expect(parseViewBox('')).toBe('0 0 24 24');
   });
