@@ -118,4 +118,63 @@ describe('pluginSvgSprite (Rsbuild)', () => {
 
     expect(config.plugins).toHaveLength(1);
   });
+
+  it('removes existing SVG rules to avoid conflicts', () => {
+    const plugin = pluginSvgSprite();
+    const config: any = {
+      module: {
+        rules: [
+          { test: /\.(png|jpg)$/, type: 'asset/resource' },
+          { test: /\.svg$/, type: 'asset/resource' },
+        ],
+      },
+      plugins: [],
+    };
+    const api = {
+      modifyRspackConfig: (fn: (config: any) => void) => fn(config),
+    };
+
+    plugin.setup(api as any);
+
+    expect(config.module.rules).toHaveLength(2); // png/jpg rule kept + new SVG sprite rule
+    expect(config.module.rules[0].test).toEqual(/\.(png|jpg)$/);
+    expect(config.module.rules[1].type).toBe('javascript/auto');
+  });
+
+  it('passes include option to the SVG rule', () => {
+    const plugin = pluginSvgSprite({ include: /\/icons\// });
+    const config: any = { module: { rules: [] }, plugins: [] };
+    const api = {
+      modifyRspackConfig: (fn: (config: any) => void) => fn(config),
+    };
+
+    plugin.setup(api as any);
+
+    expect(config.module.rules[0].include).toEqual(/\/icons\//);
+  });
+
+  it('passes exclude option to the SVG rule', () => {
+    const plugin = pluginSvgSprite({ exclude: /\/illustrations\// });
+    const config: any = { module: { rules: [] }, plugins: [] };
+    const api = {
+      modifyRspackConfig: (fn: (config: any) => void) => fn(config),
+    };
+
+    plugin.setup(api as any);
+
+    expect(config.module.rules[0].exclude).toEqual(/\/illustrations\//);
+  });
+
+  it('does not set include/exclude when not provided', () => {
+    const plugin = pluginSvgSprite();
+    const config: any = { module: { rules: [] }, plugins: [] };
+    const api = {
+      modifyRspackConfig: (fn: (config: any) => void) => fn(config),
+    };
+
+    plugin.setup(api as any);
+
+    expect(config.module.rules[0].include).toBeUndefined();
+    expect(config.module.rules[0].exclude).toBeUndefined();
+  });
 });
