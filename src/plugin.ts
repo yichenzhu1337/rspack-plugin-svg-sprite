@@ -90,6 +90,7 @@ class SvgSpritePlugin {
 
   apply = (compiler: Compiler): void => {
     compiler.hooks.thisCompilation.tap(NAMESPACE, (compilation: Compilation) => {
+      this.symbols = [];
       (compilation as any)[NAMESPACE] = this;
 
       compilation.hooks.processAssets.tap(
@@ -138,7 +139,7 @@ class SvgSpritePlugin {
 export function FallbackRawSource(this: any, str: string) {
   this._value = str;
   this.source = () => str;
-  this.size = () => str.length;
+  this.size = () => Buffer.byteLength(str, 'utf8');
   this.buffer = () => Buffer.from(str);
   this.map = () => null;
   this.sourceAndMap = () => ({ source: str, map: null });

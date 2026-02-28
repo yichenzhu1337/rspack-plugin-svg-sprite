@@ -8,7 +8,7 @@ interface MockElement {
   _children: Array<{ id: string; html: string }>;
   setAttribute(k: string, v: string): void;
   getAttribute(k: string): string | undefined;
-  querySelector(selector: string): { outerHTML: string } | null;
+  getElementById(id: string): { outerHTML: string } | null;
   insertAdjacentHTML(pos: string, html: string): void;
   readonly innerHTML: string;
 }
@@ -57,20 +57,17 @@ function createMockDOM(readyState = 'complete'): MockDocument {
         getAttribute(k: string) {
           return this.attributes[k];
         },
-        querySelector(selector: string) {
-          const idMatch = selector.match(/^#(.+)/);
-          if (idMatch) {
-            const child = this._children.find((c) => c.id === idMatch[1]);
-            if (child) {
-              return {
-                get outerHTML() {
-                  return child.html;
-                },
-                set outerHTML(val: string) {
-                  child.html = val;
-                },
-              };
-            }
+        getElementById(id: string) {
+          const child = this._children.find((c) => c.id === id);
+          if (child) {
+            return {
+              get outerHTML() {
+                return child.html;
+              },
+              set outerHTML(val: string) {
+                child.html = val;
+              },
+            };
           }
           return null;
         },

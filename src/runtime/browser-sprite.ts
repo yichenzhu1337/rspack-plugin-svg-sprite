@@ -31,7 +31,7 @@ function mount(): void {
 }
 
 function appendSymbolToSprite(symbolData: SymbolEntry): void {
-  const existing = sprite!.querySelector('#' + symbolData.id);
+  const existing = sprite!.getElementById(symbolData.id);
   if (existing) {
     existing.outerHTML = symbolData.content;
   } else {
