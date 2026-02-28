@@ -141,6 +141,38 @@ describe('SvgSpritePlugin', () => {
     expect(plugin.config.plainSprite).toBe(true);
   });
 
+  it('generates plain sprite without styles and use elements when plainSprite is true', () => {
+    const plugin = new SvgSpritePlugin({ plainSprite: true });
+    const { compiler, runCompilation } = createMockCompiler();
+    plugin.apply(compiler as any);
+
+    const { emittedAssets, runProcessAssets } = runCompilation();
+    plugin.addSymbol({ id: 'a', content: '<symbol id="a"/>', spriteFilename: 'sprite.svg' });
+    runProcessAssets();
+
+    const output = emittedAssets['sprite.svg'].source();
+    expect(output).toContain('<symbol id="a"/>');
+    expect(output).not.toContain('<style>');
+    expect(output).not.toContain('<use');
+    expect(output).not.toContain('<defs>');
+    expect(output).not.toContain('xlink');
+  });
+
+  it('generates full sprite with styles and use elements when plainSprite is false', () => {
+    const plugin = new SvgSpritePlugin({ plainSprite: false });
+    const { compiler, runCompilation } = createMockCompiler();
+    plugin.apply(compiler as any);
+
+    const { emittedAssets, runProcessAssets } = runCompilation();
+    plugin.addSymbol({ id: 'b', content: '<symbol id="b"/>', spriteFilename: 'sprite.svg' });
+    runProcessAssets();
+
+    const output = emittedAssets['sprite.svg'].source();
+    expect(output).toContain('<style>');
+    expect(output).toContain('<use');
+    expect(output).toContain('<defs>');
+  });
+
   it('merges only provided config keys', () => {
     const plugin = new SvgSpritePlugin({ plainSprite: true });
     expect(plugin.config.spriteAttrs).toEqual({});
