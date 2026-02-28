@@ -189,10 +189,30 @@ describe('browser-sprite', () => {
   });
 
   it('does not append when sprite is null (add before mount, no flush)', () => {
+    const mockDoc = createMockDOM();
+    (globalThis as any).document = mockDoc;
+
     sprite.add({
       id: 'no-mount',
       content: '<symbol id="no-mount"><rect/></symbol>',
     });
+  });
+
+  it('skips add() in SSR (no document) to prevent memory leaks', () => {
+    delete (globalThis as any).document;
+
+    sprite.add({
+      id: 'ssr-icon',
+      content: '<symbol id="ssr-icon"><rect/></symbol>',
+    });
+
+    // Mount in browser context — ssr-icon should NOT be in the sprite
+    const mockDoc = createMockDOM();
+    (globalThis as any).document = mockDoc;
+    sprite.mount();
+
+    const svgEl = mockDoc.body.childNodes[0];
+    expect(svgEl.innerHTML).not.toContain('ssr-icon');
   });
 });
 

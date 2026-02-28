@@ -40,6 +40,8 @@ function appendSymbolToSprite(symbolData: SymbolEntry): void {
 }
 
 function add(symbolData: SymbolEntry): void {
+  // Skip in SSR/Node.js to prevent memory leaks across requests
+  if (typeof document === 'undefined') return;
   symbols[symbolData.id] = symbolData;
   if (isMounted) {
     appendSymbolToSprite(symbolData);
