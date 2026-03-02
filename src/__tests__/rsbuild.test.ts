@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@rstest/core';
-import { pluginSvgSprite } from '../rsbuild';
+import { pluginSvgSprite, isSvgOnlyPattern } from '../rsbuild';
 
 describe('pluginSvgSprite (Rsbuild)', () => {
   it('returns a plugin with the correct name', () => {
@@ -119,7 +119,7 @@ describe('pluginSvgSprite (Rsbuild)', () => {
     expect(config.plugins).toHaveLength(1);
   });
 
-  it('removes existing SVG rules to avoid conflicts', () => {
+  it('removes existing SVG-only rules to avoid conflicts', () => {
     const plugin = pluginSvgSprite();
     const config: any = {
       module: {
@@ -139,6 +139,48 @@ describe('pluginSvgSprite (Rsbuild)', () => {
     expect(config.module.rules).toHaveLength(2); // png/jpg rule kept + new SVG sprite rule
     expect(config.module.rules[0].test).toEqual(/\.(png|jpg)$/);
     expect(config.module.rules[1].type).toBe('javascript/auto');
+  });
+
+  it('keeps compound rules that match SVG among other types (e.g. /\\.(svg|png|gif)$/)', () => {
+    const plugin = pluginSvgSprite();
+    const compoundRule = { test: /\.(svg|png|gif)$/, type: 'asset/resource' };
+    const config: any = {
+      module: {
+        rules: [compoundRule],
+      },
+      plugins: [],
+    };
+    const api = {
+      modifyRspackConfig: (fn: (config: any) => void) => fn(config),
+    };
+
+    plugin.setup(api as any);
+
+    // Compound rule preserved + new SVG sprite rule added
+    expect(config.module.rules).toHaveLength(2);
+    expect(config.module.rules[0]).toBe(compoundRule);
+    expect(config.module.rules[1].type).toBe('javascript/auto');
+  });
+
+  it('removes string test rules that match .svg', () => {
+    const plugin = pluginSvgSprite();
+    const config: any = {
+      module: {
+        rules: [
+          { test: '.svg', type: 'asset/resource' },
+          { test: '.css', type: 'css' },
+        ],
+      },
+      plugins: [],
+    };
+    const api = {
+      modifyRspackConfig: (fn: (config: any) => void) => fn(config),
+    };
+
+    plugin.setup(api as any);
+
+    expect(config.module.rules).toHaveLength(2); // .css kept + new SVG sprite rule
+    expect(config.module.rules[0].test).toBe('.css');
   });
 
   it('passes include option to the SVG rule', () => {
@@ -176,5 +218,27 @@ describe('pluginSvgSprite (Rsbuild)', () => {
 
     expect(config.module.rules[0].include).toBeUndefined();
     expect(config.module.rules[0].exclude).toBeUndefined();
+  });
+});
+
+describe('isSvgOnlyPattern', () => {
+  it('returns true for /\\.svg$/', () => {
+    expect(isSvgOnlyPattern(/\.svg$/)).toBe(true);
+  });
+
+  it('returns true for /\\.svg/', () => {
+    expect(isSvgOnlyPattern(/\.svg/)).toBe(true);
+  });
+
+  it('returns false for compound pattern /\\.(svg|png)$/', () => {
+    expect(isSvgOnlyPattern(/\.(svg|png)$/)).toBe(false);
+  });
+
+  it('returns false for /\\.(svg|png|jpg|gif)$/', () => {
+    expect(isSvgOnlyPattern(/\.(svg|png|jpg|gif)$/)).toBe(false);
+  });
+
+  it('returns false for /\\.(png|svg)$/', () => {
+    expect(isSvgOnlyPattern(/\.(png|svg)$/)).toBe(false);
   });
 });
