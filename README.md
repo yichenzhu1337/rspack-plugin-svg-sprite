@@ -81,7 +81,7 @@ import logo from './logo.svg';
 // logo.url     → "#logo"
 
 <svg viewBox={logo.viewBox}>
-  <use xlinkHref={logo.url} />
+  <use href={logo.url} />
 </svg>;
 ```
 
@@ -164,7 +164,7 @@ import icon from './icon.svg';
 // icon.url → "/assets/sprites/icons.svg#icon-icon"
 
 <svg viewBox={icon.viewBox}>
-  <use xlinkHref={icon.url} />
+  <use href={icon.url} />
 </svg>;
 ```
 
@@ -178,7 +178,9 @@ import icon from './icon.svg';
 | `esModule`       | `boolean`            | `true`         | Use ES module export (`export default`) vs CommonJS (`module.exports`).                                                   |
 | `extract`        | `boolean`            | `false`        | Enable extract mode to emit an external sprite file instead of inlining.                                                  |
 | `spriteFilename` | `string`             | `'sprite.svg'` | Output filename for the extracted sprite (extract mode only).                                                             |
-| `publicPath`     | `string`             | `''`           | Public URL prefix for the sprite file (extract mode only).                                                                |
+| `publicPath`     | `string`             | `''`           | Public URL prefix for the sprite file (extract mode only). Auto-detected from `output.publicPath` if not set.             |
+| `include`        | `string[]`           | —              | Glob patterns or directories to include (only process matching SVGs).                                                     |
+| `exclude`        | `string[]`           | —              | Glob patterns or directories to exclude from processing.                                                                  |
 
 ### Plugin Options (Extract Mode)
 
@@ -357,7 +359,7 @@ module.exports = {
 1. The loader parses each `.svg` file and wraps its content in an SVG `<symbol>` element.
 2. It generates a JS module that imports a browser-side sprite manager.
 3. At runtime, the sprite manager creates a hidden `<svg>` element in `document.body` and appends all symbols.
-4. You reference symbols via `<use xlink:href="#symbolId" />`.
+4. You reference symbols via `<use href="#symbolId" />`.
 
 ### Extract Mode
 
@@ -393,12 +395,13 @@ Looking for the right SVG solution for Rspack? Here's how the options compare:
 
 ## Examples
 
-The repository includes two runnable demo apps:
+The repository includes three runnable demo apps:
 
-| Example                                    | Bundler   | Plugin                     | Port | Description                                          |
-| ------------------------------------------ | --------- | -------------------------- | ---- | ---------------------------------------------------- |
-| [`react-rspack`](examples/react-rspack/)   | Rspack    | `rspack-plugin-svg-sprite` | 3000 | Extract mode with icon gallery, sidebar, and buttons |
-| [`react-webpack`](examples/react-webpack/) | Webpack 5 | `svg-sprite-loader`        | 4000 | Same UI using the original loader (for comparison)   |
+| Example                                              | Bundler   | Plugin                     | Port | Description                                                       |
+| ---------------------------------------------------- | --------- | -------------------------- | ---- | ----------------------------------------------------------------- |
+| [`react-rspack`](examples/react-rspack/)             | Rspack    | `rspack-plugin-svg-sprite` | 3000 | Extract mode with icon gallery, sidebar, and buttons              |
+| [`react-webpack`](examples/react-webpack/)           | Webpack 5 | `svg-sprite-loader`        | 4000 | Same UI using the original loader (for comparison)                |
+| [`vue-rspack-extract`](examples/vue-rspack-extract/) | Rspack    | `rspack-plugin-svg-sprite` | 3002 | Vue 3 + extract mode with `plainSprite` and external `<use href>` |
 
 **[Live demo (Rspack)](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** — see the plugin in action.
 

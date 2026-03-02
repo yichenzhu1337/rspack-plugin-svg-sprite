@@ -3,7 +3,7 @@
     <h1>SVG Sprite — Vue Extract Mode Demo</h1>
     <p class="subtitle">
       This example uses <code>plainSprite: true</code> with extract mode and
-      <code>&lt;use xlink:href&gt;</code> — the same pattern used in large enterprise apps.
+      <code>&lt;use href&gt;</code> — the same pattern used in large enterprise apps.
     </p>
 
     <section class="icon-grid">
