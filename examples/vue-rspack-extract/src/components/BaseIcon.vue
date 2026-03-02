@@ -4,7 +4,7 @@
     :title="title"
     @click="clickable ? $emit('click', $event) : null"
   >
-    <use :xlink:href="`/sprite.svg#${icon}`" />
+    <use :href="`/sprite.svg#${icon}`" />
   </svg>
 </template>
 
