@@ -54,6 +54,17 @@ describe('parseViewBox', () => {
     expect(parseViewBox('<svg><rect/></svg>')).toBe('0 0 24 24');
   });
 
+  it('does not pick up width/height from child elements, only the root <svg> tag', () => {
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg"><rect width="100" height="50" fill="red"/></svg>';
+    expect(parseViewBox(svg)).toBe('0 0 24 24');
+  });
+
+  it('derives viewBox from root <svg> width/height even when children have different dimensions', () => {
+    const svg = '<svg width="16" height="16"><image width="200" height="200"/></svg>';
+    expect(parseViewBox(svg)).toBe('0 0 16 16');
+  });
+
   it('derives viewBox from width and height when viewBox is missing', () => {
     expect(parseViewBox('<svg width="16" height="16">')).toBe('0 0 16 16');
   });
@@ -116,6 +127,17 @@ describe('extractSvgAttrs', () => {
   it('returns empty object for an empty string', () => {
     const attrs = extractSvgAttrs('');
     expect(Object.keys(attrs).length).toBe(0);
+  });
+
+  it('skips namespaced attributes like xml:space and xmlns:xlink', () => {
+    const attrs = extractSvgAttrs(
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" fill="red">',
+    );
+    expect(attrs['space']).toBeUndefined();
+    expect(attrs['xml:space']).toBeUndefined();
+    expect(attrs['xlink']).toBeUndefined();
+    expect(attrs['xmlns:xlink']).toBeUndefined();
+    expect(attrs['fill']).toBe('red');
   });
 });
 
@@ -273,6 +295,35 @@ describe('Loader', () => {
 
       const output = loader.call(ctx as any, content);
       expect(output).toContain('/cdn/sprite.svg#star');
+    });
+
+    it('appends trailing slash to publicPath when missing', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const ctx = createMockLoaderContext(fullPath, { extract: true });
+      ctx._compiler = {
+        context: FIXTURES,
+        options: { output: { publicPath: '/static' } },
+      };
+      ctx._compilation[NAMESPACE] = { addSymbol() {} };
+
+      const output = loader.call(ctx as any, content);
+      expect(output).toContain('/static/sprite.svg#star');
+      expect(output).not.toContain('/staticsprite.svg');
+    });
+
+    it('appends trailing slash to explicit publicPath when missing', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const ctx = createMockLoaderContext(fullPath, {
+        extract: true,
+        publicPath: '/assets',
+      });
+      ctx._compilation[NAMESPACE] = { addSymbol() {} };
+
+      const output = loader.call(ctx as any, content);
+      expect(output).toContain('/assets/sprite.svg#star');
+      expect(output).not.toContain('/assetssprite.svg');
     });
 
     it('prefers explicit publicPath over compiler config', () => {

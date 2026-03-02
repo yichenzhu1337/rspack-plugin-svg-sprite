@@ -59,6 +59,7 @@ jobs:
       - run: pnpm build
       - run: pnpm --filter svg-sprite-consumer-demo build
       - run: pnpm --filter svg-sprite-webpack-demo build
+      - run: pnpm --filter svg-sprite-vue-extract-demo build
 
   release:
     name: Release
