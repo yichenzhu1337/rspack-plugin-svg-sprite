@@ -1,1 +1,5 @@
-sed -i '' '/Co-[Aa]uthored-[Bb]y:.*Cursor/d; /Co-[Aa]uthored-[Bb]y:.*Claude/d' "$1"
+if sed --version >/dev/null 2>&1; then
+  sed -i '/Co-[Aa]uthored-[Bb]y:.*Cursor/d; /Co-[Aa]uthored-[Bb]y:.*Claude/d' "$1"
+else
+  sed -i '' '/Co-[Aa]uthored-[Bb]y:.*Cursor/d; /Co-[Aa]uthored-[Bb]y:.*Claude/d' "$1"
+fi

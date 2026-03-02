@@ -14,6 +14,13 @@ export interface SvgSpritePluginOptions {
   exclude?: RegExp | string;
 }
 
+/** Returns true when a RegExp targets only .svg files (not a compound pattern). */
+export function isSvgOnlyPattern(re: RegExp): boolean {
+  // Compound patterns use | for alternation (e.g. /\.(svg|png)$/).
+  // If the source contains |, it matches more than just SVG — keep the rule.
+  return !re.source.includes('|');
+}
+
 export function pluginSvgSprite(options: SvgSpritePluginOptions = {}): RsbuildPlugin {
   const { plainSprite, spriteAttrs, include, exclude, ...loaderOptions } = options;
 
@@ -24,11 +31,18 @@ export function pluginSvgSprite(options: SvgSpritePluginOptions = {}): RsbuildPl
         config.module = config.module || {};
         config.module.rules = config.module.rules || [];
 
-        // Remove existing SVG rules to avoid conflicts
+        // Remove existing SVG-only rules to avoid conflicts.
+        // Rules with compound patterns (e.g. /\.(svg|png)$/) are kept to avoid
+        // breaking non-SVG file handling — users should use include/exclude instead.
         config.module.rules = config.module.rules.filter((rule: any) => {
           if (!rule || typeof rule !== 'object') return true;
           const test = rule.test;
-          if (test instanceof RegExp && test.test('.svg')) return false;
+          if (typeof test === 'string') return test !== '.svg';
+          if (test instanceof RegExp && test.test('.svg')) {
+            // Only remove rules that exclusively target SVG files.
+            // Compound patterns like /\.(svg|png|jpg)$/ are kept intact.
+            return !isSvgOnlyPattern(test);
+          }
           return true;
         });
 

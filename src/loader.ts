@@ -19,12 +19,16 @@ interface LoaderContext {
 }
 
 export function parseViewBox(svgContent: string): string {
-  const match = svgContent.match(/viewBox=["']([^"']+)["']/);
+  // Extract the root <svg> opening tag to avoid matching attributes on child elements
+  const svgTagMatch = svgContent.match(/<svg([^>]*)>/i);
+  const svgTag = svgTagMatch ? svgTagMatch[1] : '';
+
+  const match = svgTag.match(/viewBox=["']([^"']+)["']/);
   if (match) return match[1];
 
-  // Derive viewBox from width/height attributes when viewBox is missing
-  const widthMatch = svgContent.match(/\bwidth=["'](\d+(?:\.\d+)?)(?:px)?["']/);
-  const heightMatch = svgContent.match(/\bheight=["'](\d+(?:\.\d+)?)(?:px)?["']/);
+  // Derive viewBox from width/height attributes on the root <svg> tag only
+  const widthMatch = svgTag.match(/\bwidth=["'](\d+(?:\.\d+)?)(?:px)?["']/);
+  const heightMatch = svgTag.match(/\bheight=["'](\d+(?:\.\d+)?)(?:px)?["']/);
   if (widthMatch && heightMatch) {
     return '0 0 ' + widthMatch[1] + ' ' + heightMatch[1];
   }
@@ -43,10 +47,14 @@ export function extractSvgAttrs(svgContent: string): Record<string, string> {
   if (!svgTagMatch) return attrs;
 
   const attrString = svgTagMatch[1];
-  const attrRegex = /(\w[\w-]*)=["']([^"']*?)["']/g;
+  // Match simple attributes but also capture any namespace prefix (e.g. xml:space, xmlns:xlink)
+  const attrRegex = /([\w:-]+)=["']([^"']*?)["']/g;
   let match: RegExpExecArray | null;
   while ((match = attrRegex.exec(attrString)) !== null) {
-    const name = match[1].toLowerCase();
+    const raw = match[1];
+    // Skip namespaced attributes (xml:space, xmlns:xlink) and known non-visual attrs
+    if (raw.includes(':')) continue;
+    const name = raw.toLowerCase();
     if (name !== 'xmlns' && name !== 'version' && name !== 'class' && name !== 'style') {
       attrs[name] = match[2];
     }
@@ -127,6 +135,9 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
       if (typeof outputPublicPath === 'string' && outputPublicPath !== 'auto') {
         publicPath = outputPublicPath;
       }
+    }
+    if (publicPath && !publicPath.endsWith('/')) {
+      publicPath += '/';
     }
 
     const symbolData = {
