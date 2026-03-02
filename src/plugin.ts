@@ -70,7 +70,7 @@ class SvgSpritePlugin {
   }
 
   generateSprite(symbols: SymbolData[]): string {
-    let attrs = 'xmlns="http://www.w3.org/2000/svg"';
+    let attrs = 'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"';
 
     Object.keys(this.config.spriteAttrs).forEach((key) => {
       attrs += ' ' + key + '="' + this.config.spriteAttrs[key] + '"';
@@ -79,7 +79,7 @@ class SvgSpritePlugin {
     const symbolsContent = symbols.map((s) => s.content).join('\n');
 
     if (this.config.plainSprite) {
-      return '<svg ' + attrs + '>\n' + symbolsContent + '\n</svg>';
+      return '<svg ' + attrs + '>\n<defs>\n' + symbolsContent + '\n</defs>\n</svg>';
     }
 
     const styles =

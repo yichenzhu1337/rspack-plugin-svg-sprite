@@ -154,8 +154,8 @@ describe('SvgSpritePlugin', () => {
     expect(output).toContain('<symbol id="a"/>');
     expect(output).not.toContain('<style>');
     expect(output).not.toContain('<use');
-    expect(output).not.toContain('<defs>');
-    expect(output).not.toContain('xlink');
+    expect(output).toContain('<defs>');
+    expect(output).toContain('xmlns:xlink');
   });
 
   it('generates full sprite with styles and use elements when plainSprite is false', () => {
