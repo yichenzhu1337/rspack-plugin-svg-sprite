@@ -142,12 +142,12 @@ export default function App() {
               Migration Guide
             </a>
             <a
-              href="https://npmtrends.com/rspack-plugin-svg-sprite-vs-svg-sprite-loader"
+              href="https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true"
               target="_blank"
               rel="noreferrer"
               className="btn btn-secondary"
             >
-              npm Trends
+              npmcharts
             </a>
           </div>
         </div>
@@ -171,11 +171,11 @@ export default function App() {
         </a>
         <span className="sep">&middot;</span>
         <a
-          href="https://npmtrends.com/rspack-plugin-svg-sprite-vs-svg-sprite-loader"
+          href="https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true"
           target="_blank"
           rel="noreferrer"
         >
-          npm trends
+          npmcharts
         </a>
       </footer>
     </div>
