@@ -9,7 +9,7 @@
 [![license](https://img.shields.io/github/license/yichenzhu1337/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/rspack-plugin-svg-sprite)](https://bundlephobia.com/package/rspack-plugin-svg-sprite)
 
-**[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npm trends](https://npmtrends.com/rspack-plugin-svg-sprite-vs-svg-sprite-loader)**
+**[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)**
 
 ```bash
 npm install rspack-plugin-svg-sprite -D
