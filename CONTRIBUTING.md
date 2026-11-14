@@ -4,8 +4,8 @@ Thanks for your interest in contributing! This guide covers how to set up the pr
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) >= 22
-- [pnpm](https://pnpm.io/) >= 10
+- [Node.js](https://nodejs.org/) 26.13.1 (pinned in `.nvmrc`)
+- [pnpm](https://pnpm.io/) 12.18.0 (pinned via `packageManager` in `package.json`)
 
 ## Getting Started
 
