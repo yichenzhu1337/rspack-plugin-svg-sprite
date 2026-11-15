@@ -1,4 +1,4 @@
-name: Version PR
+name: 🏷️ Version PR
 
 # Keeps a "chore: version packages" pull request up to date while unreleased changesets exist on
 # main. Merging it bumps the version and writes CHANGELOG.md. It never publishes: releasing is the
@@ -7,8 +7,7 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: version-pr
@@ -16,28 +15,47 @@ concurrency:
 
 jobs:
   version-pr:
-    name: Update the version PR
+    name: 🏷️ Update the version PR
     # Skips until the release bot GitHub App is configured.
     if: vars.RELEASE_BOT_CLIENT_ID != ''
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    # GITHUB_TOKEN only reads; every write goes through the app token below.
+    permissions:
+      contents: read
     steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
       # A GitHub App token, not GITHUB_TOKEN: pull requests opened with GITHUB_TOKEN do not run CI.
-      - id: token
-        uses: actions/create-github-app-token@v3
+      - name: 🔑 Create the release bot token
+        id: token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.RELEASE_BOT_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-      - uses: actions/checkout@v4
+          permission-contents: write
+          permission-pull-requests: write
+      # changesets/action pushes through the GitHub API with `github-token`, so the checkout keeps
+      # no credentials.
+      - name: 📥 Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ steps.token.outputs.token }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+          persist-credentials: false
+      - name: ⚙️ Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      # No dependency cache: this job holds a token that can write to the repository.
+      - name: ⚙️ Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - uses: changesets/action@v2
+          package-manager-cache: false
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: 🏷️ Create or update the version PR
+        id: changesets
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           github-token: ${{ steps.token.outputs.token }}
           version-script: pnpm run version-packages
@@ -46,3 +64,15 @@ jobs:
         env:
           # @changesets/changelog-github reads this to link pull requests and commits.
           GITHUB_TOKEN: ${{ steps.token.outputs.token }}
+      - name: 📝 Write the version PR body
+        if: steps.changesets.outputs.pr-number != ''
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ steps.changesets.outputs.pr-number }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin \
+            +refs/heads/changeset-release/main:refs/remotes/origin/changeset-release/main
+          node scripts/release/version-pr-body.mjs --ref origin/changeset-release/main > "$RUNNER_TEMP/body.md"
+          gh pr edit "$PR" --body-file "$RUNNER_TEMP/body.md"

@@ -1,12 +1,12 @@
-name: PR checks
+name: 🔍 PR checks
 
+# `pr-checks-ok` is the single required check: it fails when any job failed or was cancelled.
 on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: pr-checks-${{ github.event.pull_request.number }}
@@ -14,52 +14,103 @@ concurrency:
 
 jobs:
   changeset:
-    name: Changeset
+    name: 📝 Changeset
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - name: 📥 Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - name: ⚙️ Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      - run: node scripts/ci/changeset-check.mjs
+      - name: 📝 Check for a changeset
+        run: node scripts/ci/changeset-check.mjs
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_REF: ${{ github.head_ref }}
           LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
 
   title:
-    name: PR title
+    name: 🔍 PR title
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - name: 📥 Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - name: ⚙️ Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      - run: node scripts/ci/pr-title-check.mjs
+      - name: 🔍 Check the title is a Conventional Commit
+        run: node scripts/ci/pr-title-check.mjs
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
 
   privacy:
-    name: Privacy scan
+    name: 🔒 Privacy scan
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     # Secrets are not available to pull requests from forks; those are reviewed by hand.
     if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - name: 📥 Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - run: bash scripts/ci/privacy-scan.sh
+      - name: 🔒 Scan the changes
+        run: bash scripts/ci/privacy-scan.sh
         env:
           DENY: ${{ secrets.PERSONAL_GUARD_DENY }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
+
+  pr-checks-ok:
+    name: pr-checks-ok
+    needs: [changeset, title, privacy]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - name: ✅ Every job passed or was skipped
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          bad=$(echo "$NEEDS" | jq -r '[to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | .key] | join(", ")')
+          if [ -n "$bad" ]; then
+            echo "::error::❌ Failed or cancelled: $bad"
+            exit 1
+          fi
+          echo "✅ All jobs passed or were skipped"

@@ -99,6 +99,26 @@ import logo from './logo.svg';
 
 That's it. Every imported SVG is automatically registered as a `<symbol>` in a hidden sprite and referenced by `#id`.
 
+### Accessibility
+
+An icon next to visible text is decorative. Hide it from assistive technology:
+
+```jsx
+<svg viewBox={icon.viewBox} aria-hidden="true" focusable="false">
+  <use href={icon.url} />
+</svg>
+```
+
+An icon that stands alone, such as an icon-only button, needs a label:
+
+```jsx
+<svg viewBox={icon.viewBox} role="img" aria-label="Search">
+  <use href={icon.url} />
+</svg>
+```
+
+The hidden inline sprite itself is already marked `aria-hidden`. The end-to-end tests run axe on every consumer app to keep these patterns working.
+
 ### TypeScript
 
 This package ships with a client type declaration. Add it to your `tsconfig.json` so `import icon from './icon.svg'` is fully typed:

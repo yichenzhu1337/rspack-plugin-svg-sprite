@@ -1,0 +1,4 @@
+self-hosted-runner:
+  # GitHub-hosted image that actionlint does not know yet (used by the nightly).
+  labels:
+    - ubuntu-26.04
