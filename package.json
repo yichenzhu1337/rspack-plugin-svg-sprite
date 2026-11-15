@@ -90,9 +90,11 @@
     "dev:rspack": "pnpm build && pnpm --filter svg-sprite-consumer-demo dev",
     "dev:webpack": "pnpm --filter svg-sprite-webpack-demo dev",
     "prepublishOnly": "pnpm build",
-    "prepare": "husky",
+    "prepare": "node scripts/hooks/install.mjs",
     "changeset": "changeset",
-    "version-packages": "changeset version"
+    "version-packages": "changeset version",
+    "knip": "knip",
+    "check:package": "node scripts/ci/package-check.mjs"
   },
   "peerDependencies": {
     "@rsbuild/core": ">=1.0.0",
@@ -114,8 +116,8 @@
     "@rstest/core": "0.12.6",
     "@rstest/coverage-istanbul": "0.12.6",
     "htmlparser2": "9.1.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
+    "knip": "6.45.1",
+    "lefthook": "2.2.2",
     "oxfmt": "0.78.0",
     "oxlint": "1.93.0",
     "rsbuild-v2": "npm:@rsbuild/core@2.3.2",

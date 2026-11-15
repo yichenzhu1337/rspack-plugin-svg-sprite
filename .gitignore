@@ -5,3 +5,6 @@ coverage/
 .DS_Store
 Thumbs.db
 _thoughts/
+
+# Personal lefthook overrides
+lefthook-local.yml

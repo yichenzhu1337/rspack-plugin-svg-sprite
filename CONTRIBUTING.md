@@ -76,7 +76,7 @@ rspack-plugin-svg-sprite/
 6. Test against the examples with `pnpm dev:rspack`.
 7. If the change affects users of the package, run `pnpm changeset` and commit the generated file: pick `patch`, `minor` or `major` and describe the change for users. CI requires one whenever the published package changes; docs, CI and test-only changes don't need one.
 8. Commit using [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.). Pull requests are squash-merged, so the PR title becomes the commit subject, and the **PR title** check requires it to be a Conventional Commit (`<type>[(<scope>)][!]: <description>`, at most 100 characters, no trailing period).
-9. The pre-commit hook (husky + lint-staged) runs Oxlint and Oxfmt automatically on staged files.
+9. The pre-commit hook (lefthook) runs Oxlint and Oxfmt automatically on staged files.
 10. Open a pull request against `main`.
 
 > [!IMPORTANT]
@@ -117,5 +117,5 @@ pnpm test:ci    # Build + run tests with Istanbul coverage report
 - **TypeScript** with `strict: true` — source in `src/`, compiled output in `dist/`.
 - **Oxfmt** handles formatting — single quotes, trailing commas, 100 char print width, LF line endings.
 - **Oxlint** with its TypeScript rules catches common issues.
-- **Pre-commit hook** via husky + lint-staged runs both automatically on staged files.
+- **Pre-commit hook** via lefthook runs both automatically on staged files.
 - Keep the public API compatible with `svg-sprite-loader` — the exported symbol object should have the same shape (`id`, `viewBox`, `url`, `content`).
