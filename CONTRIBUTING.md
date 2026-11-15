@@ -82,6 +82,10 @@ rspack-plugin-svg-sprite/
 > [!IMPORTANT]
 > Pull requests that change the published package need a changeset (step 7), and the PR title must be a Conventional Commit (step 8).
 
+### Preview packages
+
+Every pull request that changes the package gets a comment from pkg.pr.new with an install command for that exact build, for example `npm i https://pkg.pr.new/yichenzhu1337/rspack-plugin-svg-sprite@<pr-number>`. Use it to try a change in a real project, or ask the person who reported a bug to confirm the fix. Nothing is published to npm.
+
 ## 🚀 Releasing
 
 Releases are manual, and versions follow [SemVer](https://semver.org/) via [Changesets](https://github.com/changesets/changesets):

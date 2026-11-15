@@ -1,0 +1,51 @@
+name: 📦 PR preview package
+
+# Publishes an installable build of each pull request to pkg.pr.new (nothing goes to npm) and
+# comments the install command on the PR, so a fix can be tried before it is released.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/**'
+      - 'client.d.ts'
+      - 'package.json'
+      - 'tsconfig.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/preview.yml'
+
+permissions: {}
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: 📦 Publish preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - name: 📥 Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: ⚙️ Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: ⚙️ Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: 🏗️ Build
+        run: pnpm build
+      - name: 🚀 Publish to pkg.pr.new
+        # Not an npm publish: pkg.pr.new authenticates through its GitHub App, with no token.
+        run: pnpm dlx pkg-pr-new@0.0.93 publish --comment=update --packageManager=npm,pnpm,bun # zizmor: ignore[use-trusted-publishing]
