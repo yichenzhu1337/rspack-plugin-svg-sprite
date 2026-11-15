@@ -1,6 +1,9 @@
-# Changesets
+## 📝 Changesets
 
-Every pull request that changes the published package needs a changeset: a short note that says
+> [!IMPORTANT]
+> Every pull request that changes the published package needs a changeset.
+
+A changeset is a short note that says
 what changed for users and whether it is a `patch`, `minor` or `major` change.
 
 ```bash

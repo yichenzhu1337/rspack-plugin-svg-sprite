@@ -16,21 +16,30 @@
 npm install rspack-plugin-svg-sprite -D
 ```
 
-**Coming from `svg-sprite-loader`?** Swap the loader path and the plugin import; your component code stays the same. [See the diff ↓](#migrating-from-svg-sprite-loader)
+**Coming from `svg-sprite-loader`?** Swap the loader path and the plugin import; your component code stays the same. [See the diff ↓](#-migrating-from-svg-sprite-loader)
+
+## 🧭 Contents
+
+| Start here                                       | Reference                                                                 | Help                                    |
+| ------------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------- |
+| [🚀 Quick Start](#-quick-start)                  | [⚙️ API Reference](#️-api-reference)                                      | [🐛 Troubleshooting](#-troubleshooting) |
+| [📦 Extract Mode](#-extract-mode)                | [🔍 How It Works](#-how-it-works)                                         | [🧩 Compatibility](#-compatibility)     |
+| [🏗️ Rsbuild Integration](#️-rsbuild-integration) | [📊 Alternatives & Comparison](#-alternatives--comparison)                | [📚 Examples](#-examples)               |
+| [🛠️ Framework Recipes](#️-framework-recipes)     | [🔄 Migrating from svg-sprite-loader](#-migrating-from-svg-sprite-loader) | [🙌 Contributing](#-contributing)       |
 
 ---
 
-## Why SVG sprites?
+## 🤔 Why SVG sprites?
 
 Individual SVG files mean one HTTP request per icon — 50 icons = 50 requests. Inlining SVGs directly into JSX bloats your bundle with duplicated markup. SVG sprites solve both problems: all icons are combined into a single file (or a single hidden DOM element), and each icon is referenced by `<use href="#id" />` — one request, zero duplication, full CSS styling support, and resolution-independent rendering at any size.
 
-## What is this?
+## 💡 What is this?
 
 `rspack-plugin-svg-sprite` lets you import `.svg` files in your Rspack (or Webpack 5) project and automatically combine them into an SVG sprite sheet — either inlined in the DOM or extracted as an external `.svg` file.
 
 It was created because the popular [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader) depends on internal Webpack APIs (`NormalModule.getCompilationHooks`, `compilation.hooks.additionalAssets`, etc.) that do not exist in Rspack ([rspack#11609](https://github.com/web-infra-dev/rspack/issues/11609)). This package reimplements the same functionality using Rspack-compatible APIs while keeping the exact same exported symbol shape (`id`, `viewBox`, `url`, `content`), so your existing component code works without changes.
 
-## Features
+## ✨ Features
 
 - **Inline mode** (default) — SVG symbols are injected into the DOM at runtime via a hidden `<svg>` element. No plugin needed.
 - **Extract mode** — SVG symbols are emitted as an external `.svg` sprite file at build time. Great for caching and performance.
@@ -40,7 +49,7 @@ It was created because the popular [`svg-sprite-loader`](https://github.com/JetB
 - **Lightweight** — zero runtime dependencies.
 - **Customizable symbol IDs** — use `[name]`, `[folder]`, or a custom function.
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Install
 
@@ -72,7 +81,7 @@ module.exports = {
 };
 ```
 
-> **Important:** The `type: 'javascript/auto'` is required to prevent rspack/webpack's built-in asset module handling from intercepting `.svg` files before the loader runs. Without it, the loader may silently fail to process your SVGs.
+> ⚠️ **Heads up:** The `type: 'javascript/auto'` is required to prevent rspack/webpack's built-in asset module handling from intercepting `.svg` files before the loader runs. Without it, the loader may silently fail to process your SVGs.
 
 ### Use in your components
 
@@ -126,7 +135,7 @@ Make sure this file is included by your `tsconfig.json` (e.g., in the `include` 
 
 </details>
 
-## Extract Mode
+## 📦 Extract Mode
 
 To emit SVGs as an external `.svg` sprite file instead of inlining them, enable extract mode and add the plugin:
 
@@ -171,7 +180,7 @@ import icon from './icon.svg';
 </svg>;
 ```
 
-## API Reference
+## ⚙️ API Reference
 
 ### Loader Options
 
@@ -203,9 +212,9 @@ Every `import icon from './icon.svg'` returns an object with:
 | `url`     | `string` | `"#icon-home"` or `"/sprites/icons.svg#icon-home"` | Fragment reference (inline) or full URL (extract). |
 | `content` | `string` | `"<symbol id=\"icon-home\" ...>...</symbol>"`      | Raw `<symbol>` markup.                             |
 
-This matches `svg-sprite-loader`'s export shape exactly, so migrating requires no component changes.
+> ✅ This matches `svg-sprite-loader`'s export shape exactly, so migrating requires no component changes.
 
-## Rsbuild Integration
+## 🏗️ Rsbuild Integration
 
 If you're using [Rsbuild](https://rsbuild.dev/), use the built-in Rsbuild plugin for one-line setup:
 
@@ -224,9 +233,9 @@ module.exports = {
 };
 ```
 
-The Rsbuild plugin handles the loader rule, `type: 'javascript/auto'`, and the `SvgSpritePlugin` automatically.
+> 💡 **Tip:** The Rsbuild plugin handles the loader rule, `type: 'javascript/auto'`, and the `SvgSpritePlugin` automatically.
 
-## Framework Recipes
+## 🛠️ Framework Recipes
 
 ### Next.js (with next-rspack)
 
@@ -285,7 +294,7 @@ import icon from './icon.svg';
 </script>
 ```
 
-## Migrating from svg-sprite-loader
+## 🔄 Migrating from svg-sprite-loader
 
 ```diff
 // rspack.config.js
@@ -314,9 +323,9 @@ module.exports = {
 };
 ```
 
-Your component code stays the same — the exported symbol object has the identical shape (`id`, `viewBox`, `url`, `content`).
+> ✅ **No component changes:** your component code stays the same — the exported symbol object has the identical shape (`id`, `viewBox`, `url`, `content`).
 
-## Migrating from `asset/resource`
+## 🔄 Migrating from `asset/resource`
 
 If you're currently using rspack/webpack's built-in `asset/resource` type to handle SVGs (common in webpack 5+ / rspack projects), you can replace it with this plugin to get proper SVG sprite support:
 
@@ -349,13 +358,13 @@ module.exports = {
 };
 ```
 
-**Key points:**
+> 💡 **Key points:**
 
 - `type: 'javascript/auto'` is **required** — it overrides the previous `asset/resource` handling and lets the loader process SVGs as JavaScript modules.
 - The sprite file is emitted to your output directory (e.g., `dist/sprite.svg`).
 - If you were using a separate CLI tool (like `svg-sprite`) to generate sprites as a post-build step, you can remove that — the plugin handles everything inside the rspack build pipeline.
 
-## How It Works
+## 🔍 How It Works
 
 ### Inline Mode
 
@@ -370,9 +379,12 @@ module.exports = {
 2. During Rspack's `processAssets` stage, the plugin collects all registered symbols and emits a combined `.svg` sprite file.
 3. The exported JS module contains the external file URL (e.g., `/sprites/icons.svg#symbolId`).
 
-## Alternatives & Comparison
+## 📊 Alternatives & Comparison
 
 Looking for the right SVG solution for Rspack? Here's how the options compare:
+
+<details>
+<summary>📊 Full comparison table</summary>
 
 | Feature               | rspack-plugin-svg-sprite | svg-sprite-loader           | @svgr/webpack    | @rsbuild/plugin-svgr | vite-plugin-svg-icons |
 | --------------------- | ------------------------ | --------------------------- | ---------------- | -------------------- | --------------------- |
@@ -385,11 +397,13 @@ Looking for the right SVG solution for Rspack? Here's how the options compare:
 | **Maintained**        | Yes                      | No (archived)               | Yes              | Yes                  | Yes                   |
 | **Drop-in migration** | —                        | Yes (same API)              | Different API    | Different API        | Different API         |
 
+</details>
+
 **When to use SVG sprites** (this plugin): You want icons combined into a single file with `<use href="#id">` references — optimal for large icon sets, full CSS styling control, and caching. Best when migrating from `svg-sprite-loader`.
 
 **When to use SVGR**: You want each SVG as a React component with props for color, size, etc. Better for SVGs that need dynamic manipulation via React props rather than CSS.
 
-## Compatibility
+## 🧩 Compatibility
 
 | Bundler                            | Tested versions | What the test suite covers                                       |
 | ---------------------------------- | --------------- | ---------------------------------------------------------------- |
@@ -399,7 +413,7 @@ Looking for the right SVG solution for Rspack? Here's how the options compare:
 
 The peer range still accepts `@rspack/core` 0.5 and newer, so existing installs keep working, but versions older than 1.7 are not exercised by the tests.
 
-## Examples
+## 📚 Examples
 
 The repository includes three runnable demo apps:
 
@@ -419,7 +433,7 @@ pnpm dev:rspack   # http://localhost:3000
 pnpm dev:webpack  # http://localhost:4000
 ```
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Sprite file not emitted / icons not rendering
 
@@ -514,10 +528,10 @@ If you export an array of configs (a multi-compiler build, for example client an
 - The sprite URL is fixed at build time from the loader's `publicPath` option, or from `output.publicPath` when that is a plain string. `output.publicPath: 'auto'` and function values are not read, so set the loader's `publicPath` in those setups.
 - The Rsbuild plugin replaces Rsbuild's built-in SVG rule. `./icon.svg?url`, `?inline` and `?raw` therefore also return a sprite symbol, and SVGs outside the plugin's `include` / `exclude` scope are left without Rsbuild's default handling.
 
-## Contributing
+## 🙌 Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, project structure, and guidelines.
 
-## License
+## 📄 License
 
 [MIT](LICENSE)
