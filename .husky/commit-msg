@@ -1,6 +1,0 @@
-# Strip co-author trailers so commits are attributed to the committer only.
-if sed --version >/dev/null 2>&1; then
-  sed -i '/^[Cc]o-[Aa]uthored-[Bb]y:/d; /^[Mm]ade-[Ww]ith:/d' "$1"
-else
-  sed -i '' '/^[Cc]o-[Aa]uthored-[Bb]y:/d; /^[Mm]ade-[Ww]ith:/d' "$1"
-fi

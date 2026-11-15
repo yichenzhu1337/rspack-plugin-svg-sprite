@@ -1,0 +1,33 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "workspaces": {
+    ".": {
+      // The public API (src/index.ts, loader.ts, plugin.ts, rsbuild.ts) is found through the
+      // `exports` field of package.json. The runtime modules are loaded by generated code, and
+      // the scripts by CI, so both are listed here as entries.
+      // The consumer fixtures in scripts/ci/package-fixtures are outside `project`: they are
+      // compiled by scripts/ci/package-check.mjs against the packed tarball.
+      "entry": ["src/runtime/*.ts", "scripts/**/*.mjs"],
+      "project": ["src/**/*.ts", "scripts/**/*.mjs"],
+      // lefthook.yml runs oxlint and oxfmt, which are added together with the switch away from
+      // ESLint and Prettier. Remove this once they are devDependencies.
+      "ignoreBinaries": ["oxlint", "oxfmt"],
+      "ignoreDependencies": [
+        // Loaded through createRequire/require.resolve with a string in the integration tests,
+        // which static analysis cannot follow: webpack, the rspack-v2 and rsbuild-v2 aliases,
+        // svgo-loader (the README recipe test), htmlparser2 (parser agreement test).
+        "webpack",
+        "rspack-v2",
+        "rsbuild-v2",
+        "svgo-loader",
+        "htmlparser2",
+        // Peer dependency of svgo-loader, resolved by svgo-loader itself.
+        "svgo",
+      ],
+    },
+    "examples/*": {
+      // svgo-loader requires svgo at runtime as its peer dependency.
+      "ignoreDependencies": ["svgo"],
+    },
+  },
+}

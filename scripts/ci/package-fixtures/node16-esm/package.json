@@ -1,0 +1,5 @@
+{
+  "name": "fixture-node16-esm",
+  "private": true,
+  "type": "module"
+}
