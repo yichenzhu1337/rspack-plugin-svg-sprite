@@ -1,0 +1,14 @@
+{
+  "name": "consumer-rsbuild2-extract",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rsbuild build"
+  },
+  "dependencies": {
+    "rspack-plugin-svg-sprite": "*"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "2.3.2"
+  }
+}

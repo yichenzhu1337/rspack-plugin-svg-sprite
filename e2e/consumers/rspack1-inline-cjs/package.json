@@ -1,0 +1,15 @@
+{
+  "name": "consumer-rspack1-inline-cjs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rspack build"
+  },
+  "dependencies": {
+    "rspack-plugin-svg-sprite": "*"
+  },
+  "devDependencies": {
+    "@rspack/cli": "1.7.12",
+    "@rspack/core": "1.7.12"
+  }
+}

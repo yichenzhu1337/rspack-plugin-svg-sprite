@@ -154,6 +154,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "knip": "pnpm build && knip",
+    "test:e2e": "pnpm --filter rspack-plugin-svg-sprite-e2e test",
     "check:package": "node scripts/ci/package-check.mjs"
   },
   "peerDependencies": {

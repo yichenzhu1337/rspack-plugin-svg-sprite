@@ -1,0 +1,19 @@
+{
+  "name": "rspack-plugin-svg-sprite-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Browser tests that load packed-tarball consumer apps in Chromium, Firefox and WebKit",
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.65.0",
+    "@types/node": "26.6.6",
+    "@types/pngjs": "6.0.5",
+    "pngjs": "7.0.0"
+  }
+}

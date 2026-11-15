@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <defs>
+    <linearGradient id="sun-fill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff9a00"/>
+      <stop offset="1" stop-color="#d4145a"/>
+    </linearGradient>
+    <clipPath id="sun-clip"><circle cx="12" cy="12" r="10"/></clipPath>
+  </defs>
+  <rect width="24" height="24" fill="url(#sun-fill)" clip-path="url(#sun-clip)"/>
+</svg>
