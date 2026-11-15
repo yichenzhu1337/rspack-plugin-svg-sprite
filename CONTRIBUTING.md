@@ -61,9 +61,18 @@ rspack-plugin-svg-sprite/
 4. Run `pnpm test` to verify nothing is broken.
 5. Run `pnpm lint` and `pnpm format` to catch style issues.
 6. Test against the examples with `pnpm dev:rspack`.
-7. Commit using [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.) — semantic-release uses these to determine version bumps.
-8. The pre-commit hook (husky + lint-staged) runs ESLint and Prettier automatically on staged files.
-9. Open a pull request against `main`.
+7. If the change affects users of the package, run `pnpm changeset` and commit the generated file: pick `patch`, `minor` or `major` and describe the change for users. CI requires one whenever the published package changes; docs, CI and test-only changes don't need one.
+8. Commit using [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.). Pull requests are squash-merged, so the PR title becomes the commit subject.
+9. The pre-commit hook (husky + lint-staged) runs ESLint and Prettier automatically on staged files.
+10. Open a pull request against `main`.
+
+## Releasing
+
+Releases are manual, and versions follow [SemVer](https://semver.org/) via [Changesets](https://github.com/changesets/changesets):
+
+1. Merged changesets accumulate on `main`. A bot keeps a **"chore: version packages"** pull request up to date that bumps the version and writes `CHANGELOG.md`. Merge it when you want to release.
+2. In the Actions tab, run **Release** with `dry-run`. It runs the full CI, packs the package once, checks the tarball (`publint`, `attw`, an import smoke test, `npm publish --dry-run`) and writes a report: the version, the changelog section, the commits included and how the package contents changed. Nothing is published.
+3. Run **Release** with `publish`. After the same checks it waits for approval in the `npm-release` environment, then publishes that exact tarball through npm trusted publishing (with provenance), tags `vX.Y.Z`, creates the GitHub release and verifies the result from npm.
 
 ## How the Plugin Works
 

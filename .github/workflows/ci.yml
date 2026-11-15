@@ -5,10 +5,16 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_call:
 
+permissions:
+  contents: read
+
+# Keyed by workflow and event, so a Release run that calls this workflow never cancels a push run
+# (or the reverse). Only superseded pull request runs are cancelled.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lint:
@@ -60,30 +66,3 @@ jobs:
       - run: pnpm --filter svg-sprite-consumer-demo build
       - run: pnpm --filter svg-sprite-webpack-demo build
       - run: pnpm --filter svg-sprite-vue-extract-demo build
-
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    needs: [lint, test, build-examples]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: npx semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
