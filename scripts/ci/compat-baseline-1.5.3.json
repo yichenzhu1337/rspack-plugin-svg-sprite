@@ -1,0 +1,860 @@
+{
+  "version": "1.5.3",
+  "cells": [
+    {
+      "group": "node",
+      "id": "require .",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require . is the value",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require . .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require . named",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default . loads",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default . is the value",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default . .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default . .named",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import { named } .",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import * as ns .",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./plugin",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./plugin .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./plugin named",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./plugin loads",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./plugin is the value",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "import default ./plugin .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./plugin .named",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import { named } ./plugin",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import * as ns ./plugin",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "require ./loader",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./loader .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./loader named",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./loader loads",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./loader is the value",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "import default ./loader .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./loader .named",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import { named } ./loader",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import * as ns ./loader",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "require ./rsbuild",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./rsbuild named",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./rsbuild loads",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./rsbuild .named",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import { named } ./rsbuild",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import * as ns ./rsbuild",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./runtime/symbol",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./runtime/symbol .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./runtime/symbol loads",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./runtime/symbol is the value",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "import default ./runtime/symbol .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import * as ns ./runtime/symbol",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "require ./runtime/browser-sprite",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require ./runtime/browser-sprite .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./runtime/browser-sprite loads",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import default ./runtime/browser-sprite is the value",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "import default ./runtime/browser-sprite .default",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import * as ns ./runtime/browser-sprite",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "require.resolve loader",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "import.meta.resolve loader",
+      "pass": true
+    },
+    {
+      "group": "node",
+      "id": "require package.json",
+      "pass": false
+    },
+    {
+      "group": "node",
+      "id": "import package.json",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: root default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node10: root named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node10: root namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node10: root require",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node10: plugin default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: plugin default as type",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: plugin default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: plugin named",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: plugin require",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: loader default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: loader default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: loader named",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: loader namespace",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: rsbuild named",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: rsbuild namespace",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: symbol default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: symbol default as type",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: browser-sprite default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: browser-sprite default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node10: client reference",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node10: package declarations",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: root default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: root named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: root namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: root require",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: plugin default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: plugin default as type",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: plugin default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: plugin named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: plugin require",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: loader default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: loader default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: loader named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: loader namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: rsbuild named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: rsbuild namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: symbol default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: symbol default as type",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: browser-sprite default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: browser-sprite default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: client reference",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-cjs: package declarations",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: root default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: root named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: root namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: plugin default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: plugin default as type",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: plugin default.default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: plugin named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: loader default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: loader default.default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: loader named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: loader namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: rsbuild named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: rsbuild namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: symbol default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: symbol default as type",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: browser-sprite default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: browser-sprite default.default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: client reference",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "node16-esm: package declarations",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: root default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: root named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: root namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: plugin default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: plugin default as type",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: plugin default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "bundler: plugin named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: loader default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: loader default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "bundler: loader named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: loader namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: rsbuild named",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: rsbuild namespace",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: symbol default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: symbol default as type",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: browser-sprite default",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: browser-sprite default.default",
+      "pass": false
+    },
+    {
+      "group": "types",
+      "id": "bundler: client reference",
+      "pass": true
+    },
+    {
+      "group": "types",
+      "id": "bundler: package declarations",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 inline cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 inline mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 inline cjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 inline mjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 extract cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 extract mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 extract cjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 extract mjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 extract mjs config, /plugin default import",
+      "pass": false
+    },
+    {
+      "group": "build",
+      "id": "rspack1 extract cjs config, require('/plugin').default",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack1 inline, app imports runtime too (one sprite)",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 inline cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 inline mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 inline cjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 inline mjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 extract cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 extract mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 extract cjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 extract mjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 extract mjs config, /plugin default import",
+      "pass": false
+    },
+    {
+      "group": "build",
+      "id": "rspack2 extract cjs config, require('/plugin').default",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rspack2 inline, app imports runtime too (one sprite)",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack inline cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack inline mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack inline cjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack inline mjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack extract cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack extract mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack extract cjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack extract mjs config, resolved loader path",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack extract mjs config, /plugin default import",
+      "pass": false
+    },
+    {
+      "group": "build",
+      "id": "webpack extract cjs config, require('/plugin').default",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "webpack inline, app imports runtime too (one sprite)",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rsbuild1 inline cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rsbuild1 inline mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rsbuild1 extract cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rsbuild1 extract mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rsbuild2 inline cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rsbuild2 inline mjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rsbuild2 extract cjs config",
+      "pass": true
+    },
+    {
+      "group": "build",
+      "id": "rsbuild2 extract mjs config",
+      "pass": true
+    }
+  ]
+}

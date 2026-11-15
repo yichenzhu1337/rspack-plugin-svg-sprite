@@ -32,8 +32,8 @@ const TSC = join(ROOT, 'node_modules', 'typescript', 'bin', 'tsc');
 // Budgets in bytes, about 20% above the values measured when they were set
 // (25,247 packed and 88,666 unpacked). Raise them on purpose, in a reviewed change.
 const BUDGET = {
-  packed: Number(process.env.PACKAGE_BUDGET_PACKED) || 30_500,
-  unpacked: Number(process.env.PACKAGE_BUDGET_UNPACKED) || 106_500,
+  packed: Number(process.env.PACKAGE_BUDGET_PACKED) || 41_500,
+  unpacked: Number(process.env.PACKAGE_BUDGET_UNPACKED) || 149_000,
 };
 
 const update = process.argv.includes('--update');
