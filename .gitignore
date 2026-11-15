@@ -8,3 +8,5 @@ _thoughts/
 
 # Personal lefthook overrides
 lefthook-local.yml
+reports/
+.stryker-tmp/
