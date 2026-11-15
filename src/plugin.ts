@@ -30,6 +30,12 @@ function merge(target: Required<PluginConfig>, source: PluginConfig): Required<P
 class SvgSpritePlugin {
   public config: Required<PluginConfig>;
   public symbols: SymbolData[];
+  // id -> position in `symbols`, so registering an icon is O(1) instead of a scan per icon.
+  // `symbols` is public and may be replaced or edited from outside, so the index remembers
+  // which array and length it describes and is rebuilt whenever that no longer matches.
+  private symbolIndex = new Map<string, number>();
+  private indexedSymbols: SymbolData[] | null = null;
+  private indexedCount = 0;
 
   constructor(cfg?: PluginConfig) {
     this.config = merge(defaultConfig, cfg || {});
@@ -40,8 +46,28 @@ class SvgSpritePlugin {
     return NAMESPACE;
   }
 
+  private rebuildSymbolIndex(): void {
+    this.symbolIndex.clear();
+    this.symbols.forEach((s, i) => this.symbolIndex.set(s.id, i));
+    this.indexedSymbols = this.symbols;
+    this.indexedCount = this.symbols.length;
+  }
+
+  private findSymbol(id: string): number {
+    if (this.indexedSymbols !== this.symbols || this.indexedCount !== this.symbols.length) {
+      this.rebuildSymbolIndex();
+    }
+    let position = this.symbolIndex.get(id);
+    if (position !== undefined && this.symbols[position].id !== id) {
+      // An entry was swapped in place from outside: the index is stale.
+      this.rebuildSymbolIndex();
+      position = this.symbolIndex.get(id);
+    }
+    return position === undefined ? -1 : position;
+  }
+
   addSymbol(symbolData: SymbolData): void {
-    const existing = this.symbols.findIndex((s) => s.id === symbolData.id);
+    const existing = this.findSymbol(symbolData.id);
     if (existing >= 0) {
       const prev = this.symbols[existing];
       if (
@@ -65,7 +91,9 @@ class SvgSpritePlugin {
       }
       this.symbols[existing] = symbolData;
     } else {
+      this.symbolIndex.set(symbolData.id, this.symbols.length);
       this.symbols.push(symbolData);
+      this.indexedCount = this.symbols.length;
     }
   }
 
