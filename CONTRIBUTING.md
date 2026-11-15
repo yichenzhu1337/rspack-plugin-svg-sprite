@@ -5,7 +5,7 @@
 
 | Jump to       |                                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------ |
-| 🛠️ Set up     | [Prerequisites](#-prerequisites), [Getting Started](#️-getting-started), [Commands](#️-commands)   |
+| 🛠️ Set up     | [Prerequisites](#-prerequisites), [Getting Started](#️-getting-started), [Commands](#️-commands) |
 | 🔁 Contribute | [Development Workflow](#-development-workflow), [Code Style](#-code-style), [Testing](#-testing) |
 | 🚀 Ship       | [Releasing](#-releasing)                                                                         |
 | 🔍 Understand | [Project Structure](#-project-structure), [How the Plugin Works](#-how-the-plugin-works)         |
@@ -46,8 +46,8 @@ rspack-plugin-svg-sprite/
 │   └── react-webpack/        # React + Webpack demo — uses svg-sprite-loader (for comparison)
 ├── tsconfig.json             # TypeScript config (strict, CommonJS output)
 ├── rstest.config.ts          # Test runner config with Istanbul coverage
-├── eslint.config.mjs         # ESLint flat config (typescript-eslint + prettier)
-├── .prettierrc               # Prettier config (single quotes, trailing commas, 100 char width)
+├── .oxlintrc.json            # Oxlint config
+├── .oxfmtrc.json             # Oxfmt config (single quotes, trailing commas, 100 char width)
 └── pnpm-workspace.yaml       # Workspace: examples/*
 ```
 
@@ -61,8 +61,8 @@ rspack-plugin-svg-sprite/
 | `pnpm test`        | Build + run unit and integration tests                     |
 | `pnpm test:ci`     | Build + run tests with Istanbul coverage (98% threshold)   |
 | `pnpm typecheck`   | Type-check without emitting                                |
-| `pnpm lint`        | Run ESLint on `src/`                                       |
-| `pnpm format`      | Auto-format everything with Prettier                       |
+| `pnpm lint`        | Run Oxlint on `src/` and `scripts/`                        |
+| `pnpm format`      | Auto-format everything with Oxfmt                          |
 | `pnpm dev:rspack`  | Start the React + Rspack example on http://localhost:3000  |
 | `pnpm dev:webpack` | Start the React + Webpack example on http://localhost:4000 |
 
@@ -76,7 +76,7 @@ rspack-plugin-svg-sprite/
 6. Test against the examples with `pnpm dev:rspack`.
 7. If the change affects users of the package, run `pnpm changeset` and commit the generated file: pick `patch`, `minor` or `major` and describe the change for users. CI requires one whenever the published package changes; docs, CI and test-only changes don't need one.
 8. Commit using [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.). Pull requests are squash-merged, so the PR title becomes the commit subject, and the **PR title** check requires it to be a Conventional Commit (`<type>[(<scope>)][!]: <description>`, at most 100 characters, no trailing period).
-9. The pre-commit hook (husky + lint-staged) runs ESLint and Prettier automatically on staged files.
+9. The pre-commit hook (husky + lint-staged) runs Oxlint and Oxfmt automatically on staged files.
 10. Open a pull request against `main`.
 
 > [!IMPORTANT]
@@ -115,7 +115,7 @@ pnpm test:ci    # Build + run tests with Istanbul coverage report
 ## 🧹 Code Style
 
 - **TypeScript** with `strict: true` — source in `src/`, compiled output in `dist/`.
-- **Prettier** handles formatting — single quotes, trailing commas, 100 char print width, LF line endings.
-- **ESLint** with `typescript-eslint` and `eslint-config-prettier` catches common issues.
-- **Pre-commit hook** via husky + lint-staged runs both automatically on staged `.ts`/`.tsx` files.
+- **Oxfmt** handles formatting — single quotes, trailing commas, 100 char print width, LF line endings.
+- **Oxlint** with its TypeScript rules catches common issues.
+- **Pre-commit hook** via husky + lint-staged runs both automatically on staged files.
 - Keep the public API compatible with `svg-sprite-loader` — the exported symbol object should have the same shape (`id`, `viewBox`, `url`, `content`).
