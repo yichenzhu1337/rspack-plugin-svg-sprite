@@ -1,0 +1,101 @@
+name: 🐛 Bug report
+description: Something does not work as documented
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. For questions or help, please use [Discussions](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/discussions) instead.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: The version of `rspack-plugin-svg-sprite` you have installed.
+      placeholder: 'e.g. 1.5.1'
+    validations:
+      required: true
+  - type: dropdown
+    id: bundler
+    attributes:
+      label: Bundler
+      description: Which bundler runs the build?
+      options:
+        - Rspack 1
+        - Rspack 2
+        - Rsbuild 1
+        - Rsbuild 2
+        - webpack 5
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: bundler-version
+    attributes:
+      label: Bundler version
+      description: The exact version, for example from your lockfile.
+      placeholder: 'e.g. @rspack/core 1.3.0'
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - Inline (default)
+        - 'Extract (extract: true)'
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: 'e.g. 22.12.0'
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: 'e.g. macOS 15, Ubuntu 24.04, Windows 11'
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the actual behavior, including any error or warning text.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: input
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: A link to a public repository or a StackBlitz project. A small reproduction lets the maintainer see the problem first-hand, which is usually the fastest way to a fix. Issues without one may be closed.
+      placeholder: 'https://github.com/you/repro or https://stackblitz.com/...'
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant config
+      description: The loader rule and plugin setup from your bundler config.
+      render: js
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Build output or console errors, if any.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and read the Troubleshooting section of the README.
+          required: true
