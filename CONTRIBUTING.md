@@ -100,6 +100,17 @@ The loader parses each `.svg` file, wraps its content in a `<symbol>`, and gener
 
 The loader registers each symbol with the `SvgSpritePlugin` via the compilation object. During the `processAssets` hook, the plugin collects all symbols and emits a combined `.svg` sprite file. The exported JS module contains the external URL (`sprite.svg#symbolId`) instead of a fragment-only reference.
 
+### ESM entry points
+
+Each public entry has `src/<name>.ts` (the implementation, compiled to CommonJS) and `src/<name>.mts` (a thin ESM wrapper that re-exports it). When you add an export, add it to both files.
+
+Before changing `exports` in `package.json`, pack the package and run the compatibility matrix against the 1.5.3 baseline. It installs the tarball into fresh projects and checks every entry under CommonJS, ESM, four TypeScript resolution modes and real Rspack, webpack and Rsbuild builds:
+
+```bash
+pnpm build && npm pack
+node scripts/ci/compat-matrix.mjs rspack-plugin-svg-sprite-*.tgz --baseline scripts/ci/compat-baseline-1.5.3.json --strict
+```
+
 ## 🧪 Testing
 
 Tests use [rstest](https://rstest.rs) with a Jest-compatible API (`describe`, `it`, `expect`). Each source module has a corresponding test file in `src/__tests__/`.
