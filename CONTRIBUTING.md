@@ -59,7 +59,7 @@ rspack-plugin-svg-sprite/
 | ------------------ | ---------------------------------------------------------- |
 | `pnpm build`       | Compile TypeScript to `dist/`                              |
 | `pnpm test`        | Build + run unit and integration tests                     |
-| `pnpm test:ci`     | Build + run tests with Istanbul coverage (98% threshold)   |
+| `pnpm test:ci`     | Build + run tests with Istanbul coverage (99% threshold)   |
 | `pnpm typecheck`   | Type-check without emitting                                |
 | `pnpm lint`        | Run Oxlint on `src/` and `scripts/`                        |
 | `pnpm format`      | Auto-format everything with Oxfmt                          |
@@ -81,6 +81,10 @@ rspack-plugin-svg-sprite/
 
 > [!IMPORTANT]
 > Pull requests that change the published package need a changeset (step 7), and the PR title must be a Conventional Commit (step 8).
+
+### Preview packages
+
+Every pull request that changes the package gets a comment from pkg.pr.new with an install command for that exact build, for example `npm i https://pkg.pr.new/yichenzhu1337/rspack-plugin-svg-sprite@<pr-number>`. Use it to try a change in a real project, or ask the person who reported a bug to confirm the fix. Nothing is published to npm.
 
 ## 🚀 Releasing
 
@@ -121,7 +125,7 @@ pnpm test:ci    # Build + run tests with Istanbul coverage report
 ```
 
 > [!TIP]
-> Coverage thresholds are enforced at **98%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
+> Coverage thresholds are enforced at **99%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
 
 ## 🧹 Code Style
 
