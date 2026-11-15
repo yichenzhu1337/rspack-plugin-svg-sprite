@@ -93,7 +93,7 @@
     "prepare": "node scripts/hooks/install.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "knip": "knip",
+    "knip": "pnpm build && knip",
     "check:package": "node scripts/ci/package-check.mjs"
   },
   "peerDependencies": {

@@ -1,0 +1,6 @@
+rules:
+  adhoc-packages:
+    ignore:
+      # The nightly installs the newest Rspack/Rsbuild builds and the oldest supported peer on
+      # purpose, outside the lockfile, to test compatibility.
+      - nightly.yml
