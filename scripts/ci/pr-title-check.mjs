@@ -5,7 +5,7 @@
 //   <type>[(<scope>)][!]: <description>
 //
 // Env: PR_TITLE.
-import { appendFileSync } from 'node:fs';
+import { fail, ok, summary, table } from '../lib/output.mjs';
 
 const TYPES = {
   feat: 'a new feature',
@@ -48,29 +48,39 @@ if (title.length > MAX_LENGTH) {
   problems.push(`it is ${title.length} characters long; keep it to ${MAX_LENGTH}`);
 }
 
-const summary = (text) =>
-  process.env.GITHUB_STEP_SUMMARY && appendFileSync(process.env.GITHUB_STEP_SUMMARY, text + '\n');
+const shown = title.replace(/`/g, "'");
 
 if (problems.length) {
-  for (const problem of problems) console.log(`::error::PR title: ${problem}`);
+  for (const problem of problems) console.log(`::error::❌ PR title: ${problem}`);
   summary(
     [
-      '### PR title',
+      '## 🏷️ PR title',
       '',
-      `\`${title.replace(/`/g, "'")}\` is not a Conventional Commit title:`,
+      '> [!CAUTION]',
+      `> \`${shown}\` is not a Conventional Commit title.`,
       '',
-      ...problems.map((p) => `- ${p}`),
+      '### What is wrong',
+      '',
+      ...problems.map((p) => `- ❌ ${p}`),
+      '',
+      '### 🛠️ How to fix',
       '',
       'Use `<type>[(<scope>)][!]: <description>`, for example `fix: keep every icon in watch mode`',
       'or `feat(loader)!: drop the include option`. GitHub revert titles (`Revert "…"`) are',
-      'accepted too. Types:',
+      'accepted too. Edit the title; this check re-runs on its own.',
       '',
-      ...Object.entries(TYPES).map(([type, meaning]) => `- \`${type}\`: ${meaning}`),
-      '',
-      'Edit the title; this check re-runs on its own.',
+      table(
+        ['Type', 'Use it for'],
+        Object.entries(TYPES).map(([type, meaning]) => [`\`${type}\``, meaning]),
+      ),
     ].join('\n'),
   );
+  fail('PR title is not a Conventional Commit title');
   process.exit(1);
 }
-console.log(`PR title ok: ${title}`);
-summary(`### PR title\n\n\`${title.replace(/`/g, "'")}\` is a valid Conventional Commit title.`);
+ok(`PR title ok: ${title}`);
+summary(
+  ['## 🏷️ PR title', '', '> [!TIP]', `> \`${shown}\` is a valid Conventional Commit title.`].join(
+    '\n',
+  ),
+);

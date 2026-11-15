@@ -26,9 +26,7 @@
           @click="handleClick('settings')"
         />
       </div>
-      <p v-if="lastClicked" class="click-log">
-        Last clicked: <strong>{{ lastClicked }}</strong>
-      </p>
+      <p v-if="lastClicked" class="click-log">Last clicked: <strong>{{ lastClicked }}</strong></p>
     </section>
 
     <section class="demo-section">

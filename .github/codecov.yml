@@ -8,9 +8,9 @@ coverage:
         target: 98%
 
 comment:
-  layout: 'reach,diff,flags,files'
+  layout: 'condensed_header, condensed_files, condensed_footer'
   behavior: default
-  require_changes: false
+  require_changes: 'coverage_drop OR uncovered_patch'
   require_base: false
   require_head: true
 

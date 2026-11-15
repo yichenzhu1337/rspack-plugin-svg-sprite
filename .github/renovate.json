@@ -1,0 +1,63 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests", ":semanticCommits"],
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "timezone": "UTC",
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "platformAutomerge": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"],
+    "automerge": false
+  },
+  "packageRules": [
+    {
+      "description": "Never touch peerDependencies: narrowing them is a breaking change",
+      "matchDepTypes": ["peerDependencies"],
+      "enabled": false
+    },
+    {
+      "description": "Root devDependencies: group non-major updates and automerge them",
+      "matchFileNames": ["package.json"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "root devDependencies (non-major)",
+      "automerge": true
+    },
+    {
+      "description": "Example apps: group non-major updates of the workspace dependencies",
+      "matchFileNames": ["examples/**/package.json"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "examples dependencies (non-major)"
+    },
+    {
+      "description": "GitHub Actions: group updates",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "description": "Toolchain: Node in .nvmrc, never automerged",
+      "matchManagers": ["nvm"],
+      "groupName": "toolchain",
+      "automerge": false
+    },
+    {
+      "description": "Toolchain: pnpm in the packageManager field, never automerged",
+      "matchDepTypes": ["packageManager"],
+      "groupName": "toolchain",
+      "automerge": false
+    },
+    {
+      "description": "Major updates: separate PRs, never automerged",
+      "matchUpdateTypes": ["major"],
+      "groupName": null,
+      "automerge": false
+    }
+  ]
+}
