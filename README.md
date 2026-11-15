@@ -182,8 +182,8 @@ import icon from './icon.svg';
 | `extract`        | `boolean`            | `false`        | Enable extract mode to emit an external sprite file instead of inlining.                                                  |
 | `spriteFilename` | `string`             | `'sprite.svg'` | Output filename for the extracted sprite (extract mode only).                                                             |
 | `publicPath`     | `string`             | `''`           | Public URL prefix for the sprite file (extract mode only). Auto-detected from `output.publicPath` if not set.             |
-| `include`        | `string[]`           | —              | Glob patterns or directories to include (only process matching SVGs).                                                     |
-| `exclude`        | `string[]`           | —              | Glob patterns or directories to exclude from processing.                                                                  |
+
+`include` and `exclude` are not loader options. To limit which SVGs become sprite symbols, use the `include` / `exclude` conditions of the bundler rule itself, or the options of the same name on the Rsbuild plugin (`pluginSvgSprite({ include: /icons/ })`).
 
 ### Plugin Options (Extract Mode)
 
@@ -391,11 +391,13 @@ Looking for the right SVG solution for Rspack? Here's how the options compare:
 
 ## Compatibility
 
-| Bundler                            | Version  | Status                                           |
-| ---------------------------------- | -------- | ------------------------------------------------ |
-| [Rspack](https://rspack.dev/)      | >= 0.5.0 | Fully supported (primary target)                 |
-| [Rsbuild](https://rsbuild.dev/)    | >= 1.0.0 | Supported via `rspack-plugin-svg-sprite/rsbuild` |
-| [Webpack](https://webpack.js.org/) | 5.x      | Supported via `webpack-sources` fallback         |
+| Bundler                            | Tested versions | What the test suite covers                                       |
+| ---------------------------------- | --------------- | ---------------------------------------------------------------- |
+| [Rspack](https://rspack.dev/)      | 1.7 and 2.3     | Inline and extract builds, watch mode, persistent cache restarts |
+| [Rsbuild](https://rsbuild.dev/)    | 1.7 and 2.3     | The `pluginSvgSprite` wrapper                                    |
+| [Webpack](https://webpack.js.org/) | 5.105           | Inline and extract builds, watch mode, filesystem cache restarts |
+
+The peer range still accepts `@rspack/core` 0.5 and newer, so existing installs keep working, but versions older than 1.7 are not exercised by the tests.
 
 ## Examples
 
@@ -455,6 +457,62 @@ module.exports = {
   plugins: [new SvgSpritePlugin()],
 };
 ```
+
+### Icon is a broken image, or DevTools shows `data:image/svg+xml;base64`
+
+**Symptom:** The build succeeds, but the icon does not render and its source is a `data:` URI or a hashed `.svg` file that contains JavaScript.
+
+**Cause:** Another rule (your own image rule, or a framework default) assigns an asset module type to `.svg` files. The sprite loader still runs, but its JavaScript output is emitted as the image instead of being executed.
+
+**Fix:** The loader prints a build warning that names the file and the module type, for example `... is handled as module type "asset/inline"`. Add `type: 'javascript/auto'` to the rule that uses `rspack-plugin-svg-sprite/loader`, or exclude your icon folder from the other rule.
+
+### Icons vanish from the extracted sprite during development, or after a cached rebuild
+
+**Symptom:** In extract mode, icons disappear from `sprite.svg` after you edit a file while the dev server is running. Or, with a persistent build cache (`cache.type: 'persistent'` in Rspack 2, `experiments.cache` in Rspack 1, `cache.type: 'filesystem'` in webpack), the second build emits no sprite at all.
+
+**Cause:** Versions up to 1.5.2 let the bundler cache SVG modules in extract mode. A cached module skips the loader, so its symbol was never registered with the plugin.
+
+**Fix:** Upgrade to 1.5.3 or newer. In extract mode the loader now opts out of caching, so every icon is read again on each rebuild (roughly 0.05 to 0.1 ms per icon). Inline mode is unaffected and stays cached.
+
+### Two icons show the same gradient, clip path, or class styling
+
+**Cause:** All symbols live in one SVG document. Icons minified by SVGO often reuse ids such as `id="a"`, and Illustrator exports reuse class names such as `.cls-1`. The first definition in the document wins.
+
+**Fix:** Let SVGO prefix ids and class names per file before the sprite loader runs:
+
+```bash
+npm install svgo svgo-loader -D
+```
+
+```js
+{
+  test: /\.svg$/,
+  type: 'javascript/auto',
+  use: [
+    { loader: 'rspack-plugin-svg-sprite/loader', options: { symbolId: 'icon-[name]' } },
+    { loader: 'svgo-loader', options: { plugins: [{ name: 'prefixIds' }] } },
+  ],
+}
+```
+
+Loaders run from the last entry to the first, so SVGO processes the raw SVG and the sprite loader receives the result. This recipe is covered by the test suite with svgo-loader 5 and svgo 4.
+
+### An icon is scaled differently after upgrading from 1.5.2 or older
+
+**Cause:** Older versions lowercased attribute names on the root `<svg>`, which turned `preserveAspectRatio` into an attribute browsers ignore. The attribute is now kept exactly as written, so the icon scales the way the SVG file asks.
+
+**Fix:** If you preferred the old rendering, remove `preserveAspectRatio` from the source SVG.
+
+### One plugin instance shared by several configs
+
+If you export an array of configs (a multi-compiler build, for example client and server), create a separate `new SvgSpritePlugin()` for each config. A shared instance puts the icons of every build into each sprite.
+
+### Known limitations
+
+- An SVG with no `viewBox` and no numeric `width` and `height` gets `viewBox="0 0 24 24"`. Add a `viewBox` to the source file if that is not its real size.
+- `spriteFilename` is used literally. Placeholders such as `[hash]` or `[chunkname]` are not interpolated.
+- The sprite URL is fixed at build time from the loader's `publicPath` option, or from `output.publicPath` when that is a plain string. `output.publicPath: 'auto'` and function values are not read, so set the loader's `publicPath` in those setups.
+- The Rsbuild plugin replaces Rsbuild's built-in SVG rule. `./icon.svg?url`, `?inline` and `?raw` therefore also return a sprite symbol, and SVGs outside the plugin's `include` / `exclude` scope are left without Rsbuild's default handling.
 
 ## Contributing
 

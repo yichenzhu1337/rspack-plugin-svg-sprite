@@ -4,7 +4,7 @@ Thanks for your interest in contributing! This guide covers how to set up the pr
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 26.13.1 (pinned in `.nvmrc`)
+- [Node.js](https://nodejs.org/) 26.13.1 (pinned in `.nvmrc`; 22.12 or newer also works)
 - [pnpm](https://pnpm.io/) 12.18.0 (pinned via `packageManager` in `package.json`)
 
 ## Getting Started
@@ -45,7 +45,7 @@ rspack-plugin-svg-sprite/
 | Command            | Description                                                |
 | ------------------ | ---------------------------------------------------------- |
 | `pnpm build`       | Compile TypeScript to `dist/`                              |
-| `pnpm test`        | Build + run unit tests                                     |
+| `pnpm test`        | Build + run unit and integration tests                     |
 | `pnpm test:ci`     | Build + run tests with Istanbul coverage (95% threshold)   |
 | `pnpm typecheck`   | Type-check without emitting                                |
 | `pnpm lint`        | Run ESLint on `src/`                                       |

@@ -14,11 +14,13 @@ interface LoaderContext {
   cacheable?: (flag?: boolean) => void;
   resourcePath: string;
   getOptions?: () => LoaderOptions;
+  emitWarning?: (warning: Error) => void;
   _compilation?: any;
   _compiler?: any;
+  _module?: any;
 }
 
-export function parseViewBox(svgContent: string): string {
+function legacyParseViewBox(svgContent: string): string {
   // Extract the root <svg> opening tag to avoid matching attributes on child elements
   const svgTagMatch = svgContent.match(/<svg([^>]*)>/i);
   const svgTag = svgTagMatch ? svgTagMatch[1] : '';
@@ -36,12 +38,12 @@ export function parseViewBox(svgContent: string): string {
   return '0 0 24 24';
 }
 
-export function extractSvgInner(svgContent: string): string {
+function legacyExtractSvgInner(svgContent: string): string {
   const innerMatch = svgContent.match(/<svg[^>]*>([\s\S]*)<\/svg>/i);
   return innerMatch ? innerMatch[1].trim() : svgContent;
 }
 
-export function extractSvgAttrs(svgContent: string): Record<string, string> {
+function legacyExtractSvgAttrs(svgContent: string): Record<string, string> {
   const attrs: Record<string, string> = {};
   const svgTagMatch = svgContent.match(/<svg([^>]*)>/i);
   if (!svgTagMatch) return attrs;
@@ -61,6 +63,136 @@ export function extractSvgAttrs(svgContent: string): Record<string, string> {
   }
   return attrs;
 }
+
+interface RootTag {
+  /** Root attributes in source order, names and values exactly as written. */
+  attrs: Array<[string, string]>;
+  /** Index of the first character after the root open tag. */
+  end: number;
+}
+
+function isXmlSpace(ch: string): boolean {
+  return ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';
+}
+
+/**
+ * Parses the root `<svg ...>` open tag as XML: quoted values may contain `>` and the other
+ * quote character, attribute names keep their case, and `<svg` text inside a comment that
+ * precedes the root is skipped.
+ *
+ * Returns null whenever the tag is not well-formed XML. Callers then run the v1 regex code
+ * unchanged, so malformed input behaves exactly as it did before.
+ */
+export function parseRootTag(svgContent: string): RootTag | null {
+  const opener = /<!--|<svg/gi;
+  let start = -1;
+  let match: RegExpExecArray | null;
+  while ((match = opener.exec(svgContent)) !== null) {
+    if (match[0] === '<!--') {
+      const close = svgContent.indexOf('-->', match.index + 4);
+      if (close !== -1) opener.lastIndex = close + 3;
+      continue;
+    }
+    start = match.index + 4;
+    break;
+  }
+  if (start === -1) return null;
+
+  const attrs: Array<[string, string]> = [];
+  const n = svgContent.length;
+  let i = start;
+  for (;;) {
+    const wsStart = i;
+    while (i < n && isXmlSpace(svgContent[i])) i++;
+    if (i >= n) return null;
+    if (svgContent[i] === '>') return { attrs, end: i + 1 };
+    if (i === wsStart) return null;
+    const nameStart = i;
+    while (i < n && !isXmlSpace(svgContent[i]) && '=<>"\'/'.indexOf(svgContent[i]) === -1) i++;
+    if (i === nameStart) return null;
+    const name = svgContent.slice(nameStart, i);
+    while (i < n && isXmlSpace(svgContent[i])) i++;
+    if (svgContent[i] !== '=') return null;
+    i++;
+    while (i < n && isXmlSpace(svgContent[i])) i++;
+    const quote = svgContent[i];
+    if (quote !== '"' && quote !== "'") return null;
+    const close = svgContent.indexOf(quote, i + 1);
+    if (close === -1) return null;
+    attrs.push([name, svgContent.slice(i + 1, close)]);
+    i = close + 1;
+  }
+}
+
+function firstAttr(root: RootTag, name: string): string | undefined {
+  for (const [attrName, value] of root.attrs) {
+    if (attrName === name) return value;
+  }
+  return undefined;
+}
+
+const DIMENSION = /^(\d+(?:\.\d+)?)(?:px)?$/;
+
+export function parseViewBox(svgContent: string): string {
+  const root = parseRootTag(svgContent);
+  if (!root) return legacyParseViewBox(svgContent);
+
+  const viewBox = firstAttr(root, 'viewBox');
+  if (viewBox) return viewBox;
+
+  const widthMatch = DIMENSION.exec(firstAttr(root, 'width') || '');
+  const heightMatch = DIMENSION.exec(firstAttr(root, 'height') || '');
+  if (widthMatch && heightMatch) {
+    return '0 0 ' + widthMatch[1] + ' ' + heightMatch[1];
+  }
+
+  return '0 0 24 24';
+}
+
+export function extractSvgInner(svgContent: string): string {
+  const root = parseRootTag(svgContent);
+  if (root) {
+    const closer = /<\/svg\s*>/gi;
+    closer.lastIndex = root.end;
+    let last = -1;
+    let match: RegExpExecArray | null;
+    while ((match = closer.exec(svgContent)) !== null) last = match.index;
+    if (last !== -1) return svgContent.slice(root.end, last).trim();
+  }
+  return legacyExtractSvgInner(svgContent);
+}
+
+function readSvgAttrs(svgContent: string, preserveCase: boolean): Record<string, string> {
+  const root = parseRootTag(svgContent);
+  if (!root) return legacyExtractSvgAttrs(svgContent);
+
+  const attrs: Record<string, string> = {};
+  for (const [name, value] of root.attrs) {
+    // Skip namespaced attributes (xml:space, xmlns:xlink) and known non-visual attrs
+    if (name.includes(':')) continue;
+    const lower = name.toLowerCase();
+    if (lower !== 'xmlns' && lower !== 'version' && lower !== 'class' && lower !== 'style') {
+      attrs[preserveCase ? name : lower] = value;
+    }
+  }
+  return attrs;
+}
+
+/**
+ * Root attributes with lowercased names. The lowercasing is the v1 contract of this exported
+ * helper and is kept for backwards compatibility. The loader itself uses the case-preserving
+ * variant so attributes such as `preserveAspectRatio` survive into the symbol.
+ */
+export function extractSvgAttrs(svgContent: string): Record<string, string> {
+  return readSvgAttrs(svgContent, false);
+}
+
+/** @internal v1 regex helpers, kept verbatim as the fallback for malformed root tags. */
+export const legacy = {
+  parseViewBox: legacyParseViewBox,
+  extractSvgInner: legacyExtractSvgInner,
+  extractSvgAttrs: legacyExtractSvgAttrs,
+};
 
 export function generateSymbolId(resourcePath: string, options: LoaderOptions): string {
   if (typeof options.symbolId === 'function') {
@@ -97,27 +229,53 @@ function interopRequire(varName: string, modulePath: string): string {
 }
 
 function svgSpriteLoader(this: LoaderContext, content: string): string {
+  const options: LoaderOptions = this.getOptions ? this.getOptions() : {};
+
   if (this.cacheable) {
-    this.cacheable();
+    // Extract mode registers the symbol with SvgSpritePlugin as a side effect of running the
+    // loader. A cached module skips the loader, so the symbol would be missing from the sprite
+    // on incremental rebuilds and after a persistent-cache restart. Inline mode keeps caching.
+    if (options.extract) {
+      this.cacheable(false);
+    } else {
+      this.cacheable();
+    }
   }
 
   if (!content.includes('<svg')) {
     throw new Error('rspack-plugin-svg-sprite: Invalid SVG content in ' + this.resourcePath);
   }
 
-  const options: LoaderOptions = this.getOptions ? this.getOptions() : {};
+  const moduleType = this._module && this._module.type;
+  if (typeof moduleType === 'string' && moduleType.indexOf('asset') === 0 && this.emitWarning) {
+    this.emitWarning(
+      new Error(
+        '[rspack-plugin-svg-sprite] ' +
+          this.resourcePath +
+          ' is handled as module type "' +
+          moduleType +
+          '", so the sprite loader output is emitted as a file or data URI instead of being' +
+          ' executed, and the icon will not render.\n' +
+          'Another rule assigns an asset type to .svg files. Add `type: "javascript/auto"` to' +
+          ' the rule that uses rspack-plugin-svg-sprite/loader, or exclude these files from' +
+          ' the other rule.',
+      ),
+    );
+  }
+
   const resourcePath = this.resourcePath;
   const symbolId = generateSymbolId(resourcePath, options);
   const viewBox = parseViewBox(content);
   const innerContent = extractSvgInner(content);
-  const svgAttrs = extractSvgAttrs(content);
+  const svgAttrs = readSvgAttrs(content, true);
   const extract = options.extract || false;
   const esModule = options.esModule !== undefined ? options.esModule : true;
 
   let attrString = 'id="' + symbolId + '" viewBox="' + viewBox + '"';
   Object.keys(svgAttrs).forEach((key) => {
-    if (key !== 'viewbox' && key !== 'id' && key !== 'width' && key !== 'height') {
-      attrString += ' ' + key + '="' + svgAttrs[key] + '"';
+    const lower = key.toLowerCase();
+    if (lower !== 'viewbox' && lower !== 'id' && lower !== 'width' && lower !== 'height') {
+      attrString += ' ' + key + '="' + svgAttrs[key].replace(/"/g, '&quot;') + '"';
     }
   });
 
