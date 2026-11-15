@@ -10,7 +10,9 @@ export default {
   commandRunner: {
     command:
       'pnpm exec rstest run --bail 1 --silent --coverage.enabled=false' +
-      " --exclude 'src/__tests__/integration/**' --exclude 'src/__tests__/esm-interop.test.ts'",
+      // Excluded: tests that run full bundler builds or need a built dist/ (too slow per mutant).
+      " --exclude 'src/__tests__/integration/**' --exclude 'src/__tests__/esm-interop.test.ts'" +
+      " --exclude 'src/__tests__/esm-entries.test.ts' --exclude 'src/__tests__/robustness.test.ts'",
   },
   // The command runner cannot tell which tests cover a mutant, so every mutant runs every test.
   coverageAnalysis: 'off',
