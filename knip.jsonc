@@ -7,7 +7,7 @@
       // the scripts by CI, so both are listed here as entries.
       // The consumer fixtures in scripts/ci/package-fixtures are outside `project`: they are
       // compiled by scripts/ci/package-check.mjs against the packed tarball.
-      "entry": ["src/runtime/*.ts", "src/**/*.mts", "scripts/**/*.mjs"],
+      "entry": ["src/runtime/*.ts", "src/**/*.mts", "src/__tests__/types/*.ts", "scripts/**/*.mjs"],
       "project": ["src/**/*.{ts,mts}", "scripts/**/*.mjs"],
       "ignoreDependencies": [
         // Loaded through createRequire/require.resolve with a string in the integration tests,
@@ -18,6 +18,10 @@
         "rsbuild-v2",
         "svgo-loader",
         "htmlparser2",
+        // stryker.config.mjs: the type import and the built-in `command` test runner ship with
+        // @stryker-mutator/core.
+        "@stryker-mutator/api",
+        "@stryker-mutator/command-runner",
         // Peer dependency of svgo-loader, resolved by svgo-loader itself.
         "svgo",
       ],

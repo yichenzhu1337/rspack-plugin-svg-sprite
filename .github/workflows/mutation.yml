@@ -47,6 +47,7 @@ jobs:
       - name: 📝 Write the score to the job summary
         if: always()
         run: |
+          # shellcheck disable=SC2016 # the single-quoted block is JavaScript, not shell
           node --input-type=module -e '
             import { existsSync, readFileSync, appendFileSync } from "node:fs";
             const out = process.env.GITHUB_STEP_SUMMARY;

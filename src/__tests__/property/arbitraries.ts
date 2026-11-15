@@ -4,7 +4,7 @@ import fc from 'fast-check';
  * Fixed seed so a CI failure is reproducible. fast-check prints the seed, the path and the
  * shrunk counterexample on failure; to explore other inputs run with `PROPERTY_SEED=<n>`.
  */
-export const SEED = process.env.PROPERTY_SEED ? Number(process.env.PROPERTY_SEED) : 20240615;
+const SEED = process.env.PROPERTY_SEED ? Number(process.env.PROPERTY_SEED) : 20240615;
 
 export function check<T>(
   property: fc.IPropertyWithHooks<T>,
