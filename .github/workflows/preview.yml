@@ -47,4 +47,5 @@ jobs:
       - name: 🏗️ Build
         run: pnpm build
       - name: 🚀 Publish to pkg.pr.new
-        run: pnpm dlx pkg-pr-new@0.0.93 publish --comment=update --packageManager=npm,pnpm,bun
+        # Not an npm publish: pkg.pr.new authenticates through its GitHub App, with no token.
+        run: pnpm dlx pkg-pr-new@0.0.93 publish --comment=update --packageManager=npm,pnpm,bun # zizmor: ignore[use-trusted-publishing]
