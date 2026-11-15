@@ -22,6 +22,11 @@
         "svgo",
       ],
     },
+    "e2e": {
+      // The consumer apps are copied to a temp directory and built there with the packed
+      // tarball, so they are fixtures, not part of this workspace.
+      "project": ["**/*.{ts,mjs}", "!consumers/**"],
+    },
     "examples/*": {
       // svgo-loader requires svgo at runtime as its peer dependency.
       "ignoreDependencies": ["svgo"],

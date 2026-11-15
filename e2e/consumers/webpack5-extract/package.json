@@ -1,0 +1,16 @@
+{
+  "name": "consumer-webpack5-extract",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {
+    "rspack-plugin-svg-sprite": "*"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "5.6.8",
+    "webpack": "5.105.2",
+    "webpack-cli": "7.3.1"
+  }
+}

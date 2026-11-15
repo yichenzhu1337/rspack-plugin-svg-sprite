@@ -1,0 +1,15 @@
+{
+  "name": "consumer-rspack2-extract-esm",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rspack build"
+  },
+  "dependencies": {
+    "rspack-plugin-svg-sprite": "*"
+  },
+  "devDependencies": {
+    "@rspack/cli": "2.3.2",
+    "@rspack/core": "2.3.2"
+  }
+}
