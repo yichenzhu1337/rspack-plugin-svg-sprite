@@ -1,10 +1,12 @@
-# React + Webpack SVG Sprite Demo
+# 🧩 React + Webpack SVG Sprite Demo
 
+> [!NOTE]
 > Example React application using [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader) with [Webpack 5](https://webpack.js.org/) in **extract mode**. This serves as a side-by-side comparison with the [`react-rspack`](../react-rspack/) example.
 
-This demo uses the **original `svg-sprite-loader`** (not `rspack-plugin-svg-sprite`) to show the Webpack-based workflow that `rspack-plugin-svg-sprite` was designed to replace.
+> [!NOTE]
+> This demo uses the **original `svg-sprite-loader`** (not `rspack-plugin-svg-sprite`) to show the Webpack-based workflow that `rspack-plugin-svg-sprite` was designed to replace.
 
-## Setup
+## 🛠️ Setup
 
 From the repository root (recommended — uses pnpm workspaces):
 
@@ -21,11 +23,12 @@ pnpm install
 pnpm dev
 ```
 
-The dev server starts at **http://localhost:4000**.
+> [!TIP]
+> The dev server starts at **http://localhost:4000**.
 
-## How it works
+## 🔍 How it works
 
-### Webpack configuration
+### ⚙️ Webpack configuration
 
 SVG files in `src/icons/` are processed by two loaders:
 
@@ -57,7 +60,7 @@ const SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 plugins: [new SpriteLoaderPlugin()];
 ```
 
-### Using icons in React
+### 🧩 Using icons in React
 
 ```jsx
 import checkIcon from './icons/check.svg';
@@ -79,7 +82,10 @@ import BaseIcon from './components/BaseIcon';
 <BaseIcon icon={checkIcon} size={24} />;
 ```
 
-### What the demo includes
+### ✨ What the demo includes
+
+<details>
+<summary>📄 5 demo sections</summary>
 
 - **Icon Gallery** — all icons in a responsive grid with hover effects
 - **Sidebar Navigation** — a realistic app sidebar with icon + label nav items
@@ -87,7 +93,9 @@ import BaseIcon from './components/BaseIcon';
 - **Notification Cards** — color-coded notification feed using different icons
 - **Code Example** — the actual usage pattern displayed in-page
 
-## Why svg-sprite-loader doesn't work with Rspack
+</details>
+
+## ⚠️ Why svg-sprite-loader doesn't work with Rspack
 
 `svg-sprite-loader` relies on several Webpack-only internal APIs that are not available in Rspack:
 
@@ -97,9 +105,12 @@ import BaseIcon from './components/BaseIcon';
 | `compilation.hooks.additionalAssets`                   | Emits the sprite file                  |
 | `compilation.hooks.afterOptimizeChunks`                | Replaces placeholders in module source |
 
-These hooks don't exist in Rspack, which is why [`rspack-plugin-svg-sprite`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite) was created as a compatible replacement. The migration is straightforward — see the [migration guide](../../README.md#migrating-from-svg-sprite-loader).
+These hooks don't exist in Rspack, which is why [`rspack-plugin-svg-sprite`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite) was created as a compatible replacement. The migration is straightforward — see the [migration guide](../../README.md#-migrating-from-svg-sprite-loader).
 
-## Project structure
+## 📂 Project structure
+
+<details>
+<summary>📄 Files</summary>
 
 ```
 react-webpack/
@@ -114,8 +125,10 @@ react-webpack/
 └── dist/                 # Build output (generated)
 ```
 
-## See also
+</details>
+
+## 🔗 See also
 
 - [rspack-plugin-svg-sprite](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite) — the Rspack-compatible replacement
 - [react-rspack example](../react-rspack/) — same UI built with Rspack + `rspack-plugin-svg-sprite`
-- [Migration guide](../../README.md#migrating-from-svg-sprite-loader) — step-by-step instructions to switch from `svg-sprite-loader`
+- [Migration guide](../../README.md#-migrating-from-svg-sprite-loader) — step-by-step instructions to switch from `svg-sprite-loader`

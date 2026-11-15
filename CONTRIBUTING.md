@@ -1,13 +1,21 @@
-# Contributing to rspack-plugin-svg-sprite
+# 🙌 Contributing to rspack-plugin-svg-sprite
 
-Thanks for your interest in contributing! This guide covers how to set up the project locally, run tests, and submit changes.
+> [!NOTE]
+> Thanks for your interest in contributing! This guide covers how to set up the project locally, run tests, and submit changes.
 
-## Prerequisites
+| Jump to       |                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| 🛠️ Set up     | [Prerequisites](#-prerequisites), [Getting Started](#️-getting-started), [Commands](#️-commands)   |
+| 🔁 Contribute | [Development Workflow](#-development-workflow), [Code Style](#-code-style), [Testing](#-testing) |
+| 🚀 Ship       | [Releasing](#-releasing)                                                                         |
+| 🔍 Understand | [Project Structure](#-project-structure), [How the Plugin Works](#-how-the-plugin-works)         |
+
+## 📋 Prerequisites
 
 - [Node.js](https://nodejs.org/) 26.13.1 (pinned in `.nvmrc`; 22.12 or newer also works)
 - [pnpm](https://pnpm.io/) 12.18.0 (pinned via `packageManager` in `package.json`)
 
-## Getting Started
+## 🛠️ Getting Started
 
 ```bash
 git clone https://github.com/yichenzhu1337/rspack-plugin-svg-sprite.git
@@ -17,7 +25,10 @@ pnpm install
 
 This installs dependencies for the plugin and both example apps via [pnpm workspaces](https://pnpm.io/workspaces).
 
-## Project Structure
+## 🔍 Project Structure
+
+<details>
+<summary>📂 Repository layout</summary>
 
 ```
 rspack-plugin-svg-sprite/
@@ -40,7 +51,9 @@ rspack-plugin-svg-sprite/
 └── pnpm-workspace.yaml       # Workspace: examples/*
 ```
 
-## Commands
+</details>
+
+## ⚙️ Commands
 
 | Command            | Description                                                |
 | ------------------ | ---------------------------------------------------------- |
@@ -53,7 +66,7 @@ rspack-plugin-svg-sprite/
 | `pnpm dev:rspack`  | Start the React + Rspack example on http://localhost:3000  |
 | `pnpm dev:webpack` | Start the React + Webpack example on http://localhost:4000 |
 
-## Development Workflow
+## 🔁 Development Workflow
 
 1. Create a branch from `main`.
 2. Make your changes in `src/`.
@@ -66,7 +79,10 @@ rspack-plugin-svg-sprite/
 9. The pre-commit hook (husky + lint-staged) runs ESLint and Prettier automatically on staged files.
 10. Open a pull request against `main`.
 
-## Releasing
+> [!IMPORTANT]
+> Pull requests that change the published package need a changeset (step 7), and the PR title must be a Conventional Commit (step 8).
+
+## 🚀 Releasing
 
 Releases are manual, and versions follow [SemVer](https://semver.org/) via [Changesets](https://github.com/changesets/changesets):
 
@@ -74,7 +90,7 @@ Releases are manual, and versions follow [SemVer](https://semver.org/) via [Chan
 2. In the Actions tab, run **Release** with `dry-run`. It runs the full CI, packs the package once, checks the tarball (`publint`, `attw`, an import smoke test, `npm publish --dry-run`) and writes a report: the version, the changelog section, the commits included and how the package contents changed. Nothing is published.
 3. Run **Release** with `publish`. After the same checks it waits for approval in the `npm-release` environment, then publishes that exact tarball through npm trusted publishing (with provenance), tags `vX.Y.Z`, creates the GitHub release and verifies the result from npm.
 
-## How the Plugin Works
+## 🧩 How the Plugin Works
 
 ### Inline mode (default)
 
@@ -84,7 +100,7 @@ The loader parses each `.svg` file, wraps its content in a `<symbol>`, and gener
 
 The loader registers each symbol with the `SvgSpritePlugin` via the compilation object. During the `processAssets` hook, the plugin collects all symbols and emits a combined `.svg` sprite file. The exported JS module contains the external URL (`sprite.svg#symbolId`) instead of a fragment-only reference.
 
-## Testing
+## 🧪 Testing
 
 Tests use [rstest](https://rstest.rs) with a Jest-compatible API (`describe`, `it`, `expect`). Each source module has a corresponding test file in `src/__tests__/`.
 
@@ -93,9 +109,10 @@ pnpm test       # Build + run tests
 pnpm test:ci    # Build + run tests with Istanbul coverage report
 ```
 
-Coverage thresholds are enforced at **98%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
+> [!TIP]
+> Coverage thresholds are enforced at **98%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
 
-## Code Style
+## 🧹 Code Style
 
 - **TypeScript** with `strict: true` — source in `src/`, compiled output in `dist/`.
 - **Prettier** handles formatting — single quotes, trailing commas, 100 char print width, LF line endings.
