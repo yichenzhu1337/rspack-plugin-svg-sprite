@@ -1,0 +1,367 @@
+name: 🌙 Nightly
+
+# Wider compatibility checks than CI runs on every pull request. A failure of the full matrix or
+# the next Ubuntu opens (or updates) one `nightly-failure` issue, which closes itself when green.
+# Canary, peer floor and audit are information only and never open the issue.
+
+on:
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: 🧪 Full matrix (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-15]
+        node: ['22', '24', '26']
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 📦 Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - name: 📥 Install
+        run: pnpm install --frozen-lockfile
+      - name: 🧪 Test
+        run: pnpm test
+
+  next-ubuntu:
+    name: 🐧 Next Ubuntu (ubuntu-26.04)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 📦 Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: 📥 Install
+        run: pnpm install --frozen-lockfile
+      - name: 🧪 Test
+        run: pnpm test
+
+  canary:
+    name: 🧩 Rspack and Rsbuild canary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Not blocking: this job reports through outputs.status and never fails the run.
+    continue-on-error: true
+    permissions:
+      contents: read
+    outputs:
+      status: ${{ steps.result.outputs.status }}
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 📦 Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: 📥 Install
+        run: pnpm install --frozen-lockfile
+      - name: 🔍 Find the newest 2.x builds
+        id: versions
+        # The `canary` dist-tags are not kept current, so take the 2.x version published last.
+        # That includes beta, rc and canary builds, and is the stable release when there is none.
+        run: |
+          newest() {
+            npm view "$1" time --json | node -e '
+              let raw = "";
+              process.stdin.on("data", (chunk) => (raw += chunk)).on("end", () => {
+                const time = JSON.parse(raw);
+                const versions = Object.keys(time).filter((v) => /^2\./.test(v));
+                versions.sort((a, b) => Date.parse(time[b]) - Date.parse(time[a]));
+                console.log(versions[0]);
+              });
+            '
+          }
+          rspack="$(newest @rspack/core)"
+          rsbuild="$(newest @rsbuild/core)"
+          echo "rspack=$rspack" >> "$GITHUB_OUTPUT"
+          echo "rsbuild=$rsbuild" >> "$GITHUB_OUTPUT"
+          echo "ℹ️ @rspack/core $rspack, @rsbuild/core $rsbuild"
+      - name: 🧩 Install the newest builds
+        env:
+          RSPACK: ${{ steps.versions.outputs.rspack }}
+          RSBUILD: ${{ steps.versions.outputs.rsbuild }}
+        run: pnpm add --save-dev --workspace-root "rspack-v2@npm:@rspack/core@$RSPACK" "rsbuild-v2@npm:@rsbuild/core@$RSBUILD"
+      - name: 🏗️ Build
+        run: pnpm build
+      - name: 🧪 Integration tests
+        run: pnpm exec rstest run --no-coverage src/__tests__/integration
+      - name: 📊 Summary
+        if: always()
+        env:
+          RSPACK: ${{ steps.versions.outputs.rspack }}
+          RSBUILD: ${{ steps.versions.outputs.rsbuild }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          {
+            echo '## 🧩 Canary'
+            echo
+            if [ "$JOB_STATUS" = success ]; then
+              echo '> [!TIP]'
+              echo '> The integration tests pass on the newest 2.x builds.'
+            else
+              echo '> [!WARNING]'
+              echo '> The integration tests fail on the newest 2.x builds. This is information only.'
+            fi
+            echo
+            echo '| Package | Version |'
+            echo '| --- | --- |'
+            echo "| @rspack/core | **$RSPACK** |"
+            echo "| @rsbuild/core | **$RSBUILD** |"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: 🔍 Record the result
+        id: result
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: echo "status=$JOB_STATUS" >> "$GITHUB_OUTPUT"
+
+  peer-floor:
+    name: 🧩 Peer floor (@rspack/core 0.x)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # Not blocking: this is information for a later decision about the peer range.
+    continue-on-error: true
+    permissions:
+      contents: read
+    outputs:
+      status: ${{ steps.result.outputs.status }}
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 📦 Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: 📥 Install
+        run: pnpm install --frozen-lockfile
+      - name: 🏗️ Build
+        run: pnpm build
+      - name: 🧩 Try the old Rspack lines
+        # Builds a two-icon extract project with each version. Always exits 0.
+        env:
+          VERSIONS: '0.5.0 0.5.9 0.6.0 0.7.0'
+        run: |
+          cat > "$RUNNER_TEMP/floor-check.cjs" <<'EOF'
+          const fs = require('fs');
+          const os = require('os');
+          const path = require('path');
+          const root = process.argv[2];
+          const from = process.argv[3];
+          const rspack = require(require.resolve('@rspack/core', { paths: [from] }));
+          const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'floor-'));
+          const icon = (d) =>
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="' + d + '"/></svg>';
+          fs.writeFileSync(path.join(dir, 'a.svg'), icon('M1 1L15 15'));
+          fs.writeFileSync(path.join(dir, 'b.svg'), icon('M3 3L9 9'));
+          fs.writeFileSync(
+            path.join(dir, 'index.js'),
+            'import a from "./a.svg";\nimport b from "./b.svg";\nconsole.log(a, b);\n',
+          );
+          const Plugin = require(path.join(root, 'dist/index.js'));
+          const compiler = rspack({
+            mode: 'production',
+            devtool: false,
+            target: 'node',
+            context: dir,
+            entry: './index.js',
+            output: { path: path.join(dir, 'out'), filename: 'bundle.js' },
+            module: {
+              rules: [
+                {
+                  test: /\.svg$/,
+                  type: 'javascript/auto',
+                  loader: path.join(root, 'dist/loader.js'),
+                  options: { extract: true },
+                },
+              ],
+            },
+            plugins: [new Plugin()],
+          });
+          compiler.run((err, stats) => {
+            compiler.close(() => {
+              const errors = err
+                ? [String(err)]
+                : stats.toJson({ all: false, errors: true }).errors.map((e) => e.message);
+              const sprite = path.join(dir, 'out', 'sprite.svg');
+              const ids = fs.existsSync(sprite)
+                ? [...fs.readFileSync(sprite, 'utf8').matchAll(/<symbol id="([^"]+)"/g)]
+                : [];
+              if (errors.length) console.log(errors.join('\n').slice(0, 1500));
+              process.exit(errors.length === 0 && ids.length === 2 ? 0 : 1);
+            });
+          });
+          EOF
+          {
+            echo '## 🧩 Peer floor'
+            echo
+            echo '> [!NOTE]'
+            echo '> Information for a later decision about the @rspack/core peer range. It never fails the nightly.'
+            echo
+            echo '| @rspack/core | Install | Extract build |'
+            echo '| --- | --- | --- |'
+          } >> "$GITHUB_STEP_SUMMARY"
+          for version in $VERSIONS; do
+            dir="$RUNNER_TEMP/floor-$version"
+            mkdir -p "$dir"
+            install='❌ Fail'
+            build='⏭️ Skipped'
+            if (cd "$dir" && npm init -y >/dev/null 2>&1 && npm install --no-audit --no-fund "@rspack/core@$version" @swc/helpers >"$dir/install.log" 2>&1); then
+              install='✅ Pass'
+              if node "$RUNNER_TEMP/floor-check.cjs" "$GITHUB_WORKSPACE" "$dir" >"$dir/build.log" 2>&1; then
+                build='✅ Pass'
+              else
+                build='❌ Fail'
+                echo "::group::Build log for @rspack/core $version"
+                cat "$dir/build.log"
+                echo '::endgroup::'
+              fi
+            else
+              echo "::group::Install log for @rspack/core $version"
+              tail -n 40 "$dir/install.log"
+              echo '::endgroup::'
+            fi
+            echo "ℹ️ @rspack/core $version: install $install, build $build"
+            echo "| $version | $install | $build |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          exit 0
+      - name: 🔍 Record the result
+        id: result
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: echo "status=$JOB_STATUS" >> "$GITHUB_OUTPUT"
+
+  audit:
+    name: 🔒 Audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Not blocking: new advisories appear on their own schedule.
+    continue-on-error: true
+    permissions:
+      contents: read
+    outputs:
+      status: ${{ steps.result.outputs.status }}
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 📦 Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: 🔒 Audit
+        run: |
+          status=0
+          pnpm audit --audit-level high > "$RUNNER_TEMP/audit.txt" 2>&1 || status=$?
+          counts="$(grep -E '^(Severity:|[0-9]+ vulnerabilit)' "$RUNNER_TEMP/audit.txt" || true)"
+          {
+            echo '## 🔒 Audit'
+            echo
+            if [ "$status" -eq 0 ]; then
+              echo '> [!TIP]'
+              echo '> No known vulnerabilities at high severity or above.'
+            else
+              echo '> [!WARNING]'
+              echo '> Known vulnerabilities at high severity or above. This is information only.'
+            fi
+            echo
+            if [ -n "$counts" ]; then
+              echo '```text'
+              echo "$counts"
+              echo '```'
+              echo
+            fi
+            echo '<details><summary>📄 Full output</summary>'
+            echo
+            echo '```text'
+            head -c 50000 "$RUNNER_TEMP/audit.txt"
+            echo
+            echo '```'
+            echo
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -eq 0 ]; then
+            echo '✅ No known vulnerabilities at high severity or above'
+          else
+            echo "⚠️ pnpm audit exited with $status"
+          fi
+          exit "$status"
+      - name: 🔍 Record the result
+        id: result
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: echo "status=$JOB_STATUS" >> "$GITHUB_OUTPUT"
+
+  report:
+    name: 📣 Report
+    needs: [test, next-ubuntu, canary, peer-floor, audit]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read # to check out the script
+      issues: write # to open, update and close the nightly-failure issue
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: 📣 Open, update or close the nightly issue
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+        run: node scripts/ci/nightly-issue.mjs
