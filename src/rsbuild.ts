@@ -66,7 +66,11 @@ export function pluginSvgSprite(options: SvgSpritePluginOptions = {}): RsbuildPl
 
         if (loaderOptions.extract) {
           config.plugins = config.plugins || [];
-          config.plugins.push(new SvgSpritePlugin({ plainSprite, spriteAttrs }));
+          config.plugins.push(
+            new SvgSpritePlugin({ plainSprite, spriteAttrs } as ConstructorParameters<
+              typeof SvgSpritePlugin
+            >[0]),
+          );
         }
       });
     },

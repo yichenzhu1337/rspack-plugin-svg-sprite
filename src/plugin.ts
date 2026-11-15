@@ -58,7 +58,7 @@ class SvgSpritePlugin {
       this.rebuildSymbolIndex();
     }
     let position = this.symbolIndex.get(id);
-    if (position !== undefined && this.symbols[position].id !== id) {
+    if (position !== undefined && this.symbols[position]!.id !== id) {
       // An entry was swapped in place from outside: the index is stale.
       this.rebuildSymbolIndex();
       position = this.symbolIndex.get(id);
@@ -69,7 +69,7 @@ class SvgSpritePlugin {
   addSymbol(symbolData: SymbolData): void {
     const existing = this.findSymbol(symbolData.id);
     if (existing >= 0) {
-      const prev = this.symbols[existing];
+      const prev = this.symbols[existing]!;
       if (
         prev.resourcePath &&
         symbolData.resourcePath &&
@@ -180,7 +180,7 @@ class SvgSpritePlugin {
           Object.keys(symbolsByFile).forEach((filename) => {
             // Loaders finish in a different order on every build. Sort so identical input
             // always produces an identical sprite file.
-            const ordered = symbolsByFile[filename]
+            const ordered = (symbolsByFile[filename] as SymbolData[])
               .slice()
               .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
             const content = this.generateSprite(ordered);
