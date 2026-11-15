@@ -3,6 +3,7 @@ packages:
   - 'examples/*'
 allowBuilds:
   core-js: false
+  lefthook: false
 
 # Network resilience: retry flaky registry requests with exponential backoff (times in ms).
 fetchRetries: 5

@@ -3,9 +3,9 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-export const ROOT = process.cwd();
+const ROOT = process.cwd();
 export const DIST = path.join(ROOT, 'dist');
-export const FIXTURES = path.join(ROOT, 'src/__tests__/fixtures');
+const FIXTURES = path.join(ROOT, 'src/__tests__/fixtures');
 
 /** Native require, so the real bundlers and the compiled dist are loaded, not bundled. */
 export const nodeRequire = createRequire(path.join(ROOT, 'package.json'));
@@ -18,7 +18,7 @@ export interface Bundler {
   impl: any;
 }
 
-export const RSPACK_LINES: Bundler[] = [
+const RSPACK_LINES: Bundler[] = [
   { name: 'rspack 1', impl: nodeRequire('@rspack/core') },
   { name: 'rspack 2', impl: nodeRequire('rspack-v2') },
 ];
