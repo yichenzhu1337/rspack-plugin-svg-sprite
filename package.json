@@ -4,6 +4,7 @@
   "description": "SVG sprite loader and plugin for Rspack — drop-in replacement for svg-sprite-loader with inline and extract mode support",
   "author": "Yichen Zhu",
   "license": "MIT",
+  "type": "commonjs",
   "homepage": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite#readme",
   "repository": {
     "type": "git",
@@ -44,31 +45,90 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "default": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./plugin": {
-      "types": "./dist/plugin.d.ts",
-      "default": "./dist/plugin.js"
+      "import": {
+        "types": "./dist/plugin.d.mts",
+        "default": "./dist/plugin.mjs"
+      },
+      "default": {
+        "types": "./dist/plugin.d.ts",
+        "default": "./dist/plugin.js"
+      }
     },
     "./loader": {
-      "types": "./dist/loader.d.ts",
-      "default": "./dist/loader.js"
+      "import": {
+        "types": "./dist/loader.d.mts",
+        "default": "./dist/loader.mjs"
+      },
+      "default": {
+        "types": "./dist/loader.d.ts",
+        "default": "./dist/loader.js"
+      }
     },
     "./runtime/browser-sprite": {
-      "types": "./dist/runtime/browser-sprite.d.ts",
-      "default": "./dist/runtime/browser-sprite.js"
+      "import": {
+        "types": "./dist/runtime/browser-sprite.d.mts",
+        "default": "./dist/runtime/browser-sprite.mjs"
+      },
+      "default": {
+        "types": "./dist/runtime/browser-sprite.d.ts",
+        "default": "./dist/runtime/browser-sprite.js"
+      }
     },
     "./runtime/symbol": {
-      "types": "./dist/runtime/symbol.d.ts",
-      "default": "./dist/runtime/symbol.js"
+      "import": {
+        "types": "./dist/runtime/symbol.d.mts",
+        "default": "./dist/runtime/symbol.mjs"
+      },
+      "default": {
+        "types": "./dist/runtime/symbol.d.ts",
+        "default": "./dist/runtime/symbol.js"
+      }
     },
     "./rsbuild": {
-      "types": "./dist/rsbuild.d.ts",
-      "default": "./dist/rsbuild.js"
+      "import": {
+        "types": "./dist/rsbuild.d.mts",
+        "default": "./dist/rsbuild.mjs"
+      },
+      "default": {
+        "types": "./dist/rsbuild.d.ts",
+        "default": "./dist/rsbuild.js"
+      }
     },
     "./client": {
       "types": "./client.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "plugin": [
+        "./dist/plugin.d.ts"
+      ],
+      "loader": [
+        "./dist/loader.d.ts"
+      ],
+      "runtime/browser-sprite": [
+        "./dist/runtime/browser-sprite.d.ts"
+      ],
+      "runtime/symbol": [
+        "./dist/runtime/symbol.d.ts"
+      ],
+      "rsbuild": [
+        "./dist/rsbuild.d.ts"
+      ],
+      "client": [
+        "./client.d.ts"
+      ]
     }
   },
   "files": [
