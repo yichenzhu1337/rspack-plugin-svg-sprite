@@ -1,12 +1,13 @@
-# React + Rspack SVG Sprite Demo
+# 🧩 React + Rspack SVG Sprite Demo
 
+> [!NOTE]
 > Example React application using [`rspack-plugin-svg-sprite`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite) with [Rspack](https://rspack.dev/) in **extract mode**.
 
 **[Live demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** — see this example running on GitHub Pages.
 
 This demo shows how to import SVG icons, combine them into a single sprite sheet, and reference them with `<use>` — all powered by `rspack-plugin-svg-sprite`.
 
-## Setup
+## 🛠️ Setup
 
 From the repository root (recommended — uses pnpm workspaces):
 
@@ -23,11 +24,12 @@ pnpm install
 pnpm dev
 ```
 
-The dev server starts at **http://localhost:3000**.
+> [!TIP]
+> The dev server starts at **http://localhost:3000**.
 
-## How it works
+## 🔍 How it works
 
-### Rspack configuration
+### ⚙️ Rspack configuration
 
 SVG files are processed by `rspack-plugin-svg-sprite/loader` in extract mode. The `SvgSpritePlugin` collects all symbols and emits a single `sprite.svg` at build time.
 
@@ -45,7 +47,7 @@ SVG files are processed by `rspack-plugin-svg-sprite/loader` in extract mode. Th
 }
 ```
 
-### Using icons in React
+### 🧩 Using icons in React
 
 ```jsx
 import homeIcon from './icons/home.svg';
@@ -67,7 +69,10 @@ import BaseIcon from './components/BaseIcon';
 <BaseIcon icon={homeIcon} size={24} />;
 ```
 
-### What the demo includes
+### ✨ What the demo includes
+
+<details>
+<summary>📄 5 demo sections</summary>
 
 - **Icon Gallery** — all icons in a responsive grid with hover effects
 - **Sidebar Navigation** — a realistic app sidebar with icon + label nav items
@@ -75,11 +80,16 @@ import BaseIcon from './components/BaseIcon';
 - **Notification Cards** — color-coded notification feed using different icons
 - **Code Example** — the actual usage pattern displayed in-page
 
-## Icons
+</details>
+
+## 🎨 Icons
 
 All icons are [Feather](https://feathericons.com/)-style, stroke-based SVGs located in `src/icons/`.
 
-## Project structure
+## 📂 Project structure
+
+<details>
+<summary>📄 Files</summary>
 
 ```
 react-rspack/
@@ -94,7 +104,9 @@ react-rspack/
 └── dist/                 # Build output (generated)
 ```
 
-## See also
+</details>
+
+## 🔗 See also
 
 - [rspack-plugin-svg-sprite](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite) — the plugin powering this demo
 - [react-webpack example](../react-webpack/) — same UI built with Webpack 5 + `svg-sprite-loader` for comparison
