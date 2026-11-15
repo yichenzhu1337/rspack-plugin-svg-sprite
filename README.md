@@ -20,10 +20,10 @@ npm install rspack-plugin-svg-sprite -D
 
 ## 🧭 Contents
 
-| Start here                                      | Reference                                                                 | Help                                    |
-| ----------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------- |
-| [🚀 Quick Start](#-quick-start)                 | [⚙️ API Reference](#️-api-reference)                                       | [🐛 Troubleshooting](#-troubleshooting) |
-| [📦 Extract Mode](#-extract-mode)               | [🔍 How It Works](#-how-it-works)                                         | [🧩 Compatibility](#-compatibility)     |
+| Start here                                       | Reference                                                                 | Help                                    |
+| ------------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------- |
+| [🚀 Quick Start](#-quick-start)                  | [⚙️ API Reference](#️-api-reference)                                      | [🐛 Troubleshooting](#-troubleshooting) |
+| [📦 Extract Mode](#-extract-mode)                | [🔍 How It Works](#-how-it-works)                                         | [🧩 Compatibility](#-compatibility)     |
 | [🏗️ Rsbuild Integration](#️-rsbuild-integration) | [📊 Alternatives & Comparison](#-alternatives--comparison)                | [📚 Examples](#-examples)               |
 | [🛠️ Framework Recipes](#️-framework-recipes)     | [🔄 Migrating from svg-sprite-loader](#-migrating-from-svg-sprite-loader) | [🙌 Contributing](#-contributing)       |
 
