@@ -150,7 +150,12 @@ class SvgSpritePlugin {
           });
 
           Object.keys(symbolsByFile).forEach((filename) => {
-            const content = this.generateSprite(symbolsByFile[filename]);
+            // Loaders finish in a different order on every build. Sort so identical input
+            // always produces an identical sprite file.
+            const ordered = symbolsByFile[filename]
+              .slice()
+              .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+            const content = this.generateSprite(ordered);
             const RawSource = resolveRawSource(compiler);
             compilation.emitAsset(filename, new RawSource(content));
           });

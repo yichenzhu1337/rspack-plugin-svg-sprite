@@ -87,7 +87,7 @@
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "dev:rspack": "pnpm --filter svg-sprite-consumer-demo dev",
+    "dev:rspack": "pnpm build && pnpm --filter svg-sprite-consumer-demo dev",
     "dev:webpack": "pnpm --filter svg-sprite-webpack-demo dev",
     "prepublishOnly": "pnpm build",
     "prepare": "husky",
@@ -110,16 +110,23 @@
     "@changesets/changelog-github": "1.0.1",
     "@changesets/cli": "3.0.3",
     "@eslint/js": "^10.0.1",
+    "@rsbuild/core": "1.7.3",
     "@rspack/core": "^1.7.6",
     "@rstest/core": "^0.8.5",
     "@rstest/coverage-istanbul": "^0.2.1",
     "eslint": "^10.0.1",
     "eslint-config-prettier": "^10.1.8",
+    "htmlparser2": "9.1.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
+    "rsbuild-v2": "npm:@rsbuild/core@2.3.2",
+    "rspack-v2": "npm:@rspack/core@2.3.2",
+    "svgo": "4.1.0",
+    "svgo-loader": "5.0.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0"
+    "typescript-eslint": "^8.56.0",
+    "webpack": "5.105.2"
   },
   "packageManager": "pnpm@12.18.0"
 }

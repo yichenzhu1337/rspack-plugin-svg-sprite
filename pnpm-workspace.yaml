@@ -1,4 +1,5 @@
 packages:
+  - '.'
   - 'examples/*'
 allowBuilds:
   core-js: false
