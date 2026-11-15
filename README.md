@@ -1,19 +1,21 @@
 # rspack-plugin-svg-sprite
 
-> SVG sprite loader and plugin for Rspack — a drop-in replacement for [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader) that works natively with [Rspack](https://rspack.dev/).
+> SVG sprite loader and plugin for [Rspack](https://rspack.dev/) and [Rsbuild](https://rsbuild.dev/) — a drop-in replacement for [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader), which doesn't work with Rspack.
 
-[![CI](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml/badge.svg)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite/graph/badge.svg)](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite)
 [![npm version](https://img.shields.io/npm/v/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
-[![npm downloads](https://img.shields.io/npm/dm/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
-[![license](https://img.shields.io/github/license/yichenzhu1337/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/rspack-plugin-svg-sprite)](https://bundlephobia.com/package/rspack-plugin-svg-sprite)
+[![npm downloads](https://img.shields.io/npm/dm/rspack-plugin-svg-sprite)](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)
+[![CI](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml/badge.svg)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml)
+[![coverage](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite/branch/main/graph/badge.svg)](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite)
+[![types](https://img.shields.io/npm/types/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
+[![license](https://img.shields.io/npm/l/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 
 **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)**
 
 ```bash
 npm install rspack-plugin-svg-sprite -D
 ```
+
+**Coming from `svg-sprite-loader`?** Swap the loader path and the plugin import; your component code stays the same. [See the diff ↓](#migrating-from-svg-sprite-loader)
 
 ---
 
@@ -388,10 +390,11 @@ Looking for the right SVG solution for Rspack? Here's how the options compare:
 
 ## Compatibility
 
-| Bundler                            | Version  | Status                                   |
-| ---------------------------------- | -------- | ---------------------------------------- |
-| [Rspack](https://rspack.dev/)      | >= 0.5.0 | Fully supported (primary target)         |
-| [Webpack](https://webpack.js.org/) | 5.x      | Supported via `webpack-sources` fallback |
+| Bundler                            | Version  | Status                                           |
+| ---------------------------------- | -------- | ------------------------------------------------ |
+| [Rspack](https://rspack.dev/)      | >= 0.5.0 | Fully supported (primary target)                 |
+| [Rsbuild](https://rsbuild.dev/)    | >= 1.0.0 | Supported via `rspack-plugin-svg-sprite/rsbuild` |
+| [Webpack](https://webpack.js.org/) | 5.x      | Supported via `webpack-sources` fallback         |
 
 ## Examples
 
