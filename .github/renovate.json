@@ -59,5 +59,6 @@
       "groupName": null,
       "automerge": false
     }
-  ]
+  ],
+  "minimumReleaseAge": "3 days"
 }
