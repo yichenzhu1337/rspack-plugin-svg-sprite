@@ -15,7 +15,7 @@ interface MockLoaderContext {
   resourcePath: string;
   cacheable(): void;
   getOptions(): Record<string, unknown>;
-  _compiler: { context: string };
+  _compiler: { context: string; options?: any };
   _compilation: Record<string, unknown>;
 }
 
