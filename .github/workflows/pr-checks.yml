@@ -1,0 +1,50 @@
+name: PR checks
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  changeset:
+    name: Changeset
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: node scripts/ci/changeset-check.mjs
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_REF: ${{ github.head_ref }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+
+  privacy:
+    name: Privacy scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    # Secrets are not available to pull requests from forks; those are reviewed by hand.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: bash scripts/ci/privacy-scan.sh
+        env:
+          DENY: ${{ secrets.PERSONAL_GUARD_DENY }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}

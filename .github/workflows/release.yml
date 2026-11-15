@@ -1,0 +1,193 @@
+name: Release
+
+# Manual releases. Start it from the Actions tab:
+#   dry-run  runs every check and writes the release report; publishes nothing
+#   publish  runs the same checks, waits for your approval (environment npm-release), publishes
+#            the exact tarball the checks inspected, tags it, creates the GitHub release, and
+#            verifies the result from npm
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'dry-run shows exactly what would ship; publish ships it after your approval'
+        type: choice
+        options: [dry-run, publish]
+        default: dry-run
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    name: Guards
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.guards.outputs.version }}
+      warnings: ${{ steps.guards.outputs.warnings }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - id: guards
+        run: node scripts/release/release.mjs guards
+        env:
+          MODE: ${{ inputs.mode }}
+
+  checks:
+    name: CI
+    needs: guard
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  preflight:
+    name: Package and report
+    needs: [guard, checks]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      name: ${{ steps.pack.outputs.name }}
+      sha256: ${{ steps.pack.outputs.sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - id: pack
+        name: Pack once
+        run: |
+          mkdir -p out
+          pnpm pack --pack-destination out
+          tarball=$(find out -name '*.tgz' | head -1)
+          echo "tarball=$tarball" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$tarball")" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(sha256sum "$tarball" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+      - id: publint
+        name: publint
+        continue-on-error: true
+        run: pnpm dlx publint@0.3.25
+      - id: attw
+        name: Are the types wrong
+        continue-on-error: true
+        # Known and tracked: node10 subpath resolution, CommonJS default on /plugin, /loader, /runtime/*.
+        run: pnpm dlx @arethetypeswrong/cli@0.18.5 "$TARBALL" --profile node16 --ignore-rules cjs-only-exports-default
+        env:
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+      - id: smoke
+        name: Import smoke test
+        continue-on-error: true
+        run: node scripts/release/release.mjs smoke "$TARBALL"
+        env:
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+      - id: publish-dry-run
+        name: npm publish --dry-run
+        continue-on-error: true
+        run: npm publish "$TARBALL" --dry-run --access public
+        env:
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+      - name: Release report
+        run: node scripts/release/release.mjs report
+        env:
+          MODE: ${{ inputs.mode }}
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+          SHA256: ${{ steps.pack.outputs.sha256 }}
+          GUARD_WARNINGS: ${{ needs.guard.outputs.warnings }}
+          PUBLINT_OUTCOME: ${{ steps.publint.outcome }}
+          ATTW_OUTCOME: ${{ steps.attw.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          PUBLISH_DRY_RUN_OUTCOME: ${{ steps.publish-dry-run.outcome }}
+          RELEASE_REPORT: out/release-report.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ needs.guard.outputs.version }}
+          path: out/
+          if-no-files-found: error
+      - name: Stop if any check failed
+        if: >-
+          steps.publint.outcome != 'success' || steps.attw.outcome != 'success' ||
+          steps.smoke.outcome != 'success' || steps.publish-dry-run.outcome != 'success'
+        run: |
+          echo "::error::A release check failed; see the release report."
+          exit 1
+
+  publish:
+    name: Publish (needs your approval)
+    if: inputs.mode == 'publish'
+    needs: [guard, preflight]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: npm-release
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          registry-url: 'https://registry.npmjs.org'
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ needs.guard.outputs.version }}
+          path: out
+      - name: Verify this is the tarball the report checked
+        run: |
+          actual=$(sha256sum "out/$NAME" | cut -d' ' -f1)
+          if [ "$actual" != "$EXPECTED" ]; then
+            echo "::error::sha256 mismatch: got $actual, expected $EXPECTED"
+            exit 1
+          fi
+        env:
+          NAME: ${{ needs.preflight.outputs.name }}
+          EXPECTED: ${{ needs.preflight.outputs.sha256 }}
+      - name: Publish to npm (trusted publishing)
+        run: npm publish "out/$NAME" --provenance --access public
+        env:
+          NAME: ${{ needs.preflight.outputs.name }}
+      - name: Tag
+        run: |
+          git tag "v$VERSION" "$GITHUB_SHA"
+          git push origin "v$VERSION"
+        env:
+          VERSION: ${{ needs.guard.outputs.version }}
+      - name: GitHub release
+        run: |
+          node scripts/release/release.mjs notes "$VERSION" > notes.md
+          gh release create "v$VERSION" --title "v$VERSION" --notes-file notes.md --verify-tag "out/$NAME"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.guard.outputs.version }}
+          NAME: ${{ needs.preflight.outputs.name }}
+
+  verify:
+    name: Verify from npm
+    needs: [guard, publish]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: node scripts/release/release.mjs verify "$VERSION"
+        env:
+          VERSION: ${{ needs.guard.outputs.version }}
