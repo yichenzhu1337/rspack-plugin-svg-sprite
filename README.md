@@ -9,6 +9,7 @@
 [![dependencies](https://npmx.dev/api/registry/badge/dependencies/rspack-plugin-svg-sprite)](https://npmx.dev/package/rspack-plugin-svg-sprite)
 [![types](https://npmx.dev/api/registry/badge/types/rspack-plugin-svg-sprite)](https://npmx.dev/package/rspack-plugin-svg-sprite)
 [![license](https://npmx.dev/api/registry/badge/license/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
+[![renovate](https://img.shields.io/badge/maintained%20with-renovate-1A1F6C?logo=renovate&logoColor=white)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/.github/renovate.json)
 
 **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)**
 
