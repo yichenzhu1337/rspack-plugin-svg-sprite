@@ -2,12 +2,13 @@
 
 > SVG sprite loader and plugin for [Rspack](https://rspack.dev/) and [Rsbuild](https://rsbuild.dev/) — a drop-in replacement for [`svg-sprite-loader`](https://github.com/JetBrains/svg-sprite-loader), which doesn't work with Rspack.
 
-[![npm version](https://img.shields.io/npm/v/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
-[![npm downloads](https://img.shields.io/npm/dm/rspack-plugin-svg-sprite)](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)
+[![version](https://npmx.dev/api/registry/badge/version/rspack-plugin-svg-sprite)](https://npmx.dev/package/rspack-plugin-svg-sprite)
+[![downloads](https://npmx.dev/api/registry/badge/downloads/rspack-plugin-svg-sprite)](https://npmx.dev/package/rspack-plugin-svg-sprite)
 [![CI](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml/badge.svg)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/actions/workflows/ci.yml)
 [![coverage](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite/branch/main/graph/badge.svg)](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite)
-[![types](https://img.shields.io/npm/types/rspack-plugin-svg-sprite)](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
-[![license](https://img.shields.io/npm/l/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
+[![dependencies](https://npmx.dev/api/registry/badge/dependencies/rspack-plugin-svg-sprite)](https://npmx.dev/package/rspack-plugin-svg-sprite)
+[![types](https://npmx.dev/api/registry/badge/types/rspack-plugin-svg-sprite)](https://npmx.dev/package/rspack-plugin-svg-sprite)
+[![license](https://npmx.dev/api/registry/badge/license/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 
 **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)**
 
