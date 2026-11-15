@@ -73,7 +73,8 @@ jobs:
         run: |
           mkdir -p out
           pnpm pack --pack-destination out
-          tarball=$(find out -name '*.tgz' | head -1)
+          # npm reads `out/x.tgz` as a GitHub shorthand (owner/repo); a ./ prefix makes it a path.
+          tarball="./$(find out -name '*.tgz' | head -1)"
           echo "tarball=$tarball" >> "$GITHUB_OUTPUT"
           echo "name=$(basename "$tarball")" >> "$GITHUB_OUTPUT"
           echo "sha256=$(sha256sum "$tarball" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
@@ -158,7 +159,7 @@ jobs:
           NAME: ${{ needs.preflight.outputs.name }}
           EXPECTED: ${{ needs.preflight.outputs.sha256 }}
       - name: Publish to npm (trusted publishing)
-        run: npm publish "out/$NAME" --provenance --access public
+        run: npm publish "./out/$NAME" --provenance --access public
         env:
           NAME: ${{ needs.preflight.outputs.name }}
       - name: Tag
@@ -170,7 +171,7 @@ jobs:
       - name: GitHub release
         run: |
           node scripts/release/release.mjs notes "$VERSION" > notes.md
-          gh release create "v$VERSION" --title "v$VERSION" --notes-file notes.md --verify-tag "out/$NAME"
+          gh release create "v$VERSION" --title "v$VERSION" --notes-file notes.md --verify-tag "./out/$NAME"
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.guard.outputs.version }}
