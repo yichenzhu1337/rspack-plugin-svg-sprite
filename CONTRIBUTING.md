@@ -46,7 +46,7 @@ rspack-plugin-svg-sprite/
 | ------------------ | ---------------------------------------------------------- |
 | `pnpm build`       | Compile TypeScript to `dist/`                              |
 | `pnpm test`        | Build + run unit and integration tests                     |
-| `pnpm test:ci`     | Build + run tests with Istanbul coverage (95% threshold)   |
+| `pnpm test:ci`     | Build + run tests with Istanbul coverage (98% threshold)   |
 | `pnpm typecheck`   | Type-check without emitting                                |
 | `pnpm lint`        | Run ESLint on `src/`                                       |
 | `pnpm format`      | Auto-format everything with Prettier                       |
@@ -62,7 +62,7 @@ rspack-plugin-svg-sprite/
 5. Run `pnpm lint` and `pnpm format` to catch style issues.
 6. Test against the examples with `pnpm dev:rspack`.
 7. If the change affects users of the package, run `pnpm changeset` and commit the generated file: pick `patch`, `minor` or `major` and describe the change for users. CI requires one whenever the published package changes; docs, CI and test-only changes don't need one.
-8. Commit using [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.). Pull requests are squash-merged, so the PR title becomes the commit subject.
+8. Commit using [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.). Pull requests are squash-merged, so the PR title becomes the commit subject, and the **PR title** check requires it to be a Conventional Commit (`<type>[(<scope>)][!]: <description>`, at most 100 characters, no trailing period).
 9. The pre-commit hook (husky + lint-staged) runs ESLint and Prettier automatically on staged files.
 10. Open a pull request against `main`.
 
@@ -93,7 +93,7 @@ pnpm test       # Build + run tests
 pnpm test:ci    # Build + run tests with Istanbul coverage report
 ```
 
-Coverage thresholds are enforced at **95%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
+Coverage thresholds are enforced at **98%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
 
 ## Code Style
 
