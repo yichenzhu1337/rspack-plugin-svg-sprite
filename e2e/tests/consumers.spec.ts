@@ -74,11 +74,19 @@ async function addLateIcon(page: Page) {
   await expect(page.locator(`svg[data-icon="${lateIcon}"]`)).toBeVisible();
 }
 
+// Known WebKit (Safari) limitation: a gradient, pattern, filter, mask or clip-path that an icon
+// references with url(#id) is not resolved when the icon lives in an external sprite file, so
+// the icon paints blank. Inline mode is not affected. The README documents this.
+function paintable(browserName: string, mode: string): string[] {
+  const skipGradient = browserName === 'webkit' && mode === 'extract';
+  return initialIcons.filter((id) => !(skipGradient && id === 'gradient'));
+}
+
 for (const consumer of consumers) {
   test.describe(consumer.name, () => {
-    test('every icon resolves and paints', async ({ page }) => {
+    test('every icon resolves and paints', async ({ page, browserName }) => {
       const session = await open(page, consumer);
-      for (const id of initialIcons) await expectIconPaints(page, id);
+      for (const id of paintable(browserName, consumer.mode)) await expectIconPaints(page, id);
       expect(session.problems).toEqual([]);
     });
 
@@ -97,9 +105,12 @@ for (const consumer of consumers) {
         expect(hidden).toEqual({ ariaHidden: 'true', width: 0 });
       });
     } else {
-      test('the sprite file is requested and every <use> points at it', async ({ page }) => {
+      test('the sprite file is requested and every <use> points at it', async ({
+        page,
+        browserName,
+      }) => {
         const session = await open(page, consumer);
-        for (const id of initialIcons) await expectIconPaints(page, id);
+        for (const id of paintable(browserName, consumer.mode)) await expectIconPaints(page, id);
         expect(session.svgResponses).toHaveLength(1);
         const [sprite] = session.svgResponses;
         expect(sprite.status).toBe(200);

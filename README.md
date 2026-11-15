@@ -547,6 +547,7 @@ If you export an array of configs (a multi-compiler build, for example client an
 - `spriteFilename` is used literally. Placeholders such as `[hash]` or `[chunkname]` are not interpolated.
 - The sprite URL is fixed at build time from the loader's `publicPath` option, or from `output.publicPath` when that is a plain string. `output.publicPath: 'auto'` and function values are not read, so set the loader's `publicPath` in those setups.
 - The Rsbuild plugin replaces Rsbuild's built-in SVG rule. `./icon.svg?url`, `?inline` and `?raw` therefore also return a sprite symbol, and SVGs outside the plugin's `include` / `exclude` scope are left without Rsbuild's default handling.
+- In extract mode, Safari (WebKit) does not resolve `url(#id)` references inside an external sprite file. An icon that uses a gradient, pattern, filter, mask or clip-path paints blank there. Chrome and Firefox are not affected. Use inline mode for those icons, or flatten the effect to solid fills. The end-to-end tests cover this case.
 
 ## 🙌 Contributing
 
