@@ -59,7 +59,7 @@ rspack-plugin-svg-sprite/
 | ------------------ | ---------------------------------------------------------- |
 | `pnpm build`       | Compile TypeScript to `dist/`                              |
 | `pnpm test`        | Build + run unit and integration tests                     |
-| `pnpm test:ci`     | Build + run tests with Istanbul coverage (98% threshold)   |
+| `pnpm test:ci`     | Build + run tests with Istanbul coverage (99% threshold)   |
 | `pnpm typecheck`   | Type-check without emitting                                |
 | `pnpm lint`        | Run Oxlint on `src/` and `scripts/`                        |
 | `pnpm format`      | Auto-format everything with Oxfmt                          |
@@ -121,7 +121,7 @@ pnpm test:ci    # Build + run tests with Istanbul coverage report
 ```
 
 > [!TIP]
-> Coverage thresholds are enforced at **98%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
+> Coverage thresholds are enforced at **99%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
 
 ## 🧹 Code Style
 
