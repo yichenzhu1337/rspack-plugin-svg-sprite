@@ -82,7 +82,7 @@
     "build": "tsc",
     "test": "tsc && rstest run",
     "test:ci": "tsc && rstest run --coverage",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write .",
