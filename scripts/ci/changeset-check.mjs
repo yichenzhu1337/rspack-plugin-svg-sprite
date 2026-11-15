@@ -9,13 +9,12 @@
 //
 // Env: BASE_SHA (PR base commit), HEAD_REF (PR branch), LABELS (JSON array of label names).
 import { execFileSync } from 'node:child_process';
-import { appendFileSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
+import { fail, group, info, ok, summary } from '../lib/output.mjs';
 
 const PKG = 'rspack-plugin-svg-sprite';
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const lines = (text) => text.split('\n').filter(Boolean);
-const summary = (text) =>
-  process.env.GITHUB_STEP_SUMMARY && appendFileSync(process.env.GITHUB_STEP_SUMMARY, text + '\n');
 
 const base = process.env.BASE_SHA;
 const headRef = process.env.HEAD_REF || '';
@@ -62,11 +61,12 @@ if (changed.includes('package.json')) {
   }
 }
 
-summary('### Changeset check');
+let exemption = null;
+let note = null;
 if (headRef.startsWith('changeset-release/')) {
-  summary('Version PR: exempt.');
+  exemption = 'Version PR';
 } else if (labels.includes('no-changeset')) {
-  summary('Labelled `no-changeset`: exempt.');
+  exemption = 'Labelled `no-changeset`';
 } else if (reasons.length && !changesets.length) {
   problems.push(
     `this PR changes the published package (${reasons.join(', ')}) but adds no changeset. ` +
@@ -74,16 +74,57 @@ if (headRef.startsWith('changeset-release/')) {
       'add the `no-changeset` label.',
   );
 } else {
-  summary(
-    changesets.length
-      ? `Changesets: ${changesets.join(', ')}`
-      : 'No published files changed: no changeset needed.',
-  );
+  note = changesets.length
+    ? `Changesets: ${changesets.join(', ')}`
+    : 'No published files changed: no changeset needed.';
 }
 
+const bullets = (items) => items.map((f) => `- \`${f}\``).join('\n');
+const facts = [
+  '| Fact | Value |',
+  '|---|---|',
+  `| 🔍 Files changed | ${changed.length} |`,
+  `| 📦 Published files touched | ${reasons.length ? reasons.map((r) => `\`${r}\``).join(', ') : 'none'} |`,
+  `| 📝 Changesets added | ${changesets.length} |`,
+];
+const failure = [];
+group('Changeset check', () => {
+  info(`${changed.length} file(s) changed, ${reasons.length} touching the published package`);
+  if (exemption) ok(`${exemption}: exempt`);
+  else if (note) ok(note);
+  for (const problem of problems) console.log(`::error::❌ ${problem}`);
+});
+
 if (problems.length) {
-  for (const problem of problems) console.log(`::error::${problem}`);
-  summary(problems.map((p) => `- ❌ ${p}`).join('\n'));
+  failure.push(
+    '## 📝 Changeset check',
+    '',
+    '> [!CAUTION]',
+    `> ${problems.length} problem(s) with the changeset for this pull request.`,
+    '',
+    ...facts,
+    '',
+    ...problems.map((p) => `- ❌ ${p}`),
+    '',
+    '### 🛠️ How to fix',
+    '',
+    '1. Run `pnpm changeset` and pick `patch`, `minor` or `major`.',
+    '2. Commit the new file in `.changeset/` and push.',
+    '3. Or, for a change that should not be released, add the `no-changeset` label.',
+  );
+  summary(failure.join('\n'));
+  fail('changeset check failed');
   process.exit(1);
 }
-console.log('changeset check passed');
+summary(
+  [
+    '## 📝 Changeset check',
+    '',
+    '> [!TIP]',
+    exemption ? `> ${exemption}: exempt from the changeset check.` : `> ${note}`,
+    '',
+    ...facts,
+    ...(changesets.length ? ['', bullets(changesets)] : []),
+  ].join('\n'),
+);
+ok('changeset check passed');
