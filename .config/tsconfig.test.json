@@ -1,13 +1,13 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "module": "preserve",
     "moduleResolution": "bundler",
-    "rootDir": ".",
+    "rootDir": "..",
     "noEmit": true,
     "noUncheckedIndexedAccess": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "examples"]
+  "include": ["../src"],
+  "exclude": ["../node_modules", "../dist", "../examples"]
 }
