@@ -80,7 +80,13 @@ function parse(xml: string): Parsed {
 
 /** Entities other than the five predefined ones and numeric references, outside CDATA/comments. */
 function undeclaredEntities(xml: string): string[] {
-  const text = xml.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, '').replace(/<!--[\s\S]*?-->/g, '');
+  // Strip until nothing changes, so a removal cannot leave a new CDATA or comment opener behind.
+  let text = xml;
+  let previous: string;
+  do {
+    previous = text;
+    text = text.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, '').replace(/<!--[\s\S]*?-->/g, '');
+  } while (text !== previous);
   return text.match(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)[^\s<"']{0,12}/g) ?? [];
 }
 
