@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "setup": "node scripts/setup.mjs",
+    "differential": "node scripts/differential.mjs",
     "test": "playwright test",
     "report": "playwright show-report"
   },
@@ -14,6 +15,7 @@
     "@playwright/test": "1.65.0",
     "@types/node": "26.6.6",
     "@types/pngjs": "6.0.5",
-    "pngjs": "7.0.0"
+    "pngjs": "7.0.0",
+    "verdaccio": "7.1.0"
   }
 }
