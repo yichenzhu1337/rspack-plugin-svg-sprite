@@ -51,10 +51,21 @@ async function buildConsumer(consumer, tarball) {
   // Each consumer installs and builds with its own package manager. A bundler launched through
   // `bun run` still runs on Node (its bin has a Node shebang), like for every other user.
   const pm = consumer.packageManager ?? 'npm';
-  const install =
-    pm === 'bun' ? ['bun', ['install']] : ['npm', ['install', '--no-audit', '--no-fund']];
-  await run(install[0], install[1], dir, `${consumer.name}: ${pm} install`);
-  await run(pm, ['run', 'build'], dir, `${consumer.name}: ${pm} run build`);
+  const installs = {
+    npm: ['npm', ['install', '--no-audit', '--no-fund']],
+    bun: ['bun', ['install']],
+    // pnpm's strict node_modules is where missing-dependency bugs surface; the repo itself no
+    // longer uses pnpm, so it is fetched on demand and pinned (bunx cannot run it).
+    pnpm: ['npx', ['--yes', 'pnpm@12.18.0', 'install', '--ignore-workspace']],
+  };
+  const [command, args] = installs[pm];
+  await run(command, args, dir, `${consumer.name}: ${pm} install`);
+  await run(
+    pm === 'bun' ? 'bun' : 'npm',
+    ['run', 'build'],
+    dir,
+    `${consumer.name}: ${pm} run build`,
+  );
 
   const dist = path.join(dir, 'dist');
   if (!fs.existsSync(path.join(dist, 'index.html'))) {
