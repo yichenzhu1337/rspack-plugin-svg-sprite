@@ -111,7 +111,7 @@ interface Classified {
 function classify(block: Block): Classified {
   const code = block.lang === 'diff' ? applyDiff(block.code) : block.code;
   if (block.lang === 'vue') {
-    const m = /<script[^>]*>([\s\S]*?)<\/script>/.exec(code);
+    const m = /<script\b[^>]*>([\s\S]*?)<\/script\s*>/i.exec(code);
     if (!m) return { kind: null, source: code, ext: 'ts' };
     return {
       kind: 'vue',
