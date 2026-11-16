@@ -8,5 +8,5 @@
   "arrowParens": "always",
   "endOfLine": "lf",
   "sortPackageJson": false,
-  "ignorePatterns": ["dist/", "node_modules/", "bun.lock", "*.svg"]
+  "ignorePatterns": ["dist/", "doc_build/", "node_modules/", "bun.lock", "*.svg"]
 }
