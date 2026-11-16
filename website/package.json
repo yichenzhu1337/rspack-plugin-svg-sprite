@@ -1,0 +1,15 @@
+{
+  "name": "rspack-plugin-svg-sprite-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Documentation site for rspack-plugin-svg-sprite",
+  "scripts": {
+    "dev": "rspress dev",
+    "build": "rspress build",
+    "preview": "rspress preview"
+  },
+  "devDependencies": {
+    "@rspress/core": "2.1.3"
+  }
+}
