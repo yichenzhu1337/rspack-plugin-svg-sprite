@@ -80,7 +80,7 @@ jobs:
               # The published package: sources, manifests, build config and the shipped docs.
               case "$f" in
                 src/* | package.json | bun.lock | bunfig.toml | tsconfig*.json | \
-                  client.d.ts | rstest.config.ts | .npmrc | .nvmrc | README.md | CHANGELOG.md | LICENSE)
+                  client.d.ts | rstest.config.mts | .npmrc | .nvmrc | README.md | CHANGELOG.md | LICENSE)
                   package=true ;;
               esac
               case "$f" in examples/*) examples=true ;; esac
