@@ -25,7 +25,12 @@
     "e2e": {
       // The consumer apps are copied to a temp directory and built there with the packed
       // tarball, so they are fixtures, not part of this workspace.
+      "entry": ["scripts/*.mjs"],
       "project": ["**/*.{ts,mjs}", "!consumers/**"],
+      // Started as a child process (the local registry of E2E_SOURCE=registry), never imported.
+      "ignoreDependencies": ["verdaccio"],
+      // The system `diff`, used to print the unified diff of the differential test.
+      "ignoreBinaries": ["diff"],
     },
     "bench": {
       "entry": ["compare.mjs"],

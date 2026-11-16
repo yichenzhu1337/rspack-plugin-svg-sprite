@@ -129,6 +129,25 @@ bun run test:ci    # Build + run tests with Istanbul coverage report
 > [!TIP]
 > Coverage thresholds are enforced at **99%** for statements, branches, functions, and lines. Coverage reports are generated in `coverage/` (HTML + LCOV) and uploaded to [Codecov](https://codecov.io/gh/yichenzhu1337/rspack-plugin-svg-sprite) on every CI run.
 
+### 🌐 Browser tests and install sources
+
+`bun run test:e2e` builds the consumer apps in `e2e/consumers` and runs them in real browsers. `E2E_SOURCE` picks where the package comes from:
+
+| `E2E_SOURCE` | Package installed in the consumers                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------- |
+| `tarball`    | The packed tarball of this checkout (default)                                                            |
+| `registry`   | This checkout, published to a throwaway local registry (Verdaccio) and installed by name                 |
+| `npm`        | The real npm registry, version or dist-tag in `E2E_VERSION` (default `latest`); nothing is built locally |
+
+```bash
+bun run test:e2e                                          # tarball, all browsers
+E2E_SOURCE=registry bun run test:e2e --project=chromium   # publish and install by name
+E2E_SOURCE=npm E2E_VERSION=1.6.2 bun run test:e2e --project=chromium
+node e2e/scripts/differential.mjs --baseline latest       # compare the output with a published version
+```
+
+The differential script builds every consumer with a published version and with this checkout, and fails on any difference in the emitted sprites or the exported `{ id, viewBox, url, content }`. A deliberate change goes in `e2e/differential-allow.json` with a reason and the version that introduced it. `published-smoke.yml` runs the `npm` source and the compatibility matrix against the published package every day.
+
 ## 🧹 Code Style
 
 - **TypeScript** with `strict: true` — source in `src/`, compiled output in `dist/`.
