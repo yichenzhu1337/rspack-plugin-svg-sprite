@@ -35,6 +35,12 @@ module.exports = {
 The exported symbol object has the identical shape (`id`, `viewBox`, `url`, `content`), so no component changes are needed.
 :::
 
+Three differences to check when you migrate:
+
+- **Extract mode `url` target.** `svg-sprite-loader` exports `id: "arrow-usage"` and `url: "sprite.svg#arrow-usage"`, which point at a preview `<use>` element inside the sprite, so `<img src={icon.url}>` and CSS `background: url(...)` render the icon. This package exports `id: "arrow"` and `url: "sprite.svg#arrow"`, which point at the `<symbol>`. That works with `<svg><use href={icon.url} /></svg>` (the recommended usage in both libraries), but browsers do not render a bare symbol as an image. If you used `icon.url` in an `<img>` or in CSS, switch to `<svg><use href={icon.url} /></svg>`.
+- **`class` on the root `<svg>` is not copied to the `<symbol>`.** The loader skips `xmlns`, `version`, `class` and `style` on the root element. `svg-sprite-loader` copies `class`. Put the class on the `<svg>` element where you use the icon.
+- **Preview `<use>` elements in the sprite file use `href`, not `xlink:href`.** `href` in `<use>` needs Safari 12.1 or newer. This only matters when you open the sprite file directly.
+
 `svg-sprite-loader` depends on internal webpack APIs (`NormalModule.getCompilationHooks`, `compilation.hooks.additionalAssets`) that do not exist in Rspack ([rspack#11609](https://github.com/web-infra-dev/rspack/issues/11609)). This package reimplements the same functionality with Rspack-compatible APIs.
 
 ## From asset/resource
