@@ -855,6 +855,256 @@
       "group": "build",
       "id": "rsbuild2 extract mjs config",
       "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require .",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require . is the value",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require . .default",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require . named",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default . loads",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default . is the value",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default . .default",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default . .named",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import { named } .",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import * as ns .",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./plugin",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./plugin .default",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./plugin named",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./plugin loads",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./plugin is the value",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./plugin .default",
+      "pass": false
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./plugin .named",
+      "pass": false
+    },
+    {
+      "group": "bun",
+      "id": "bun: import { named } ./plugin",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import * as ns ./plugin",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./loader",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./loader .default",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./loader named",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./loader loads",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./loader is the value",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./loader .default",
+      "pass": false
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./loader .named",
+      "pass": false
+    },
+    {
+      "group": "bun",
+      "id": "bun: import { named } ./loader",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import * as ns ./loader",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./rsbuild",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./rsbuild named",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./rsbuild loads",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./rsbuild .named",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import { named } ./rsbuild",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import * as ns ./rsbuild",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./runtime/symbol",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./runtime/symbol .default",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./runtime/symbol loads",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./runtime/symbol is the value",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./runtime/symbol .default",
+      "pass": false
+    },
+    {
+      "group": "bun",
+      "id": "bun: import * as ns ./runtime/symbol",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./runtime/browser-sprite",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require ./runtime/browser-sprite .default",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./runtime/browser-sprite loads",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./runtime/browser-sprite is the value",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import default ./runtime/browser-sprite .default",
+      "pass": false
+    },
+    {
+      "group": "bun",
+      "id": "bun: import * as ns ./runtime/browser-sprite",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require.resolve loader",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import.meta.resolve loader",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: require package.json",
+      "pass": true
+    },
+    {
+      "group": "bun",
+      "id": "bun: import package.json",
+      "pass": true
     }
   ]
 }
