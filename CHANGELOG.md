@@ -1,5 +1,13 @@
 # rspack-plugin-svg-sprite
 
+## 1.6.2
+
+### Patch Changes
+
+- [#31](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/31) [`90262dd`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/90262dd75f19c4eab079d6072083377b0a5a6598) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - Fix ESM imports of `rspack-plugin-svg-sprite/loader`, `/runtime/symbol` and `/runtime/browser-sprite` on the Bun runtime. In 1.6.0 these imports threw `TypeError: Object.assign requires that input parameter not be null or undefined` when the code ran under Bun (for example `bun --bun rspack build` or a Bun script that imports the loader). Node and bundled app output are unchanged: the ESM entry points now give the same default export and named exports on Node, on Bun and inside Rspack and webpack bundles, and still share the single CommonJS implementation.
+
+  This release also contains the fixes listed under 1.6.1 (escaped symbol ids, linear-time parsing of malformed files, the DOCTYPE entity warning), because 1.6.1 was never published to npm.
+
 ## 1.6.1
 
 _Not published to npm. These changes ship in 1.6.2._
