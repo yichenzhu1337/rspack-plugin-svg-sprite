@@ -4,7 +4,9 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "rootDir": ".",
-    "noEmit": true
+    "noEmit": true,
+    "noUncheckedIndexedAccess": false,
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "examples"]

@@ -23,10 +23,10 @@ interface LoaderContext {
 function legacyParseViewBox(svgContent: string): string {
   // Extract the root <svg> opening tag to avoid matching attributes on child elements
   const svgTagMatch = svgContent.match(/<svg([^>]*)>/i);
-  const svgTag = svgTagMatch ? svgTagMatch[1] : '';
+  const svgTag = svgTagMatch ? svgTagMatch[1]! : '';
 
   const match = svgTag.match(/viewBox=["']([^"']+)["']/);
-  if (match) return match[1];
+  if (match) return match[1]!;
 
   // Derive viewBox from width/height attributes on the root <svg> tag only
   const widthMatch = svgTag.match(/\bwidth=["'](\d+(?:\.\d+)?)(?:px)?["']/);
@@ -40,7 +40,7 @@ function legacyParseViewBox(svgContent: string): string {
 
 function legacyExtractSvgInner(svgContent: string): string {
   const innerMatch = svgContent.match(/<svg[^>]*>([\s\S]*)<\/svg>/i);
-  return innerMatch ? innerMatch[1].trim() : svgContent;
+  return innerMatch ? innerMatch[1]!.trim() : svgContent;
 }
 
 function legacyExtractSvgAttrs(svgContent: string): Record<string, string> {
@@ -48,17 +48,17 @@ function legacyExtractSvgAttrs(svgContent: string): Record<string, string> {
   const svgTagMatch = svgContent.match(/<svg([^>]*)>/i);
   if (!svgTagMatch) return attrs;
 
-  const attrString = svgTagMatch[1];
+  const attrString = svgTagMatch[1]!;
   // Match simple attributes but also capture any namespace prefix (e.g. xml:space, xmlns:xlink)
   const attrRegex = /([\w:-]+)=["']([^"']*?)["']/g;
   let match: RegExpExecArray | null;
   while ((match = attrRegex.exec(attrString)) !== null) {
-    const raw = match[1];
+    const raw = match[1]!;
     // Skip namespaced attributes (xml:space, xmlns:xlink) and known non-visual attrs
     if (raw.includes(':')) continue;
     const name = raw.toLowerCase();
     if (name !== 'xmlns' && name !== 'version' && name !== 'class' && name !== 'style') {
-      attrs[name] = match[2];
+      attrs[name] = match[2]!;
     }
   }
   return attrs;
@@ -103,18 +103,18 @@ export function parseRootTag(svgContent: string): RootTag | null {
   let i = start;
   for (;;) {
     const wsStart = i;
-    while (i < n && isXmlSpace(svgContent[i])) i++;
+    while (i < n && isXmlSpace(svgContent[i]!)) i++;
     if (i >= n) return null;
     if (svgContent[i] === '>') return { attrs, end: i + 1 };
     if (i === wsStart) return null;
     const nameStart = i;
-    while (i < n && !isXmlSpace(svgContent[i]) && '=<>"\'/'.indexOf(svgContent[i]) === -1) i++;
+    while (i < n && !isXmlSpace(svgContent[i]!) && '=<>"\'/'.indexOf(svgContent[i]!) === -1) i++;
     if (i === nameStart) return null;
     const name = svgContent.slice(nameStart, i);
-    while (i < n && isXmlSpace(svgContent[i])) i++;
+    while (i < n && isXmlSpace(svgContent[i]!)) i++;
     if (svgContent[i] !== '=') return null;
     i++;
-    while (i < n && isXmlSpace(svgContent[i])) i++;
+    while (i < n && isXmlSpace(svgContent[i]!)) i++;
     const quote = svgContent[i];
     if (quote !== '"' && quote !== "'") return null;
     const close = svgContent.indexOf(quote, i + 1);
@@ -275,7 +275,7 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
   Object.keys(svgAttrs).forEach((key) => {
     const lower = key.toLowerCase();
     if (lower !== 'viewbox' && lower !== 'id' && lower !== 'width' && lower !== 'height') {
-      attrString += ' ' + key + '="' + svgAttrs[key].replace(/"/g, '&quot;') + '"';
+      attrString += ' ' + key + '="' + svgAttrs[key]!.replace(/"/g, '&quot;') + '"';
     }
   });
 

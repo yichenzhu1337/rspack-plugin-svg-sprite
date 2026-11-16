@@ -25,7 +25,7 @@ function mount(): void {
   isMounted = true;
 
   Object.keys(symbols).forEach((id) => {
-    appendSymbolToSprite(symbols[id]);
+    appendSymbolToSprite(symbols[id]!);
   });
 }
 
