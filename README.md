@@ -11,7 +11,7 @@
 [![license](https://npmx.dev/api/registry/badge/license/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 [![renovate](https://img.shields.io/badge/maintained%20with-renovate-1A1F6C?logo=renovate&logoColor=white)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/.github/renovate.json)
 
-**[Documentation](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/)** | **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[Open in StackBlitz](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)**
+**[Documentation](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/)** | **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[Open in StackBlitz](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)** | Listed on the **[Rspack ecosystem page](https://rspack.rs/guide/start/ecosystem#community-plugins)**
 
 ```bash
 npm install rspack-plugin-svg-sprite -D
