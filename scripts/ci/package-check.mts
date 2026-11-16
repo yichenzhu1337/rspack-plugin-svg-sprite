@@ -4,7 +4,7 @@
 //   node scripts/ci/package-check.mts --update   also rewrite scripts/ci/package-files.txt
 //
 // Checks: tarball file list vs snapshot, size budgets, TypeScript consumer fixtures
-// (node16 CommonJS, node16 ESM, bundler) and the runtime smoke test of release.mts.
+// (node16 CommonJS, node16 ESM, bundler) on TypeScript 5.0, 5.2, 5.3, 5.9 and 7 and the runtime smoke test of release.mts.
 //
 // Env: PACKAGE_BUDGET_PACKED and PACKAGE_BUDGET_UNPACKED (bytes) override the budgets below.
 import { execFileSync } from 'node:child_process';
@@ -37,8 +37,18 @@ interface PackInfo {
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SNAPSHOT = join(ROOT, 'scripts', 'ci', 'package-files.txt');
 const FIXTURES = join(ROOT, 'scripts', 'ci', 'package-fixtures');
+const OWN_DECLARATIONS = 'node_modules/rspack-plugin-svg-sprite/';
 const RELEASE = join(ROOT, 'scripts', 'release', 'release.mts');
-const TSC = join(ROOT, 'node_modules', 'typescript', 'bin', 'tsc');
+// Compilers the consumer fixtures run against: the supported floor (5.0), 5.2 (the last
+// release before import attributes parse), 5.3, the latest 5.x, and the repo's own
+// TypeScript. All but the last are aliased devDependencies.
+const COMPILERS = [
+  { label: 'TypeScript 5.0 (floor)', pkg: 'typescript-5.0' },
+  { label: 'TypeScript 5.2', pkg: 'typescript-5.2' },
+  { label: 'TypeScript 5.3', pkg: 'typescript-5.3' },
+  { label: 'TypeScript 5.9 (latest 5.x)', pkg: 'typescript-5.9' },
+  { label: 'TypeScript 7', pkg: 'typescript' },
+].map((c) => ({ ...c, bin: join(ROOT, 'node_modules', c.pkg, 'bin', 'tsc') }));
 
 // Budgets in bytes, about 20% above the values measured when they were set
 // (25,247 packed and 88,666 unpacked). Raise them on purpose, in a reviewed change.
@@ -166,9 +176,25 @@ try {
       console.log(install.out);
       continue;
     }
-    const tsc = attempt(process.execPath, [TSC, '-p', 'tsconfig.json'], { cwd: dir });
-    record(`Fixture ${name}`, tsc.ok, tsc.ok ? 'tsc --noEmit' : 'type errors');
-    if (!tsc.ok) console.log(tsc.out);
+    for (const { label, bin, pkg } of COMPILERS) {
+      // TypeScript 7 removed esModuleInterop=false and allowSyntheticDefaultImports=false.
+      if (name.endsWith('-strict') && pkg === 'typescript') continue;
+      const tsc = attempt(process.execPath, [bin, '-p', 'tsconfig.json'], { cwd: dir });
+      // The `-strict` fixtures turn skipLibCheck off, so third-party declarations (Rsbuild's
+      // bundled ones need @types/node) report errors that are not ours: keep only the fixture's
+      // own and this package's.
+      const errors = name.endsWith('-strict')
+        ? tsc.out
+            .split('\n')
+            .filter((l) => /error TS\d+/.test(l))
+            .filter((l) => !l.startsWith('node_modules/') || l.startsWith(OWN_DECLARATIONS))
+        : tsc.ok
+          ? []
+          : [tsc.out];
+      const ok = errors.length === 0;
+      record(`Fixture ${name} on ${label}`, ok, ok ? 'tsc --noEmit' : 'type errors');
+      if (!ok) console.log(errors.join('\n'));
+    }
   }
   endGroup();
 

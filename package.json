@@ -192,6 +192,10 @@
     "svgo": "4.1.0",
     "svgo-loader": "5.0.0",
     "typescript": "7.0.2",
+    "typescript-5.0": "npm:typescript@5.0.4",
+    "typescript-5.2": "npm:typescript@5.2.2",
+    "typescript-5.3": "npm:typescript@5.3.3",
+    "typescript-5.9": "npm:typescript@5.9.3",
     "webpack": "5.105.2"
   },
   "packageManager": "bun@1.4.4",

@@ -13,3 +13,11 @@ const rsbuildPlugin = pluginSvgSprite(options);
 const url: string = icon.url;
 
 export const used = [instance, rsbuildPlugin, url, plugin, loader, browserSprite, symbol];
+
+// The declarations must resolve to the real types, not `any`: these lines fail to compile if
+// the CommonJS view of a module cannot be resolved.
+export const namespace: string = instance.NAMESPACE;
+export const another: string = new plugin.default().NAMESPACE;
+export const viewBox: string = loader.parseViewBox('<svg viewBox="0 0 1 1"/>');
+// @ts-expect-error `plainSprite` is a boolean
+new SvgSpritePlugin({ plainSprite: 'yes' });
