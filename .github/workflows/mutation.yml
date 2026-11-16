@@ -2,7 +2,7 @@ name: Mutation testing
 
 # Report only. Stryker mutates the loader, the plugin and the runtime modules and checks that the
 # unit tests notice. The score is written to the job summary and the HTML report is uploaded as an
-# artifact. Nothing here runs on pull requests, and a low score never fails the job.
+# artifact. Nothing here runs on pull requests, and a low score never fails the job, but a Stryker error does.
 on:
   schedule:
     - cron: '41 3 * * 1'
@@ -18,7 +18,7 @@ jobs:
   mutation:
     name: 🧬 Mutation score
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 180
     permissions:
       contents: read
     steps:
@@ -45,9 +45,12 @@ jobs:
       - name: 📥 Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: 🏗️ Build dist/ for the tests that need it
+        run: bun run build
+
       - name: 🧬 Run Stryker
-        # A surviving mutant is a finding, not a failure, so never fail the job here.
-        continue-on-error: true
+        # A surviving mutant never fails this step (thresholds.break is null), so a non-zero exit
+        # means Stryker itself failed. Let it fail the job; the steps below still run (always()).
         run: bun run test:mutation
 
       - name: 📝 Write the score to the job summary
