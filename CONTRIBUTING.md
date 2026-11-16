@@ -164,6 +164,8 @@ node e2e/scripts/differential.mjs --baseline latest       # compare the output w
 
 The differential script builds every consumer with a published version and with this checkout, and fails on any difference in the emitted sprites or the exported `{ id, viewBox, url, content }`. A deliberate change goes in `e2e/differential-allow.json` with a reason and the version that introduced it. `published-smoke.yml` runs the `npm` source and the compatibility matrix against the published package every day, and the Release workflow runs it on the new version right after each publish.
 
+`canaries.yml` proves the drop-in claim on real projects once a week. `e2e/canaries.mjs` lists a few open-source apps that use `svg-sprite-loader`, each pinned to a commit and with the small patch (the loader and plugin paths) that swaps in this package. `node e2e/scripts/canary.mjs [--project <name>]` builds each one as it is, builds it again with the packed tarball of this checkout, and fails when the sprite symbols (ids and viewBoxes) differ. A failing scheduled run opens one `canary-failure` issue. It does not run on pull requests and is not a required check. To add a project, pin a commit and list its patches; to accept a real difference, set `expectedDiff` with the reason.
+
 ## 🧹 Code Style
 
 - **TypeScript** with `strict: true` — source in `src/`, compiled output in `dist/`.
