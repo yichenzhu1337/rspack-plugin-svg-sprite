@@ -32,6 +32,10 @@
       // The system `diff`, used to print the unified diff of the differential test.
       "ignoreBinaries": ["diff"],
     },
+    "bench": {
+      "entry": ["compare.mjs"],
+      "project": ["**/*.mjs"],
+    },
     "examples/*": {
       // svgo-loader requires svgo at runtime as its peer dependency.
       "ignoreDependencies": ["svgo"],

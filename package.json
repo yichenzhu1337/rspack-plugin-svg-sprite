@@ -154,6 +154,7 @@
     "prepare": "node scripts/hooks/install.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
+    "bench": "bun run build && bun run --filter svg-sprite-bench bench",
     "knip": "bun run build && knip",
     "test:e2e": "bun run --filter rspack-plugin-svg-sprite-e2e test",
     "check:package": "node scripts/ci/package-check.mjs"
@@ -194,7 +195,8 @@
   "workspaces": [
     ".",
     "examples/*",
-    "e2e"
+    "e2e",
+    "bench"
   ],
   "trustedDependencies": []
 }
