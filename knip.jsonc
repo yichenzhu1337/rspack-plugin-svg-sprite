@@ -27,6 +27,10 @@
       // tarball, so they are fixtures, not part of this workspace.
       "project": ["**/*.{ts,mjs}", "!consumers/**"],
     },
+    "bench": {
+      "entry": ["compare.mjs"],
+      "project": ["**/*.mjs"],
+    },
     "examples/*": {
       // svgo-loader requires svgo at runtime as its peer dependency.
       "ignoreDependencies": ["svgo"],
