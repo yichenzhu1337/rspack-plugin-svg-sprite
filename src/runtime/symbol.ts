@@ -19,7 +19,8 @@ class SpriteSymbol {
   }
 
   get url(): string {
-    return this._url || '#' + this.id;
+    // A `%` followed by two hex digits would be read as an escape sequence in a fragment.
+    return this._url || '#' + String(this.id).replace(/%(?=[0-9a-fA-F]{2})/g, '%25');
   }
 
   set url(val: string) {

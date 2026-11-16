@@ -20,6 +20,27 @@ const defaultConfig: Required<PluginConfig> = {
   spriteAttrs: {},
 };
 
+// Escapes an attribute value; valid references such as `&amp;` are kept.
+function escapeAttr(value: string): string {
+  return value
+    .replace(/&(?![A-Za-z_:][\w.:-]*;|#\d+;|#x[0-9a-fA-F]+;)/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/"/g, '&quot;');
+}
+
+// Ids are plain text, so every `&` is literal.
+function escapeId(id: string): string {
+  return id
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/"/g, '&quot;')
+    .replace(/\t/g, '&#9;')
+    .replace(/\n/g, '&#10;')
+    .replace(/\r/g, '&#13;');
+}
+
+const SAFE_ATTR_NAME = /^[A-Za-z_:\u00C0-\uFFFF][\w.:\-\u00B7\u00C0-\uFFFF]*$/;
+
 function merge(target: Required<PluginConfig>, source: PluginConfig): Required<PluginConfig> {
   const result = { ...target };
   if (source.plainSprite !== undefined) result.plainSprite = source.plainSprite;
@@ -101,7 +122,15 @@ class SvgSpritePlugin {
     let attrs = 'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"';
 
     Object.keys(this.config.spriteAttrs).forEach((key) => {
-      attrs += ' ' + key + '="' + this.config.spriteAttrs[key] + '"';
+      if (!SAFE_ATTR_NAME.test(key)) {
+        console.warn(
+          '[rspack-plugin-svg-sprite] Ignoring spriteAttrs entry "' +
+            key +
+            '": it is not a valid attribute name.',
+        );
+        return;
+      }
+      attrs += ' ' + key + '="' + escapeAttr(String(this.config.spriteAttrs[key])) + '"';
     });
 
     const symbolsContent = symbols.map((s) => s.content).join('\n');
@@ -120,9 +149,9 @@ class SvgSpritePlugin {
       .map(
         (s) =>
           '<use id="' +
-          s.id +
+          escapeId(s.id) +
           '-usage" href="#' +
-          s.id +
+          escapeId(s.id.replace(/%(?=[0-9a-fA-F]{2})/g, '%25')) +
           '" width="100%" height="100%" class="sprite-symbol-usage" />',
       )
       .join('\n');
