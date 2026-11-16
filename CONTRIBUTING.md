@@ -162,7 +162,7 @@ E2E_SOURCE=npm E2E_VERSION=1.6.2 bun run test:e2e --project=chromium
 node e2e/scripts/differential.mjs --baseline latest       # compare the output with a published version
 ```
 
-The differential script builds every consumer with a published version and with this checkout, and fails on any difference in the emitted sprites or the exported `{ id, viewBox, url, content }`. A deliberate change goes in `e2e/differential-allow.json` with a reason and the version that introduced it. `published-smoke.yml` runs the `npm` source and the compatibility matrix against the published package every day.
+The differential script builds every consumer with a published version and with this checkout, and fails on any difference in the emitted sprites or the exported `{ id, viewBox, url, content }`. A deliberate change goes in `e2e/differential-allow.json` with a reason and the version that introduced it. `published-smoke.yml` runs the `npm` source and the compatibility matrix against the published package every day, and the Release workflow runs it on the new version right after each publish.
 
 ## 🧹 Code Style
 

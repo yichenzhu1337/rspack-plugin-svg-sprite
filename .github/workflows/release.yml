@@ -342,3 +342,15 @@ jobs:
           VERSION: ${{ needs.guard.outputs.version }}
           EXPECTED_INTEGRITY: ${{ needs.preflight.outputs.integrity }}
           EXPECTED_SHASUM: ${{ needs.preflight.outputs.shasum }}
+
+  post-release:
+    name: 🔍 Smoke test the published package
+    needs: [guard, verify]
+    permissions:
+      contents: read
+      # The called workflow's report job (scheduled runs only) writes issues, and a caller must
+      # grant every permission a called job declares, even one that is skipped here.
+      issues: write
+    uses: ./.github/workflows/published-smoke.yml # zizmor: ignore[self-repository] same commit as the release
+    with:
+      version: ${{ needs.guard.outputs.version }}
