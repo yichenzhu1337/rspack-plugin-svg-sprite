@@ -2,6 +2,8 @@
 
 ## 1.6.1
 
+_Not published to npm. These changes ship in 1.6.2._
+
 ### Patch Changes
 
 - [#28](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/28) [`5036c0c`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/5036c0ca63bbcae0e42a925fead36c786941df82) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - Fixes three problems with unusual input. Icons that do not hit them produce byte-identical output.

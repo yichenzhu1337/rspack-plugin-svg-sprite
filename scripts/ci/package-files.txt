@@ -8,6 +8,9 @@ dist/index.js
 dist/index.js.map
 dist/index.mjs
 dist/index.mjs.map
+dist/interop.d.mts
+dist/interop.mjs
+dist/interop.mjs.map
 dist/loader.d.mts
 dist/loader.d.ts
 dist/loader.js
