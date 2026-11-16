@@ -1,0 +1,7 @@
+<!-- Written by hand for the parity test -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <!-- the outline -->
+  <circle cx="8" cy="8" r="6" fill="none" stroke="black" stroke-width="1.5"/>
+  <!-- the dot -->
+  <circle cx="8" cy="8" r="1.5" fill="black"/>
+</svg>

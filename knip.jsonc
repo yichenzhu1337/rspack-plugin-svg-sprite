@@ -12,12 +12,12 @@
       "ignoreDependencies": [
         // Loaded through createRequire/require.resolve with a string in the integration tests,
         // which static analysis cannot follow: webpack, the rspack-v2 and rsbuild-v2 aliases,
-        // svgo-loader (the README recipe test), htmlparser2 (parser agreement test).
+        // svgo-loader (the README recipe test), svg-sprite-loader (the parity test).
         "webpack",
         "rspack-v2",
         "rsbuild-v2",
         "svgo-loader",
-        "htmlparser2",
+        "svg-sprite-loader",
         // Peer dependency of svgo-loader, resolved by svgo-loader itself.
         "svgo",
       ],
