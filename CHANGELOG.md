@@ -1,5 +1,11 @@
 # rspack-plugin-svg-sprite
 
+## 1.6.3
+
+### Patch Changes
+
+- [#50](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/50) [`d3d2158`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/d3d2158e514514f6fa0ee576cfcd3d39ad45b15d) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - Fix the ESM type declarations (`*.d.mts`) failing to parse on TypeScript 5.0 to 5.2 (`moduleResolution` node16, nodenext or bundler), a regression in 1.6.0.
+
 ## 1.6.2
 
 ### Patch Changes
