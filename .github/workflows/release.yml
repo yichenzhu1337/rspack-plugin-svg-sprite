@@ -81,23 +81,25 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: ⚙️ Set up pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       # No dependency cache here: the tarball that ships is built from a clean install.
       - name: ⚙️ Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
       - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: 🏗️ Build the package
-        run: pnpm build
+        run: bun run build
       - id: pack
         name: 📦 Pack once
         run: |
           mkdir -p out
-          pnpm pack --pack-destination out
+          npm pack --pack-destination out
           # npm reads `out/x.tgz` as a GitHub shorthand (owner/repo); a ./ prefix makes it a path.
           tarball="./$(find out -name '*.tgz' | head -1)"
           {
@@ -108,12 +110,12 @@ jobs:
       - id: publint
         name: 🔍 publint
         continue-on-error: true
-        run: pnpm dlx publint@0.3.25
+        run: bunx publint@0.3.25
       - id: attw
         name: 🔷 Are the types wrong
         continue-on-error: true
         # Known and tracked: node10 subpath resolution, CommonJS default on /plugin, /loader, /runtime/*.
-        run: pnpm dlx @arethetypeswrong/cli@0.18.5 "$TARBALL" --profile node16 --ignore-rules cjs-only-exports-default
+        run: bunx @arethetypeswrong/cli@0.18.5 "$TARBALL" --profile node16 --ignore-rules cjs-only-exports-default
         env:
           TARBALL: ${{ steps.pack.outputs.tarball }}
       - id: smoke

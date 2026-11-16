@@ -2,7 +2,7 @@
 // Pull request check: changes to the published package need a changeset.
 //
 // Needs one: src/ outside src/__tests__/, client.d.ts, and package.json fields other than
-// devDependencies, scripts, packageManager and version.
+// devDependencies, scripts, packageManager, workspaces, trustedDependencies and version.
 // Exempt: everything else (docs, CI, tests, examples), the version PR (branch changeset-release/*),
 // and pull requests labelled `no-changeset`.
 // Also validates every changeset the PR adds.
@@ -50,7 +50,15 @@ const reasons = changed.filter(
 if (changed.includes('package.json')) {
   const published = (json) => {
     const pkg = JSON.parse(json);
-    for (const key of ['devDependencies', 'scripts', 'packageManager', 'version']) delete pkg[key];
+    for (const key of [
+      'devDependencies',
+      'scripts',
+      'packageManager',
+      'workspaces',
+      'trustedDependencies',
+      'version',
+    ])
+      delete pkg[key];
     return JSON.stringify(pkg);
   };
   if (
@@ -70,7 +78,7 @@ if (headRef.startsWith('changeset-release/')) {
 } else if (reasons.length && !changesets.length) {
   problems.push(
     `this PR changes the published package (${reasons.join(', ')}) but adds no changeset. ` +
-      'Run `pnpm changeset`, commit the file, and push. For a change that should not be released, ' +
+      'Run `bun run changeset`, commit the file, and push. For a change that should not be released, ' +
       'add the `no-changeset` label.',
   );
 } else {
@@ -108,7 +116,7 @@ if (problems.length) {
     '',
     '### 🛠️ How to fix',
     '',
-    '1. Run `pnpm changeset` and pick `patch`, `minor` or `major`.',
+    '1. Run `bun run changeset` and pick `patch`, `minor` or `major`.',
     '2. Commit the new file in `.changeset/` and push.',
     '3. Or, for a change that should not be released, add the `no-changeset` label.',
   );

@@ -8,19 +8,19 @@
 
 ## 🛠️ Setup
 
-From the repository root (recommended — uses pnpm workspaces):
+From the repository root (recommended — uses Bun workspaces):
 
 ```bash
-pnpm install
-pnpm dev:webpack
+bun install
+bun run dev:webpack
 ```
 
 Or from this directory:
 
 ```bash
 cd examples/react-webpack
-pnpm install
-pnpm dev
+bun install
+bun run dev
 ```
 
 > [!TIP]

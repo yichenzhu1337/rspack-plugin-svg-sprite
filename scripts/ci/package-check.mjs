@@ -87,8 +87,8 @@ const sections = []; // markdown for the job summary
 try {
   // 1. Build and pack.
   group('🏗️ Build and pack');
-  const build = attempt('pnpm', ['build'], { cwd: ROOT });
-  record('Build (pnpm build)', build.ok);
+  const build = attempt('bun', ['run', 'build'], { cwd: ROOT });
+  record('Build (bun run build)', build.ok);
   if (!build.ok) {
     console.log(build.out);
     throw new Error('build failed');
@@ -123,9 +123,11 @@ try {
     record('File list matches package-files.txt', false, `${diff.length} differences`);
     const block = ['```diff', ...diff, '```'].join('\n');
     console.log(block);
-    console.log('💡 Intended change? Run `pnpm check:package --update` and commit the snapshot.');
+    console.log(
+      '💡 Intended change? Run `bun run check:package --update` and commit the snapshot.',
+    );
     sections.push(
-      `### 🔍 File list changed\n\n${block}\n\n💡 Run \`pnpm check:package --update\` if intended.`,
+      `### 🔍 File list changed\n\n${block}\n\n💡 Run \`bun run check:package --update\` if intended.`,
     );
   }
   endGroup();

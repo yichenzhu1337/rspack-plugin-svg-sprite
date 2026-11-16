@@ -30,10 +30,10 @@ function run(command, args, cwd, label) {
 async function packPackage() {
   const packDir = path.join(workDir, 'pack');
   fs.mkdirSync(packDir, { recursive: true });
-  await run('pnpm', ['build'], repoRoot, 'pnpm build');
-  await run('pnpm', ['pack', '--pack-destination', packDir], repoRoot, 'pnpm pack');
+  await run('bun', ['run', 'build'], repoRoot, 'bun run build');
+  await run('npm', ['pack', '--pack-destination', packDir], repoRoot, 'npm pack');
   const tarball = fs.readdirSync(packDir).find((file) => file.endsWith('.tgz'));
-  if (!tarball) throw new Error('pnpm pack produced no .tgz file');
+  if (!tarball) throw new Error('npm pack produced no .tgz file');
   return path.join(packDir, tarball);
 }
 
@@ -48,8 +48,13 @@ async function buildConsumer(consumer, tarball) {
   pkg.dependencies['rspack-plugin-svg-sprite'] = `file:${tarball}`;
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
 
-  await run('pnpm', ['install', '--ignore-workspace'], dir, `${consumer.name}: pnpm install`);
-  await run('pnpm', ['run', 'build'], dir, `${consumer.name}: pnpm run build`);
+  // Each consumer installs and builds with its own package manager. A bundler launched through
+  // `bun run` still runs on Node (its bin has a Node shebang), like for every other user.
+  const pm = consumer.packageManager ?? 'npm';
+  const install =
+    pm === 'bun' ? ['bun', ['install']] : ['npm', ['install', '--no-audit', '--no-fund']];
+  await run(install[0], install[1], dir, `${consumer.name}: ${pm} install`);
+  await run(pm, ['run', 'build'], dir, `${consumer.name}: ${pm} run build`);
 
   const dist = path.join(dir, 'dist');
   if (!fs.existsSync(path.join(dist, 'index.html'))) {

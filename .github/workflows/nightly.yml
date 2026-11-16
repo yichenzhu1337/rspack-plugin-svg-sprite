@@ -2,7 +2,7 @@ name: 🌙 Nightly
 
 # Wider compatibility checks than CI runs on every pull request. A failure of the full matrix or
 # the next Ubuntu opens (or updates) one `nightly-failure` issue, which closes itself when green.
-# Canary, peer floor and audit are information only and never open the issue.
+# Canary, peer floor, audit and the Bun runtime run are information only and never open the issue.
 
 on:
   schedule:
@@ -32,17 +32,24 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: 📦 Set up pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - name: 🟢 Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ matrix.node }}
-          cache: pnpm
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
       - name: 📥 Install
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: 🧪 Test
-        run: pnpm test
+        run: bun run test
 
   next-ubuntu:
     name: 🐧 Next Ubuntu (ubuntu-26.04)
@@ -55,17 +62,24 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: 📦 Set up pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - name: 🟢 Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
       - name: 📥 Install
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: 🧪 Test
-        run: pnpm test
+        run: bun run test
 
   canary:
     name: 🧩 Rspack and Rsbuild canary
@@ -82,15 +96,22 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: 📦 Set up pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - name: 🟢 Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
       - name: 📥 Install
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: 🔍 Find the newest 2.x builds
         id: versions
         # The `canary` dist-tags are not kept current, so take the 2.x version published last.
@@ -116,11 +137,11 @@ jobs:
         env:
           RSPACK: ${{ steps.versions.outputs.rspack }}
           RSBUILD: ${{ steps.versions.outputs.rsbuild }}
-        run: pnpm add --save-dev --workspace-root "rspack-v2@npm:@rspack/core@$RSPACK" "rsbuild-v2@npm:@rsbuild/core@$RSBUILD"
+        run: bun add --dev "rspack-v2@npm:@rspack/core@$RSPACK" "rsbuild-v2@npm:@rsbuild/core@$RSBUILD"
       - name: 🏗️ Build
-        run: pnpm build
+        run: bun run build
       - name: 🧪 Integration tests
-        run: pnpm exec rstest run --no-coverage src/__tests__/integration
+        run: bun run rstest run --no-coverage src/__tests__/integration
       - name: 📊 Summary
         if: always()
         env:
@@ -166,17 +187,24 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: 📦 Set up pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - name: 🟢 Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
       - name: 📥 Install
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: 🏗️ Build
-        run: pnpm build
+        run: bun run build
       - name: 🧩 Try the old Rspack lines
         # Builds a two-icon extract project with each version. Always exits 0.
         env:
@@ -287,18 +315,19 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: 📦 Set up pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - name: 🟢 Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
       - name: 🔒 Audit
         run: |
           status=0
-          pnpm audit --audit-level high > "$RUNNER_TEMP/audit.txt" 2>&1 || status=$?
-          counts="$(grep -E '^(Severity:|[0-9]+ vulnerabilit)' "$RUNNER_TEMP/audit.txt" || true)"
+          bun audit --audit-level=high > "$RUNNER_TEMP/audit.txt" 2>&1 || status=$?
+          counts="$(grep -E '^ *(Severity:|[0-9]+ vulnerabilit)' "$RUNNER_TEMP/audit.txt" || true)"
           {
             echo '## 🔒 Audit'
             echo
@@ -328,8 +357,75 @@ jobs:
           if [ "$status" -eq 0 ]; then
             echo '✅ No known vulnerabilities at high severity or above'
           else
-            echo "⚠️ pnpm audit exited with $status"
+            echo "⚠️ bun audit exited with $status"
           fi
+          exit "$status"
+      - name: 🔍 Record the result
+        id: result
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: echo "status=$JOB_STATUS" >> "$GITHUB_OUTPUT"
+
+  bun-runtime:
+    name: 🥟 Tests on the Bun runtime
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Not blocking: Bun's Node compatibility is reported for information. The package supports Node.
+    continue-on-error: true
+    permissions:
+      contents: read
+    outputs:
+      status: ${{ steps.result.outputs.status }}
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+      - name: 📥 Install
+        run: bun install --frozen-lockfile
+      - name: 🏗️ Build
+        run: bun run build
+      - name: 🧪 Unit and integration tests on the Bun runtime
+        # `--bun` makes Bun launch rstest itself instead of Node. Failures are reported, not fatal.
+        run: |
+          status=0
+          bun --bun run rstest run --no-coverage > "$RUNNER_TEMP/bun-runtime.txt" 2>&1 || status=$?
+          {
+            echo '## 🥟 Bun runtime'
+            echo
+            if [ "$status" -eq 0 ]; then
+              echo '> [!TIP]'
+              echo '> The unit and integration tests pass when rstest runs on the Bun runtime.'
+            else
+              echo '> [!WARNING]'
+              echo '> Some tests fail on the Bun runtime. This is information only: the package supports Node.'
+            fi
+            echo
+            echo '<details><summary>📄 Output (tail)</summary>'
+            echo
+            echo '```text'
+            tail -c 20000 "$RUNNER_TEMP/bun-runtime.txt"
+            echo
+            echo '```'
+            echo
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "ℹ️ bun --bun rstest exited with $status"
           exit "$status"
       - name: 🔍 Record the result
         id: result
@@ -340,7 +436,7 @@ jobs:
 
   report:
     name: 📣 Report
-    needs: [test, next-ubuntu, canary, peer-floor, audit]
+    needs: [test, next-ubuntu, canary, peer-floor, audit, bun-runtime]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5

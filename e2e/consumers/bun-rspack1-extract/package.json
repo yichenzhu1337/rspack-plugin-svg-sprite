@@ -1,0 +1,15 @@
+{
+  "name": "consumer-bun-rspack1-extract",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rspack build"
+  },
+  "dependencies": {
+    "rspack-plugin-svg-sprite": "*"
+  },
+  "devDependencies": {
+    "@rspack/cli": "1.7.12",
+    "@rspack/core": "1.7.12"
+  }
+}

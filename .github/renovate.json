@@ -48,7 +48,7 @@
       "automerge": false
     },
     {
-      "description": "Toolchain: pnpm in the packageManager field, never automerged",
+      "description": "Toolchain: Bun in the packageManager field (also the version CI installs), never automerged",
       "matchDepTypes": ["packageManager"],
       "groupName": "toolchain",
       "automerge": false
