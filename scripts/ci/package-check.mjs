@@ -4,7 +4,7 @@
 //   node scripts/ci/package-check.mjs --update   also rewrite scripts/ci/package-files.txt
 //
 // Checks: tarball file list vs snapshot, size budgets, TypeScript consumer fixtures
-// (node16 CommonJS, node16 ESM, bundler) and the runtime smoke test of release.mjs.
+// (node16 CommonJS, node16 ESM, bundler) on TypeScript 5.3, 5.9 and 7 and the runtime smoke test of release.mjs.
 //
 // Env: PACKAGE_BUDGET_PACKED and PACKAGE_BUDGET_UNPACKED (bytes) override the budgets below.
 import { execFileSync } from 'node:child_process';
@@ -28,7 +28,14 @@ const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SNAPSHOT = join(ROOT, 'scripts', 'ci', 'package-files.txt');
 const FIXTURES = join(ROOT, 'scripts', 'ci', 'package-fixtures');
 const RELEASE = join(ROOT, 'scripts', 'release', 'release.mjs');
-const TSC = join(ROOT, 'node_modules', 'typescript', 'bin', 'tsc');
+// Compilers the consumer fixtures run against: the supported floor (5.3, the first
+// release that parses the `with` import attribute in the .d.mts files), the latest
+// 5.x, and the repo's own TypeScript. The first two are aliased devDependencies.
+const COMPILERS = [
+  { label: 'TypeScript 5.3 (floor)', pkg: 'typescript-5.3' },
+  { label: 'TypeScript 5.9 (latest 5.x)', pkg: 'typescript-5.9' },
+  { label: 'TypeScript 7', pkg: 'typescript' },
+].map((c) => ({ ...c, bin: join(ROOT, 'node_modules', c.pkg, 'bin', 'tsc') }));
 
 // Budgets in bytes, about 20% above the values measured when they were set
 // (25,247 packed and 88,666 unpacked). Raise them on purpose, in a reviewed change.
@@ -155,9 +162,11 @@ try {
       console.log(install.out);
       continue;
     }
-    const tsc = attempt(process.execPath, [TSC, '-p', 'tsconfig.json'], { cwd: dir });
-    record(`Fixture ${name}`, tsc.ok, tsc.ok ? 'tsc --noEmit' : 'type errors');
-    if (!tsc.ok) console.log(tsc.out);
+    for (const { label, bin } of COMPILERS) {
+      const tsc = attempt(process.execPath, [bin, '-p', 'tsconfig.json'], { cwd: dir });
+      record(`Fixture ${name} on ${label}`, tsc.ok, tsc.ok ? 'tsc --noEmit' : 'type errors');
+      if (!tsc.ok) console.log(tsc.out);
+    }
   }
   endGroup();
 

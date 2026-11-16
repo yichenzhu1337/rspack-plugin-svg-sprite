@@ -163,3 +163,31 @@ pluginSvgSprite({ extract: true, include: /icons/, symbolId: (p) => p });
 pluginSvgSprite({ nope: 1 });
 // @ts-expect-error extract must be boolean
 pluginSvgSprite({ extract: 'yes' });
+
+// ---- Wrong usage is rejected ----
+// @ts-expect-error misspelled plugin option
+new SvgSpritePlugin({ plainSprit: true });
+// @ts-expect-error misspelled plugin option
+new SvgSpritePlugin({ spriteAttr: {} });
+// @ts-expect-error plugin options must be an object
+new SvgSpritePlugin(true);
+// @ts-expect-error misspelled Rsbuild option
+pluginSvgSprite({ symbolID: 'x' });
+// @ts-expect-error misspelled Rsbuild option
+pluginSvgSprite({ spriteFileName: 'sprite.svg' });
+// @ts-expect-error symbolId must be a string or function
+pluginSvgSprite({ symbolId: 1 });
+// @ts-expect-error spriteFilename must be a string
+pluginSvgSprite({ spriteFilename: 1 });
+// @ts-expect-error include must be a RegExp or string
+pluginSvgSprite({ include: 1 });
+// @ts-expect-error spriteAttrs values must be strings
+pluginSvgSprite({ spriteAttrs: { a: 1 } });
+// @ts-expect-error the SVG module id is a string
+export const wrongId: number = icon.id;
+// @ts-expect-error the SVG module url is a string
+export const wrongUrl: number = icon.url;
+// @ts-expect-error the SVG module content is a string
+export const wrongContent: boolean = icon.content;
+// @ts-expect-error the SVG module has no `symbol` field
+void icon.symbol;
