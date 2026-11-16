@@ -22,6 +22,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkBudgets, lineDiff } from '../lib/package-diff.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SNAPSHOT = join(ROOT, 'scripts', 'ci', 'package-files.txt');
@@ -70,15 +71,6 @@ function record(check, ok, detail = '') {
   results.push({ check, ok, detail });
   console.log(`${ok ? green('✅') : red('❌')} ${check}${detail ? dim(` (${detail})`) : ''}`);
   if (!ok && inActions) console.log(`::error::❌ ${check}${detail ? ` (${detail})` : ''}`);
-}
-
-function lineDiff(expected, actual) {
-  const exp = new Set(expected);
-  const act = new Set(actual);
-  const lines = [];
-  for (const f of expected) if (!act.has(f)) lines.push(`- ${f}`);
-  for (const f of actual) if (!exp.has(f)) lines.push(`+ ${f}`);
-  return lines.sort((a, b) => a.slice(2).localeCompare(b.slice(2)));
 }
 
 const work = mkdtempSync(join(tmpdir(), 'svg-sprite-package-check-'));
@@ -135,18 +127,12 @@ try {
   // 3. Size budgets.
   group('📊 Size budgets');
   const sizeRows = [];
-  for (const [label, key, value] of [
-    ['Packed', 'packed', info.size],
-    ['Unpacked', 'unpacked', info.unpackedSize],
-  ]) {
-    const ok = value <= BUDGET[key];
-    sizeRows.push(
-      `| ${label} | ${kb(value)} | ${kb(BUDGET[key])} | ${ok ? '✅ Pass' : '❌ Over'} |`,
-    );
+  for (const { label, value, budget, ok } of checkBudgets(info, BUDGET)) {
+    sizeRows.push(`| ${label} | ${kb(value)} | ${kb(budget)} | ${ok ? '✅ Pass' : '❌ Over'} |`);
     record(
       `${label} size within budget`,
       ok,
-      `${value.toLocaleString('en-US')} B of ${BUDGET[key].toLocaleString('en-US')} B`,
+      `${value.toLocaleString('en-US')} B of ${budget.toLocaleString('en-US')} B`,
     );
   }
   sections.push(

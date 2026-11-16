@@ -1,7 +1,7 @@
 import { defineConfig } from '@rstest/core';
 
 export default defineConfig({
-  include: ['src/__tests__/**/*.test.ts'],
+  include: ['src/__tests__/**/*.test.ts', 'scripts/__tests__/**/*.test.ts'],
   coverage: {
     enabled: true,
     provider: 'istanbul',

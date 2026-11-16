@@ -335,6 +335,36 @@ jobs:
       - name: 📦 Check the package
         run: bun run check:package
 
+  # Pushes to main and the Release workflow (a workflow_call), never pull requests: two clean
+  # installs and builds take a few minutes.
+  determinism:
+    name: 🏗️ Build determinism
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - name: 📥 Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: ⚙️ Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - name: 🏗️ Build and pack twice, compare the tarballs
+        run: node scripts/ci/determinism-check.mjs
+
   actionlint:
     name: 🔍 actionlint
     needs: changes
@@ -392,7 +422,19 @@ jobs:
 
   ci-ok:
     name: ci-ok
-    needs: [changes, lint, knip, test, test-matrix, build-examples, package, actionlint, zizmor]
+    needs:
+      [
+        changes,
+        lint,
+        knip,
+        test,
+        test-matrix,
+        build-examples,
+        package,
+        determinism,
+        actionlint,
+        zizmor,
+      ]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 5

@@ -96,6 +96,22 @@ Releases are manual, and versions follow [SemVer](https://semver.org/) via [Chan
 2. In the Actions tab, run **Release** with `dry-run`. It runs the full CI, packs the package once, checks the tarball (`publint`, `attw`, an import smoke test, `npm publish --dry-run`) and writes a report: the version, the changelog section, the commits included and how the package contents changed. Nothing is published.
 3. Run **Release** with `publish`. After the same checks it waits for approval in the `npm-release` environment, then publishes that exact tarball through npm trusted publishing (with provenance), tags `vX.Y.Z`, creates the GitHub release and verifies the result from npm.
 
+Guards that stop a `publish` run: not on `main`, unreleased changesets, a version that is already on npm or tagged, and a failed latest nightly run on `main`. Run **Release** with `allow-red-nightly` on to publish anyway. A dry run only warns. After publishing, `verify` also checks that the bytes npm serves (`dist.integrity` and `dist.shasum`) match the tarball the workflow built.
+
+### 🧪 Release candidates
+
+Run **Release** with `release-candidate` to try a build in real projects before it is released. It computes `X.Y.Z-rc.N` from the version in `package.json` (`N` is the next free number on npm), sets that version only inside the workflow's working copy, runs the same checks, and after the same approval publishes with `--tag next --provenance`. It creates no commit, no git tag and no GitHub release, and `latest` does not move. Pending changesets are allowed; the run must be on `main`. Install it with `npm i rspack-plugin-svg-sprite@next`.
+
+### ⏪ Rollback
+
+If a published version is bad, from a maintainer's machine (it needs your own npm login, with 2FA):
+
+1. Rehearse: `node scripts/release/rollback.mjs <bad-version> [--to <good-version>]`. It prints the exact commands and changes nothing. Without `--to` it picks the highest non-prerelease version below the bad one.
+2. Run it for real: add `--execute`. It runs `npm dist-tag add rspack-plugin-svg-sprite@<good> latest`, then `npm deprecate rspack-plugin-svg-sprite@<bad> "<message>"`.
+3. Work through the checklist it prints: check `npm view rspack-plugin-svg-sprite dist-tags`, mark the GitHub release, open an issue, then fix forward with a changeset and a new patch release.
+
+Do not unpublish: npm keeps the version installable by its exact number, and unpublishing breaks lockfiles.
+
 ## 🧩 How the Plugin Works
 
 ### Inline mode (default)

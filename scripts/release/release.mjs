@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Helpers for .github/workflows/release.yml. Run from the repository root.
 //
-//   guards                  can this commit be released? (MODE=publish turns problems into errors)
+//   guards                  can this commit be released? (MODE=publish and MODE=release-candidate
+//                           turn problems into errors; a release candidate version is computed here)
 //   smoke <tarball|spec>    install into a fresh folder; CJS, ESM and subpath imports must work
 //   notes <version>         print the CHANGELOG.md section for <version>
 //   report                  write the release report (job summary + RELEASE_REPORT file)
@@ -20,6 +21,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { sectionOf } from '../lib/changelog.mjs';
 import { details, detail, fail, group, info, ok, summary, table, warn } from '../lib/output.mjs';
+import { nextRc } from '../lib/semver.mjs';
+import { integrityProblems } from '../lib/verify.mjs';
 
 const PKG = 'rspack-plugin-svg-sprite';
 const REPO = 'https://github.com/yichenzhu1337/rspack-plugin-svg-sprite';
@@ -44,30 +47,82 @@ const output = (key, value) =>
 const currentVersion = () => JSON.parse(readFileSync('package.json', 'utf8')).version;
 const isPublished = (version) =>
   attempt('npm', ['view', `${PKG}@${version}`, 'version']).out === version;
+const publishedVersions = () => {
+  const result = attempt('npm', ['view', PKG, 'versions', '--json']);
+  if (!result.ok || !result.out) return [];
+  const parsed = JSON.parse(result.out);
+  return Array.isArray(parsed) ? parsed : [parsed];
+};
 const pendingChangesets = () =>
   readdirSync('.changeset').filter((f) => f.endsWith('.md') && f !== 'README.md');
 
+// The newest completed run of nightly.yml on main: { red, url } or { unknown } when gh cannot say.
+function nightlyStatus() {
+  const result = attempt('gh', [
+    'run',
+    'list',
+    '--workflow',
+    'nightly.yml',
+    '--branch',
+    'main',
+    '--status',
+    'completed',
+    '--limit',
+    '1',
+    '--json',
+    'conclusion,url',
+  ]);
+  if (!result.ok) return { unknown: true };
+  try {
+    const [latest] = JSON.parse(result.out);
+    if (!latest) return { unknown: true };
+    return { red: latest.conclusion === 'failure', url: latest.url };
+  } catch {
+    return { unknown: true };
+  }
+}
+
 function guards() {
-  const version = currentVersion();
+  const rc = process.env.MODE === 'release-candidate';
+  const version = rc ? nextRc(currentVersion(), publishedVersions()) : currentVersion();
   const problems = [];
+  const notes = [];
   if (process.env.GITHUB_REF !== 'refs/heads/main') {
     problems.push(`releases run from main only; this run is on ${process.env.GITHUB_REF}`);
   }
-  const pending = pendingChangesets();
-  if (pending.length) {
-    problems.push(
-      `${pending.length} unreleased changeset(s): merge the "chore: version packages" PR first`,
-    );
+  if (!rc) {
+    const pending = pendingChangesets();
+    if (pending.length) {
+      problems.push(
+        `${pending.length} unreleased changeset(s): merge the "chore: version packages" PR first`,
+      );
+    }
+    if (isPublished(version)) {
+      problems.push(`${PKG}@${version} is already on npm; nothing new to publish`);
+    }
+    if (attempt('git', ['rev-parse', '-q', '--verify', `refs/tags/v${version}`]).ok) {
+      problems.push(`tag v${version} already exists`);
+    }
   }
-  if (isPublished(version)) {
-    problems.push(`${PKG}@${version} is already on npm; nothing new to publish`);
-  }
-  if (attempt('git', ['rev-parse', '-q', '--verify', `refs/tags/v${version}`]).ok) {
-    problems.push(`tag v${version} already exists`);
+  const nightly = nightlyStatus();
+  if (nightly.unknown) {
+    notes.push('could not read the latest nightly run, so its result was not checked');
+    console.log(`::warning::⚠️ ${notes.at(-1)}`);
+  } else if (nightly.red) {
+    const message = `the latest nightly run on main failed (${nightly.url})`;
+    if (rc || process.env.ALLOW_RED_NIGHTLY === 'true') {
+      notes.push(
+        `${message}; continuing because ${rc ? 'a release candidate' : 'allow-red-nightly is on'}`,
+      );
+      console.log(`::warning::⚠️ ${notes.at(-1)}`);
+    } else {
+      problems.push(`${message}; fix it first, or run again with allow-red-nightly`);
+    }
   }
   output('version', version);
+  output('latest', attempt('npm', ['view', PKG, 'dist-tags.latest']).out);
   output('warnings', JSON.stringify(problems));
-  const fatal = process.env.MODE === 'publish';
+  const fatal = process.env.MODE === 'publish' || rc;
   for (const problem of problems) console.log(`::${fatal ? 'error' : 'warning'}::⚠️ ${problem}`);
   if (fatal && problems.length) {
     summary(
@@ -92,6 +147,7 @@ function guards() {
         : `> [!TIP]\n> ${PKG} ${version} can be released from this commit.`,
       '',
       ...problems.map((p) => `- ⚠️ ${p}`),
+      ...notes.map((n) => `- ⚠️ ${n}`),
     ].join('\n'),
   );
   if (problems.length) warn(`version ${version}: dry run continues despite warnings`);
@@ -203,7 +259,8 @@ const list = (items) => items.map((f) => `- \`${f}\``).join('\n');
 
 function report() {
   const { TARBALL, SHA256, MODE, GITHUB_SHA } = process.env;
-  const publish = MODE === 'publish';
+  const rc = MODE === 'release-candidate';
+  const publish = MODE === 'publish' || rc;
   const version = currentVersion();
   const latest = attempt('npm', ['view', PKG, 'dist-tags.latest']).out || null;
   const warnings = JSON.parse(process.env.GUARD_WARNINGS || '[]');
@@ -216,7 +273,8 @@ function report() {
   const section = changelogSection(version);
   const shortSha = (GITHUB_SHA || '').slice(0, 7);
   const tarballName = TARBALL.split('/').pop();
-  const runLabel = publish ? 'Publish run' : 'Dry run';
+  const runLabel = rc ? 'Release candidate run' : publish ? 'Publish run' : 'Dry run';
+  const publishJob = rc ? 'publish-rc' : 'publish';
 
   const checks = [
     ['Full CI on this commit', '✅ Pass (required before this job)'],
@@ -243,7 +301,7 @@ function report() {
   } else if (publish) {
     out.push(
       '> [!IMPORTANT]',
-      '> Checks pass. The `publish` job now waits for your approval in the `npm-release` environment.',
+      `> Checks pass. The \`${publishJob}\` job now waits for your approval in the \`npm-release\` environment.`,
     );
   } else {
     out.push('> [!TIP]', '> Dry run: all checks pass. Nothing was published, tagged or released.');
@@ -272,16 +330,12 @@ function report() {
   out.push('', '### 🔍 Checks', '', table(['Check', 'Result'], checks));
   out.push(
     '',
-    '> [!NOTE]',
-    '> Known package issues, not blocking yet: subpath imports fail under TypeScript `moduleResolution: node10`, ' +
-      'and the `/plugin`, `/loader` and `/runtime/*` subpaths expose a CommonJS `default` that ESM default imports see as an object.',
-  );
-
-  out.push(
-    '',
     '### 📝 Changelog',
     '',
-    section ?? '_No CHANGELOG.md section for this version yet._',
+    section ??
+      (rc
+        ? '_A release candidate has no changelog section; the changelog is written when the version is released._'
+        : '_No CHANGELOG.md section for this version yet._'),
   );
   const commitCount = commits ? commits.split('\n').length : 0;
   out.push(
@@ -303,32 +357,40 @@ function report() {
     } else out.push('No files added or removed.');
   }
 
-  out.push('', '### 🛠️ What `publish` runs', '');
+  out.push('', `### 🛠️ What \`${publishJob}\` runs`, '');
   out.push(`1. Verify the downloaded tarball's sha256 is \`${SHA256}\``);
-  out.push(
-    `2. \`npm publish ${tarballName} --provenance --access public\` (npm trusted publishing)`,
-  );
-  out.push(`3. \`git tag v${version}\` on \`${shortSha}\` and push it`);
-  out.push(
-    `4. \`gh release create v${version}\` with the changelog section above and the tarball attached`,
-  );
-  out.push(
-    '5. Verify from npm: `latest` points at it, provenance is present, the import smoke test passes',
-  );
+  if (rc) {
+    out.push(
+      `2. \`npm publish ${tarballName} --tag next --provenance --access public\` (npm trusted publishing)`,
+      '3. No git tag and no GitHub release; `latest` stays where it is',
+      `4. Verify from npm: \`next\` points at ${version}, \`latest\` did not move, the tarball bytes match, provenance is present, the import smoke test passes`,
+    );
+  } else {
+    out.push(
+      `2. \`npm publish ${tarballName} --provenance --access public\` (npm trusted publishing)`,
+    );
+    out.push(`3. \`git tag v${version}\` on \`${shortSha}\` and push it`);
+    out.push(
+      `4. \`gh release create v${version}\` with the changelog section above and the tarball attached`,
+    );
+    out.push(
+      '5. Verify from npm: `latest` points at it, the tarball bytes match, provenance is present, the import smoke test passes',
+    );
+  }
 
   out.push('', '### 💡 Next', '');
   if (failedChecks.length) {
     out.push(
       `- Fix the failed checks, then run [Release](${RELEASE_WORKFLOW}) again with \`dry-run\`.`,
       publish
-        ? '- This run stops before `publish`; there is nothing to approve.'
+        ? `- This run stops before \`${publishJob}\`; there is nothing to approve.`
         : '- Publishing stays off until a dry run is green.',
     );
   } else if (publish) {
     out.push(
-      '- Review this report, then approve the `publish` job in the `npm-release` environment.',
+      `- Review this report, then approve the \`${publishJob}\` job in the \`npm-release\` environment.`,
       '- Reject it to stop. Nothing is published before you approve.',
-      '- After publishing, the `verify` job checks npm, provenance and the install.',
+      `- After publishing, the \`${rc ? 'verify-rc' : 'verify'}\` job checks npm, provenance and the install.`,
     );
   } else {
     if (warnings.length) out.push('- Resolve the guard warnings above first.');
@@ -359,8 +421,26 @@ async function verify(version) {
   const problems = [];
   const served = isPublished(version);
   if (!served) problems.push(`npm does not serve ${PKG}@${version} after 10 minutes`);
-  const latest = attempt('npm', ['view', PKG, 'dist-tags.latest']).out;
-  if (latest !== version) problems.push(`dist-tag latest is ${latest}, expected ${version}`);
+  const tag = process.env.DIST_TAG || 'latest';
+  const tagged = attempt('npm', ['view', PKG, `dist-tags.${tag}`]).out;
+  if (tagged !== version) problems.push(`dist-tag ${tag} is ${tagged}, expected ${version}`);
+  const latest = tag === 'latest' ? tagged : attempt('npm', ['view', PKG, 'dist-tags.latest']).out;
+  const expectedLatest = process.env.EXPECTED_LATEST;
+  if (tag !== 'latest' && expectedLatest && latest !== expectedLatest) {
+    problems.push(`dist-tag latest moved to ${latest}, expected it to stay at ${expectedLatest}`);
+  }
+  const expectedBytes = {
+    integrity: process.env.EXPECTED_INTEGRITY,
+    shasum: process.env.EXPECTED_SHASUM,
+  };
+  const checkBytes = Boolean(expectedBytes.integrity || expectedBytes.shasum);
+  const byteProblems = checkBytes
+    ? integrityProblems(expectedBytes, {
+        integrity: attempt('npm', ['view', `${PKG}@${version}`, 'dist.integrity']).out,
+        shasum: attempt('npm', ['view', `${PKG}@${version}`, 'dist.shasum']).out,
+      })
+    : [];
+  problems.push(...byteProblems);
   const attestations = attempt('npm', ['view', `${PKG}@${version}`, 'dist.attestations', '--json']);
   const provenance = attestations.ok && Boolean(attestations.out);
   if (!provenance) problems.push('no provenance attestation on the published version');
@@ -372,13 +452,31 @@ async function verify(version) {
         '',
         failed
           ? '> [!CAUTION]\n> The published version failed verification. Check the rows below.'
-          : '> [!TIP]\n> Published, tagged `latest`, with provenance, and installable.',
+          : `> [!TIP]\n> Published, tagged \`${tag}\`, with provenance, and installable.`,
         '',
         table(
           ['Check', 'Result'],
           [
             ['npm serves the version', served ? '✅ Pass' : '❌ Fail'],
-            ['`latest` points at it', latest === version ? '✅ Pass' : `❌ latest is ${latest}`],
+            [`\`${tag}\` points at it`, tagged === version ? '✅ Pass' : `❌ ${tag} is ${tagged}`],
+            ...(tag === 'latest'
+              ? []
+              : [
+                  [
+                    '`latest` did not move',
+                    problems.some((p) => p.startsWith('dist-tag latest moved'))
+                      ? `❌ latest is ${latest}`
+                      : '✅ Pass',
+                  ],
+                ]),
+            ...(checkBytes
+              ? [
+                  [
+                    'Published bytes match the built tarball',
+                    byteProblems.length ? '❌ Mismatch' : '✅ Pass',
+                  ],
+                ]
+              : []),
             ['Provenance attestation', provenance ? '✅ Pass' : '❌ Missing'],
             ['`npm audit signatures`', signatures],
           ],
@@ -393,7 +491,7 @@ async function verify(version) {
     finish('⏭️ Skipped');
     process.exit(1);
   }
-  ok(`npm serves ${PKG}@${version}, latest points at it, provenance is present`);
+  ok(`npm serves ${PKG}@${version}, ${tag} points at it, provenance is present`);
   const dir = smoke(`${PKG}@${version}`);
   const signatures = attempt('npm', ['audit', 'signatures'], { cwd: dir });
   group('npm audit signatures', () => console.log(signatures.out));
