@@ -20,10 +20,18 @@ interface LoaderContext {
   _module?: any;
 }
 
+/** Text of the first `<svg ...>` tag, found without the regex's retry from every `<svg`. */
+function legacyRootTagText(svgContent: string): string | null {
+  const open = /<svg/i.exec(svgContent);
+  if (!open) return null;
+  const close = svgContent.indexOf('>', open.index + 4);
+  return close === -1 ? null : svgContent.slice(open.index + 4, close);
+}
+
 function legacyParseViewBox(svgContent: string): string {
   // Extract the root <svg> opening tag to avoid matching attributes on child elements
-  const svgTagMatch = svgContent.match(/<svg([^>]*)>/i);
-  const svgTag = svgTagMatch ? svgTagMatch[1]! : '';
+  const svgTagText = legacyRootTagText(svgContent);
+  const svgTag = svgTagText !== null ? svgTagText : '';
 
   const match = svgTag.match(/viewBox=["']([^"']+)["']/);
   if (match) return match[1]!;
@@ -39,16 +47,24 @@ function legacyParseViewBox(svgContent: string): string {
 }
 
 function legacyExtractSvgInner(svgContent: string): string {
-  const innerMatch = svgContent.match(/<svg[^>]*>([\s\S]*)<\/svg>/i);
-  return innerMatch ? innerMatch[1]!.trim() : svgContent;
+  // Same result as the v1 regex, without its retries: only the first `<svg` can match.
+  const open = /<svg/i.exec(svgContent);
+  if (!open) return svgContent;
+  const tagEnd = svgContent.indexOf('>', open.index + 4);
+  if (tagEnd === -1) return svgContent;
+  const closer = /<\/svg>/gi;
+  closer.lastIndex = tagEnd + 1;
+  let last = -1;
+  let match: RegExpExecArray | null;
+  while ((match = closer.exec(svgContent)) !== null) last = match.index;
+  return last === -1 ? svgContent : svgContent.slice(tagEnd + 1, last).trim();
 }
 
 function legacyExtractSvgAttrs(svgContent: string): Record<string, string> {
   const attrs: Record<string, string> = {};
-  const svgTagMatch = svgContent.match(/<svg([^>]*)>/i);
-  if (!svgTagMatch) return attrs;
+  const attrString = legacyRootTagText(svgContent);
+  if (attrString === null) return attrs;
 
-  const attrString = svgTagMatch[1]!;
   // Match simple attributes but also capture any namespace prefix (e.g. xml:space, xmlns:xlink)
   const attrRegex = /([\w:-]+)=["']([^"']*?)["']/g;
   let match: RegExpExecArray | null;
@@ -87,10 +103,14 @@ export function parseRootTag(svgContent: string): RootTag | null {
   const opener = /<!--|<svg/gi;
   let start = -1;
   let match: RegExpExecArray | null;
+  // Once one `-->` search comes back empty, no later one can succeed, so stop searching.
+  let hasClose = true;
   while ((match = opener.exec(svgContent)) !== null) {
     if (match[0] === '<!--') {
+      if (!hasClose) continue;
       const close = svgContent.indexOf('-->', match.index + 4);
-      if (close !== -1) opener.lastIndex = close + 3;
+      if (close === -1) hasClose = false;
+      else opener.lastIndex = close + 3;
       continue;
     }
     start = match.index + 4;
@@ -211,6 +231,59 @@ export function generateSymbolId(resourcePath: string, options: LoaderOptions): 
     .replace(/\[ext\]/g, path.extname(resourcePath).slice(1));
 }
 
+/** Escapes the id for a double-quoted attribute. Ordinary ids, including `>` and `'`, are unchanged. */
+function escapeIdAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/"/g, '&quot;')
+    .replace(/\t/g, '&#9;')
+    .replace(/\n/g, '&#10;')
+    .replace(/\r/g, '&#13;');
+}
+
+/** Copied attribute values are already markup; only a quote that would end the attribute is escaped. */
+function escapeMarkupAttr(value: string): string {
+  return value.replace(/"/g, '&quot;');
+}
+
+/** Attribute names that can be written into markup. Namespaced names are filtered earlier. */
+const SAFE_ATTR_NAME = /^[A-Za-z_\u00C0-\uFFFF][\w.\-\u00B7\u00C0-\uFFFF]*$/;
+
+/** Only a `%` that would read as an escape sequence is encoded in a fragment. */
+function encodeFragment(id: string): string {
+  return id.replace(/%(?=[0-9a-fA-F]{2})/g, '%25');
+}
+
+const XML_PREDEFINED = new Set(['amp', 'lt', 'gt', 'quot', 'apos']);
+
+/** DOCTYPE-declared entities the icon uses (the prolog is not copied, so they end up undeclared). */
+function undeclaredEntities(svgContent: string): string[] {
+  const doctype = svgContent.indexOf('<!DOCTYPE');
+  if (doctype === -1) return [];
+  const subsetStart = svgContent.indexOf('[', doctype);
+  const rootStart = svgContent.indexOf('<svg', doctype);
+  if (subsetStart === -1 || rootStart === -1 || subsetStart > rootStart) return [];
+  const subsetEnd = rootStart;
+
+  const declared = new Set<string>();
+  const declaration = /<!ENTITY\s+([A-Za-z_:][\w.:-]*)\s/g;
+  const subset = svgContent.slice(subsetStart, subsetEnd);
+  let match: RegExpExecArray | null;
+  while ((match = declaration.exec(subset)) !== null) {
+    if (!XML_PREDEFINED.has(match[1]!)) declared.add(match[1]!);
+  }
+  if (declared.size === 0) return [];
+
+  const used = new Set<string>();
+  const reference = /&([A-Za-z_:][\w.:-]*);/g;
+  const body = svgContent.slice(subsetEnd);
+  while ((match = reference.exec(body)) !== null) {
+    if (declared.has(match[1]!)) used.add(match[1]!);
+  }
+  return Array.from(used);
+}
+
 function interopRequire(varName: string, modulePath: string): string {
   return (
     'var _' +
@@ -263,6 +336,25 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
     );
   }
 
+  if (this.emitWarning) {
+    const entities = undeclaredEntities(content);
+    if (entities.length > 0) {
+      this.emitWarning(
+        new Error(
+          '[rspack-plugin-svg-sprite] ' +
+            this.resourcePath +
+            ' declares the entit' +
+            (entities.length === 1 ? 'y ' : 'ies ') +
+            entities.map((name) => '&' + name + ';').join(', ') +
+            ' in its DOCTYPE and uses ' +
+            (entities.length === 1 ? 'it' : 'them') +
+            '. The DOCTYPE is not copied into the sprite, so the reference is undeclared there.\n' +
+            'Replace it with its literal value, or run SVGO.',
+        ),
+      );
+    }
+  }
+
   const resourcePath = this.resourcePath;
   const symbolId = generateSymbolId(resourcePath, options);
   const viewBox = parseViewBox(content);
@@ -271,11 +363,13 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
   const extract = options.extract || false;
   const esModule = options.esModule !== undefined ? options.esModule : true;
 
-  let attrString = 'id="' + symbolId + '" viewBox="' + viewBox + '"';
+  let attrString =
+    'id="' + escapeIdAttr(symbolId) + '" viewBox="' + escapeMarkupAttr(viewBox) + '"';
   Object.keys(svgAttrs).forEach((key) => {
     const lower = key.toLowerCase();
     if (lower !== 'viewbox' && lower !== 'id' && lower !== 'width' && lower !== 'height') {
-      attrString += ' ' + key + '="' + svgAttrs[key]!.replace(/"/g, '&quot;') + '"';
+      if (!SAFE_ATTR_NAME.test(key)) return;
+      attrString += ' ' + key + '="' + escapeMarkupAttr(svgAttrs[key]!) + '"';
     }
   });
 
@@ -319,7 +413,7 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
       );
     }
 
-    const url = publicPath + spriteFilename + '#' + symbolId;
+    const url = publicPath + spriteFilename + '#' + encodeFragment(symbolId);
 
     let runtime = interopRequire('SpriteSymbol', symbolModulePath);
     runtime +=
