@@ -7,7 +7,7 @@
       // the scripts by CI, so both are listed here as entries.
       // The consumer fixtures in scripts/ci/package-fixtures are outside `project`: they are
       // compiled by scripts/ci/package-check.mjs against the packed tarball.
-      "entry": ["src/runtime/*.ts", "src/**/*.mts", "scripts/**/*.mjs"],
+      "entry": ["src/runtime/*.ts", "src/**/*.mts", "src/__tests__/types/*.ts", "scripts/**/*.mjs"],
       "project": ["src/**/*.{ts,mts}", "scripts/**/*.mjs"],
       "ignoreDependencies": [
         // Loaded through createRequire/require.resolve with a string in the integration tests,
