@@ -1,13 +1,16 @@
 // Checks the package exactly as npm users receive it.
 //
-//   node scripts/ci/package-check.mjs            build, pack and run every check
-//   node scripts/ci/package-check.mjs --update   also rewrite scripts/ci/package-files.txt
+//   node scripts/ci/package-check.mts            build, pack and run every check
+//   node scripts/ci/package-check.mts --update   also rewrite scripts/ci/package-files.txt
 //
 // Checks: tarball file list vs snapshot, size budgets, TypeScript consumer fixtures
-// (node16 CommonJS, node16 ESM, bundler) and the runtime smoke test of release.mjs.
+// (node16 CommonJS, node16 ESM, bundler) and the runtime smoke test of release.mts.
 //
 // Env: PACKAGE_BUDGET_PACKED and PACKAGE_BUDGET_UNPACKED (bytes) override the budgets below.
 import { execFileSync } from 'node:child_process';
+import type { ExecFileSyncOptions } from 'node:child_process';
+
+type RunOptions = Omit<ExecFileSyncOptions, 'encoding'>;
 import {
   appendFileSync,
   cpSync,
@@ -22,12 +25,19 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkBudgets, lineDiff } from '../lib/package-diff.mjs';
+import { checkBudgets, lineDiff } from '../lib/package-diff.mts';
+
+interface PackInfo {
+  filename: string;
+  files: { path: string }[];
+  size: number;
+  unpackedSize: number;
+}
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const SNAPSHOT = join(ROOT, 'scripts', 'ci', 'package-files.txt');
 const FIXTURES = join(ROOT, 'scripts', 'ci', 'package-fixtures');
-const RELEASE = join(ROOT, 'scripts', 'release', 'release.mjs');
+const RELEASE = join(ROOT, 'scripts', 'release', 'release.mts');
 const TSC = join(ROOT, 'node_modules', 'typescript', 'bin', 'tsc');
 
 // Budgets in bytes, about 20% above the values measured when they were set
@@ -40,13 +50,13 @@ const BUDGET = {
 const update = process.argv.includes('--update');
 const inActions = Boolean(process.env.GITHUB_ACTIONS);
 const color = !process.env.NO_COLOR && (process.stdout.isTTY || process.env.CI || inActions);
-const paint = (code, text) => (color ? `\u001b[${code}m${text}\u001b[0m` : text);
-const green = (t) => paint(32, t);
-const red = (t) => paint(31, t);
-const dim = (t) => paint(2, t);
+const paint = (code: number, text: string) => (color ? `\u001b[${code}m${text}\u001b[0m` : text);
+const green = (t: string) => paint(32, t);
+const red = (t: string) => paint(31, t);
+const dim = (t: string) => paint(2, t);
 
 const win = process.platform === 'win32';
-function run(cmd, args, options = {}) {
+function run(cmd: string, args: string[], options: RunOptions = {}): string {
   return execFileSync(cmd, args, {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -54,20 +64,21 @@ function run(cmd, args, options = {}) {
     ...options,
   });
 }
-function attempt(cmd, args, options) {
+function attempt(cmd: string, args: string[], options?: RunOptions) {
   try {
     return { ok: true, out: run(cmd, args, options).trim() };
   } catch (error) {
-    return { ok: false, out: `${error.stdout ?? ''}${error.stderr ?? ''}`.trim() };
+    const { stdout, stderr } = error as { stdout?: string; stderr?: string };
+    return { ok: false, out: `${stdout ?? ''}${stderr ?? ''}`.trim() };
   }
 }
 
-const group = (title) => inActions && console.log(`::group::${title}`);
+const group = (title: string) => inActions && console.log(`::group::${title}`);
 const endGroup = () => inActions && console.log('::endgroup::');
-const kb = (n) => `${(n / 1024).toFixed(1)} kB`;
+const kb = (n: number) => `${(n / 1024).toFixed(1)} kB`;
 
-const results = []; // { check, ok, detail }
-function record(check, ok, detail = '') {
+const results: { check: string; ok: boolean; detail: string }[] = [];
+function record(check: string, ok: boolean, detail = '') {
   results.push({ check, ok, detail });
   console.log(`${ok ? green('✅') : red('❌')} ${check}${detail ? dim(` (${detail})`) : ''}`);
   if (!ok && inActions) console.log(`::error::❌ ${check}${detail ? ` (${detail})` : ''}`);
@@ -93,7 +104,7 @@ try {
     record('Pack (npm pack)', false);
     throw new Error('pack failed');
   }
-  const info = JSON.parse(pack.out.slice(pack.out.indexOf('[')))[0];
+  const info: PackInfo = JSON.parse(pack.out.slice(pack.out.indexOf('[')))[0];
   const tarball = join(packDir, info.filename);
   record('Pack (npm pack)', true, `${info.filename}, ${info.files.length} files`);
   endGroup();
@@ -164,12 +175,13 @@ try {
   // 5. Runtime smoke test.
   group('🧪 Runtime smoke test');
   const smoke = attempt(process.execPath, [RELEASE, 'smoke', tarball], { cwd: ROOT });
-  record('Runtime smoke test (release.mjs smoke)', smoke.ok);
+  record('Runtime smoke test (release.mts smoke)', smoke.ok);
   if (smoke.out) console.log(smoke.out);
   endGroup();
 } catch (error) {
-  console.log(red(`❌ ${error.message}`));
-  if (!results.some((r) => !r.ok)) record(error.message, false);
+  const { message } = error as Error;
+  console.log(red(`❌ ${message}`));
+  if (!results.some((r) => !r.ok)) record(message, false);
 } finally {
   rmSync(work, { recursive: true, force: true });
 }

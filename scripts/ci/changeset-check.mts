@@ -10,15 +10,15 @@
 // Env: BASE_SHA (PR base commit), HEAD_REF (PR branch), LABELS (JSON array of label names).
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { fail, group, info, ok, summary } from '../lib/output.mjs';
+import { fail, group, info, ok, summary } from '../lib/output.mts';
 
 const PKG = 'rspack-plugin-svg-sprite';
-const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
-const lines = (text) => text.split('\n').filter(Boolean);
+const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+const lines = (text: string) => text.split('\n').filter(Boolean);
 
 const base = process.env.BASE_SHA;
 const headRef = process.env.HEAD_REF || '';
-const labels = JSON.parse(process.env.LABELS || '[]');
+const labels: string[] = JSON.parse(process.env.LABELS || '[]');
 if (!base) throw new Error('BASE_SHA is not set');
 
 const changed = lines(git('diff', '--name-only', `${base}...HEAD`));
@@ -27,7 +27,7 @@ const changesets = added.filter(
   (f) => /^\.changeset\/[^/]+\.md$/.test(f) && f !== '.changeset/README.md',
 );
 
-const problems = [];
+const problems: string[] = [];
 for (const file of changesets) {
   const match = readFileSync(file, 'utf8').match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
   if (!match) {
@@ -48,8 +48,8 @@ const reasons = changed.filter(
   (f) => (f.startsWith('src/') && !f.startsWith('src/__tests__/')) || f === 'client.d.ts',
 );
 if (changed.includes('package.json')) {
-  const published = (json) => {
-    const pkg = JSON.parse(json);
+  const published = (json: string) => {
+    const pkg: Record<string, unknown> = JSON.parse(json);
     for (const key of [
       'devDependencies',
       'scripts',
@@ -87,7 +87,7 @@ if (headRef.startsWith('changeset-release/')) {
     : 'No published files changed: no changeset needed.';
 }
 
-const bullets = (items) => items.map((f) => `- \`${f}\``).join('\n');
+const bullets = (items: string[]) => items.map((f) => `- \`${f}\``).join('\n');
 const facts = [
   '| Fact | Value |',
   '|---|---|',

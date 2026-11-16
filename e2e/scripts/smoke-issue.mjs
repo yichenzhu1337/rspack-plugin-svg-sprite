@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Keeps exactly one open `published-smoke-failure` issue in sync with the scheduled smoke test
-// of the published package (same approach as scripts/ci/nightly-issue.mjs):
+// of the published package (same approach as scripts/ci/nightly-issue.mts):
 //
 //   - a job failed        -> open the issue, or update the open one
 //   - every job passed    -> close the open issue with a comment
@@ -82,7 +82,7 @@ function issueBody() {
     '### 💡 Next',
     '',
     '- Open the failed job in the run. A failure here means users can break even though the release passed.',
-    '- Reproduce it with `E2E_SOURCE=npm bun run test:e2e`, or with `node scripts/ci/compat-matrix.mjs rspack-plugin-svg-sprite@latest`.',
+    '- Reproduce it with `E2E_SOURCE=npm bun run test:e2e`, or with `node scripts/ci/compat-matrix.mts rspack-plugin-svg-sprite@latest`.',
     '- This issue updates itself every day, and closes itself when the checks pass again.',
     '',
   ].join('\n');

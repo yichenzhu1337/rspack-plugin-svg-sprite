@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@rstest/core';
 import { run, script } from './helpers';
 
-const NIGHTLY = script('ci', 'nightly-issue.mjs');
+const NIGHTLY = script('ci', 'nightly-issue.mts');
 
 type Status = 'success' | 'failure' | 'cancelled' | 'skipped';
 function needs(blocking: Record<string, Status>, nonBlocking: Record<string, Status> = {}) {
@@ -22,7 +22,7 @@ function nightly(json: string, args: string[] = []) {
   });
 }
 
-describe('nightly-issue.mjs --dry-run', () => {
+describe('nightly-issue.mts --dry-run', () => {
   it('opens an issue, creating the label first, when a blocking job fails', () => {
     const result = nightly(needs({ ...green, test: 'failure' }));
     expect(result.code).toBe(0);

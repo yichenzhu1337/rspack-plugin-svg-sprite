@@ -1,7 +1,14 @@
 // Tiny SemVer helpers for the release scripts. No dependencies.
 const PATTERN = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$/;
 
-export function parse(version) {
+export interface Version {
+  major: number;
+  minor: number;
+  patch: number;
+  pre: string | null;
+}
+
+export function parse(version: string): Version | null {
   const match = PATTERN.exec(version);
   if (!match) return null;
   return {
@@ -12,13 +19,13 @@ export function parse(version) {
   };
 }
 
-export const isPrerelease = (version) => parse(version)?.pre != null;
+export const isPrerelease = (version: string) => parse(version)?.pre != null;
 
 // Negative when a < b. Numeric parts first; a release sorts after its own prereleases.
-export function compare(a, b) {
-  const x = parse(a);
-  const y = parse(b);
-  for (const key of ['major', 'minor', 'patch']) {
+export function compare(a: string, b: string): number {
+  const x = parse(a) as Version;
+  const y = parse(b) as Version;
+  for (const key of ['major', 'minor', 'patch'] as const) {
     if (x[key] !== y[key]) return x[key] - y[key];
   }
   if (x.pre === y.pre) return 0;
@@ -28,8 +35,8 @@ export function compare(a, b) {
 }
 
 // The release candidate that comes next for `base`: X.Y.Z-rc.N, N one above the highest taken.
-export function nextRc(base, published) {
-  const { major, minor, patch } = parse(base);
+export function nextRc(base: string, published: string[]): string {
+  const { major, minor, patch } = parse(base) as Version;
   const stem = `${major}.${minor}.${patch}-rc.`;
   let highest = 0;
   for (const version of published) {

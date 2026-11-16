@@ -9,6 +9,7 @@
 //   verify <version>        after publishing: npm serves it, `latest` points at it, provenance,
 //                           smoke test from the registry, `npm audit signatures`
 import { execFileSync } from 'node:child_process';
+import type { ExecFileSyncOptions } from 'node:child_process';
 import {
   appendFileSync,
   existsSync,
@@ -19,35 +20,38 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { sectionOf } from '../lib/changelog.mjs';
-import { details, detail, fail, group, info, ok, summary, table, warn } from '../lib/output.mjs';
-import { nextRc } from '../lib/semver.mjs';
-import { integrityProblems } from '../lib/verify.mjs';
+import { sectionOf } from '../lib/changelog.mts';
+import { details, detail, fail, group, info, ok, summary, table, warn } from '../lib/output.mts';
+import { nextRc } from '../lib/semver.mts';
+import { integrityProblems } from '../lib/verify.mts';
 
 const PKG = 'rspack-plugin-svg-sprite';
 const REPO = 'https://github.com/yichenzhu1337/rspack-plugin-svg-sprite';
 const RELEASE_WORKFLOW = `${REPO}/actions/workflows/release.yml`;
 
-function run(cmd, args, options = {}) {
+type RunOptions = Omit<ExecFileSyncOptions, 'encoding'>;
+
+function run(cmd: string, args: string[], options: RunOptions = {}) {
   return execFileSync(cmd, args, {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
     ...options,
   }).trim();
 }
-function attempt(cmd, args, options) {
+function attempt(cmd: string, args: string[], options?: RunOptions) {
   try {
     return { ok: true, out: run(cmd, args, options) };
   } catch (error) {
-    return { ok: false, out: `${error.stdout ?? ''}${error.stderr ?? ''}`.trim() };
+    const { stdout, stderr } = error as { stdout?: string; stderr?: string };
+    return { ok: false, out: `${stdout ?? ''}${stderr ?? ''}`.trim() };
   }
 }
-const output = (key, value) =>
+const output = (key: string, value: string) =>
   process.env.GITHUB_OUTPUT && appendFileSync(process.env.GITHUB_OUTPUT, `${key}=${value}\n`);
 const currentVersion = () => JSON.parse(readFileSync('package.json', 'utf8')).version;
-const isPublished = (version) =>
+const isPublished = (version: string) =>
   attempt('npm', ['view', `${PKG}@${version}`, 'version']).out === version;
-const publishedVersions = () => {
+const publishedVersions = (): string[] => {
   const result = attempt('npm', ['view', PKG, 'versions', '--json']);
   if (!result.ok || !result.out) return [];
   const parsed = JSON.parse(result.out);
@@ -154,12 +158,12 @@ function guards() {
   else ok(`version ${version}: ready to release`);
 }
 
-function smoke(target) {
+function smoke(target: string) {
   const dir = mkdtempSync(join(tmpdir(), 'svg-sprite-smoke-'));
   writeFileSync(join(dir, 'package.json'), '{ "private": true }\n');
   const spec = existsSync(target) ? resolve(target) : target;
   run('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error', spec], { cwd: dir });
-  const checks = [
+  const checks: [string, string[]][] = [
     [
       'CommonJS require',
       [
@@ -185,7 +189,7 @@ function smoke(target) {
     ],
     ['Loader subpath resolves', ['-e', `require.resolve('${PKG}/loader')`]],
   ];
-  const rows = [];
+  const rows: string[][] = [];
   let failed = 0;
   group(`Import smoke test: ${target}`, () => {
     for (const [name, args] of checks) {
@@ -214,11 +218,11 @@ function smoke(target) {
   return dir;
 }
 
-function changelogSection(version) {
+function changelogSection(version: string) {
   return sectionOf(readFileSync('CHANGELOG.md', 'utf8'), version);
 }
 
-function notes(version) {
+function notes(version: string) {
   const section = changelogSection(version);
   if (!section) {
     console.error(`CHANGELOG.md has no section for ${version}`);
@@ -241,10 +245,11 @@ function notes(version) {
   );
 }
 
-function packInfo(spec, cwd) {
+function packInfo(spec: string, cwd?: string) {
   const result = attempt('npm', ['pack', spec, '--dry-run', '--json', '--ignore-scripts'], { cwd });
   if (!result.ok) return null;
-  const [info] = JSON.parse(result.out.slice(result.out.indexOf('[')));
+  const [info]: { files: { path: string }[]; unpackedSize: number; entryCount: number }[] =
+    JSON.parse(result.out.slice(result.out.indexOf('[')));
   return {
     files: info.files.map((f) => f.path).sort(),
     size: info.unpackedSize,
@@ -252,10 +257,10 @@ function packInfo(spec, cwd) {
   };
 }
 
-const status = (outcome) =>
+const status = (outcome: string | undefined) =>
   outcome === 'success' ? '✅ Pass' : outcome ? `❌ ${outcome}` : '⏭️ Skipped';
-const kb = (bytes) => `${(bytes / 1024).toFixed(1)} kB`;
-const list = (items) => items.map((f) => `- \`${f}\``).join('\n');
+const kb = (bytes: number) => `${(bytes / 1024).toFixed(1)} kB`;
+const list = (items: string[]) => items.map((f) => `- \`${f}\``).join('\n');
 
 function report() {
   const { TARBALL, SHA256, MODE, GITHUB_SHA } = process.env;
@@ -263,16 +268,16 @@ function report() {
   const publish = MODE === 'publish' || rc;
   const version = currentVersion();
   const latest = attempt('npm', ['view', PKG, 'dist-tags.latest']).out || null;
-  const warnings = JSON.parse(process.env.GUARD_WARNINGS || '[]');
+  const warnings: string[] = JSON.parse(process.env.GUARD_WARNINGS || '[]');
   const lastTag = attempt('git', ['describe', '--tags', '--abbrev=0', '--match', 'v*']).out;
   const commits = lastTag
     ? attempt('git', ['log', '--format=- %s (%h)', `${lastTag}..HEAD`]).out
     : '';
-  const next = packInfo(resolve(TARBALL));
+  const next = packInfo(resolve(TARBALL as string));
   const previous = latest ? packInfo(`${PKG}@${latest}`, tmpdir()) : null;
   const section = changelogSection(version);
   const shortSha = (GITHUB_SHA || '').slice(0, 7);
-  const tarballName = TARBALL.split('/').pop();
+  const tarballName = (TARBALL as string).split('/').pop();
   const runLabel = rc ? 'Release candidate run' : publish ? 'Publish run' : 'Dry run';
   const publishJob = rc ? 'publish-rc' : 'publish';
 
@@ -285,7 +290,7 @@ function report() {
   ];
   const failedChecks = checks.filter(([, result]) => result.startsWith('❌')).map(([name]) => name);
 
-  const out = [];
+  const out: string[] = [];
   out.push(`## 🚀 Release report: ${PKG} ${version}`, '');
   if (failedChecks.length) {
     out.push(
@@ -413,12 +418,12 @@ function report() {
   });
 }
 
-async function verify(version) {
+async function verify(version: string) {
   for (let i = 0; i < 40 && !isPublished(version); i++) {
     info('waiting for npm to serve the new version...');
     await new Promise((done) => setTimeout(done, 15000));
   }
-  const problems = [];
+  const problems: string[] = [];
   const served = isPublished(version);
   if (!served) problems.push(`npm does not serve ${PKG}@${version} after 10 minutes`);
   const tag = process.env.DIST_TAG || 'latest';
@@ -444,7 +449,7 @@ async function verify(version) {
   const attestations = attempt('npm', ['view', `${PKG}@${version}`, 'dist.attestations', '--json']);
   const provenance = attestations.ok && Boolean(attestations.out);
   if (!provenance) problems.push('no provenance attestation on the published version');
-  const finish = (signatures) => {
+  const finish = (signatures: string) => {
     const failed = problems.length > 0 || signatures.startsWith('❌');
     summary(
       [
@@ -504,8 +509,8 @@ async function verify(version) {
   ok(`${PKG}@${version} verified from the registry`);
 }
 
-const [command, arg] = process.argv.slice(2);
-const commands = {
+const [command, arg] = process.argv.slice(2) as [string, string];
+const commands: Record<string, () => unknown> = {
   guards,
   smoke: () => smoke(arg),
   notes: () => notes(arg),
@@ -513,7 +518,7 @@ const commands = {
   verify: () => verify(arg),
 };
 if (!commands[command]) {
-  console.error(`usage: release.mjs <${Object.keys(commands).join(' | ')}> [arg]`);
+  console.error(`usage: release.mts <${Object.keys(commands).join(' | ')}> [arg]`);
   process.exit(2);
 }
 await commands[command]();

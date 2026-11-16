@@ -5,7 +5,7 @@
 //   <type>[(<scope>)][!]: <description>
 //
 // Env: PR_TITLE.
-import { fail, ok, summary, table } from '../lib/output.mjs';
+import { fail, ok, summary, table } from '../lib/output.mts';
 
 const TYPES = {
   feat: 'a new feature',

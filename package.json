@@ -143,7 +143,7 @@
     "test": "tsc && rstest run",
     "test:ci": "tsc && rstest run --coverage",
     "test:mutation": "bunx @stryker-mutator/core@10.1.1 run .config/stryker.config.mjs",
-    "typecheck": "tsc --noEmit && tsc -p .config/tsconfig.test.json",
+    "typecheck": "tsc --noEmit && tsc -p .config/tsconfig.test.json && tsc -p .config/tsconfig.scripts.json",
     "lint": "oxlint src/ scripts/",
     "lint:fix": "oxlint src/ scripts/ --fix",
     "format": "oxfmt .",
@@ -151,13 +151,13 @@
     "dev:rspack": "bun run build && bun run --filter svg-sprite-consumer-demo dev",
     "dev:webpack": "bun run --filter svg-sprite-webpack-demo dev",
     "prepublishOnly": "bun run build",
-    "prepare": "node scripts/hooks/install.mjs",
+    "prepare": "node scripts/hooks/install.mts",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "bench": "bun run build && bun run --filter svg-sprite-bench bench",
     "knip": "bun run build && knip",
     "test:e2e": "bun run --filter rspack-plugin-svg-sprite-e2e test",
-    "check:package": "node scripts/ci/package-check.mjs"
+    "check:package": "node scripts/ci/package-check.mts"
   },
   "peerDependencies": {
     "@rsbuild/core": ">=1.0.0",
@@ -178,6 +178,7 @@
     "@rspack/core": "^1.7.6",
     "@rstest/core": "0.12.6",
     "@rstest/coverage-istanbul": "0.12.6",
+    "@types/node": "26.6.6",
     "fast-check": "4.10.2",
     "htmlparser2": "9.1.0",
     "knip": "6.45.1",

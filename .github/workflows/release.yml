@@ -57,7 +57,7 @@ jobs:
           node-version-file: .nvmrc
       - name: 🔍 Check this commit can be released
         id: guards
-        run: node scripts/release/release.mjs guards
+        run: node scripts/release/release.mts guards
         env:
           MODE: ${{ inputs.mode }}
           ALLOW_RED_NIGHTLY: ${{ inputs.allow-red-nightly }}
@@ -143,7 +143,7 @@ jobs:
       - id: smoke
         name: 🧪 Import smoke test
         continue-on-error: true
-        run: node scripts/release/release.mjs smoke "$TARBALL"
+        run: node scripts/release/release.mts smoke "$TARBALL"
         env:
           TARBALL: ${{ steps.pack.outputs.tarball }}
       - id: publish-dry-run
@@ -153,7 +153,7 @@ jobs:
         env:
           TARBALL: ${{ steps.pack.outputs.tarball }}
       - name: 📝 Release report
-        run: node scripts/release/release.mjs report
+        run: node scripts/release/release.mts report
         env:
           MODE: ${{ inputs.mode }}
           TARBALL: ${{ steps.pack.outputs.tarball }}
@@ -233,7 +233,7 @@ jobs:
           VERSION: ${{ needs.guard.outputs.version }}
       - name: 📝 GitHub release
         run: |
-          node scripts/release/release.mjs notes "$VERSION" > notes.md
+          node scripts/release/release.mts notes "$VERSION" > notes.md
           gh release create "v$VERSION" --title "v$VERSION" --notes-file notes.md --verify-tag "./out/$NAME"
         env:
           GH_TOKEN: ${{ github.token }}
@@ -308,7 +308,7 @@ jobs:
         with:
           node-version-file: .nvmrc
       - name: ✅ Verify the published package
-        run: node scripts/release/release.mjs verify "$VERSION"
+        run: node scripts/release/release.mts verify "$VERSION"
         env:
           VERSION: ${{ needs.guard.outputs.version }}
           DIST_TAG: next
@@ -337,7 +337,7 @@ jobs:
         with:
           node-version-file: .nvmrc
       - name: ✅ Verify the published package
-        run: node scripts/release/release.mjs verify "$VERSION"
+        run: node scripts/release/release.mts verify "$VERSION"
         env:
           VERSION: ${{ needs.guard.outputs.version }}
           EXPECTED_INTEGRITY: ${{ needs.preflight.outputs.integrity }}

@@ -14,7 +14,7 @@ import { dirname, join, resolve } from 'node:path';
 
 export const ROOT = resolve(process.cwd());
 export const script = (...parts: string[]) => join(ROOT, 'scripts', ...parts);
-const FAKE = script('__tests__', 'fake-cli.mjs');
+const FAKE = script('__tests__', 'fake-cli.mts');
 
 export const tempDir = (label = 'script-test') =>
   mkdtempSync(join(tmpdir(), `svg-sprite-${label}-`));

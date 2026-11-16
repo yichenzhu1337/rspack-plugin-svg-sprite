@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@rstest/core';
 import { run, script } from './helpers';
 
-const CHECK = script('ci', 'pr-title-check.mjs');
+const CHECK = script('ci', 'pr-title-check.mts');
 const title = (value: string) => run(CHECK, [], { env: { PR_TITLE: value } });
 
 describe('pr-title-check', () => {

@@ -150,7 +150,7 @@ jobs:
 
       - name: 🧩 Check every entry point of the published package
         run: >-
-          node scripts/ci/compat-matrix.mjs "rspack-plugin-svg-sprite@$VERSION"
+          node scripts/ci/compat-matrix.mts "rspack-plugin-svg-sprite@$VERSION"
           --baseline scripts/ci/compat-baseline-1.5.3.json --strict
 
   report:

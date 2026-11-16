@@ -363,7 +363,7 @@ jobs:
         with:
           bun-version-file: package.json
       - name: 🏗️ Build and pack twice, compare the tarballs
-        run: node scripts/ci/determinism-check.mjs
+        run: node scripts/ci/determinism-check.mts
 
   actionlint:
     name: 🔍 actionlint

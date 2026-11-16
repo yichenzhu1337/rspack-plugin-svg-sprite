@@ -4,11 +4,11 @@ pre-commit:
   parallel: true
   jobs:
     - name: oxlint
-      glob: '*.{ts,tsx}'
+      glob: '*.{ts,tsx,mts}'
       run: bun run oxlint --fix {staged_files}
       stage_fixed: true
     - name: oxfmt
-      glob: '*.{ts,tsx,json,md,yaml,yml}'
+      glob: '*.{ts,tsx,mts,json,md,yaml,yml}'
       run: bun run oxfmt {staged_files}
       stage_fixed: true
 
@@ -16,4 +16,4 @@ pre-commit:
 commit-msg:
   jobs:
     - name: strip-trailers
-      run: node scripts/hooks/strip-trailers.mjs {1}
+      run: node scripts/hooks/strip-trailers.mts {1}

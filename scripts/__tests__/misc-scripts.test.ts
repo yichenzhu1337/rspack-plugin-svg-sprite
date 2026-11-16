@@ -1,10 +1,10 @@
 import { describe, it, expect } from '@rstest/core';
 import { commit, fakeTools, makeRepo, run, script } from './helpers';
-import { sectionOf } from '../lib/changelog.mjs';
-import { details, table } from '../lib/output.mjs';
-import { checkBudgets, differingFiles, lineDiff } from '../lib/package-diff.mjs';
-import { compare, isPrerelease, nextRc, parse } from '../lib/semver.mjs';
-import { integrityProblems } from '../lib/verify.mjs';
+import { sectionOf } from '../lib/changelog.mts';
+import { details, table } from '../lib/output.mts';
+import { checkBudgets, differingFiles, lineDiff } from '../lib/package-diff.mts';
+import { compare, isPrerelease, nextRc, parse } from '../lib/semver.mts';
+import { integrityProblems } from '../lib/verify.mts';
 
 const PKG = 'rspack-plugin-svg-sprite';
 
@@ -34,7 +34,7 @@ describe('lib/output', () => {
 
   it('prints status lines without color under NO_COLOR and appends to the job summary', () => {
     const tools = fakeTools({});
-    const file = script('__tests__', 'output-probe.mjs');
+    const file = script('__tests__', 'output-probe.mts');
     const result = run(file, [], { bin: tools.dir });
     expect(result.out).toContain('✅ fine');
     expect(result.out).toContain('❌ broken');
@@ -46,7 +46,7 @@ describe('lib/output', () => {
   });
 
   it('colors in CI and wraps groups on GitHub Actions, unless NO_COLOR is set', () => {
-    const file = script('__tests__', 'output-probe.mjs');
+    const file = script('__tests__', 'output-probe.mts');
     const colored = run(file, [], { env: { NO_COLOR: '', CI: 'true', GITHUB_ACTIONS: 'true' } });
     expect(colored.out).toContain('\u001b[32m');
     expect(colored.out).toContain('::group::Group title');
@@ -125,8 +125,8 @@ describe('lib/verify', () => {
   });
 });
 
-describe('version-pr-body.mjs', () => {
-  const BODY = script('release', 'version-pr-body.mjs');
+describe('version-pr-body.mts', () => {
+  const BODY = script('release', 'version-pr-body.mts');
   const files = {
     'package.json': JSON.stringify({ name: PKG, version: '1.2.3' }),
     'CHANGELOG.md': '## 1.2.3\n\n- Fixed a thing.\n\n## 1.2.2\n\n- Old.\n',

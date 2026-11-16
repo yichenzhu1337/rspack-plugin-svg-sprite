@@ -38,20 +38,21 @@ const simulatedExisting = existingFlag >= 0 ? Number(args[existingFlag + 1]) : n
 const useColor =
   !process.env.NO_COLOR &&
   (process.stdout.isTTY || process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true');
-const paint = (code) => (text) => (useColor ? `\u001b[${code}m${text}\u001b[0m` : text);
+const paint = (code: number) => (text: string) =>
+  useColor ? `\u001b[${code}m${text}\u001b[0m` : text;
 const green = paint(32);
 const red = paint(31);
 const yellow = paint(33);
 const dim = paint(2);
-const group = (title) => process.env.GITHUB_ACTIONS && console.log(`::group::${title}`);
+const group = (title: string) => process.env.GITHUB_ACTIONS && console.log(`::group::${title}`);
 const endGroup = () => process.env.GITHUB_ACTIONS && console.log('::endgroup::');
 
-function fail(message) {
+function fail(message: string): never {
   console.error(red(`❌ ${message}`));
   process.exit(1);
 }
 
-let needs;
+let needs: Record<string, { result?: string; outputs?: { status?: string } } | undefined>;
 try {
   needs = JSON.parse(process.env.NEEDS ?? '');
 } catch {
@@ -61,20 +62,20 @@ const runUrl = process.env.RUN_URL;
 if (!runUrl) fail('RUN_URL is not set.');
 
 /** A job's outcome. Non-blocking jobs publish `outputs.status`, because their own result hides failures. */
-function outcome(key) {
+function outcome(key: string) {
   const job = needs[key];
   if (!job) return 'missing';
   return job.outputs?.status || job.result || 'missing';
 }
 
-const results = {};
+const results: Record<string, string> = {};
 for (const [key] of [...BLOCKING, ...NON_BLOCKING]) results[key] = outcome(key);
 
 for (const [key] of BLOCKING) {
   if (results[key] === 'missing') fail(`The blocking job "${key}" is missing from NEEDS.`);
 }
 
-function cell(status, blocking) {
+function cell(status: string | undefined, blocking: boolean) {
   if (status === 'success') return '✅ Pass';
   if (status === 'failure') return blocking ? '❌ Fail' : '⚠️ Failed, not blocking';
   if (status === 'cancelled') return '⏭️ Cancelled';
@@ -84,7 +85,7 @@ function cell(status, blocking) {
 const failedBlocking = BLOCKING.filter(([key]) => results[key] === 'failure');
 const allGreen = BLOCKING.every(([key]) => results[key] === 'success');
 
-function table(rows, blocking) {
+function table(rows: string[][], blocking: boolean) {
   return [
     '| Check | Result |',
     '| --- | --- |',
@@ -138,8 +139,8 @@ function issueBody() {
   return lines.join('\n');
 }
 
-function gh(ghArgs, input) {
-  const shown = `gh ${ghArgs.map((a) => (/^[\w./:=@-]+$/.test(a) ? a : JSON.stringify(a))).join(' ')}`;
+function gh(ghArgs: string[], input?: string) {
+  const shown = `gh ${ghArgs.map((a: string) => (/^[\w./:=@-]+$/.test(a) ? a : JSON.stringify(a))).join(' ')}`;
   if (dryRun) {
     console.log(dim(`$ ${shown}${input === undefined ? '' : '   # body on stdin'}`));
     if (input !== undefined) console.log(input.replace(/^/gm, dim('  | ')));
@@ -169,7 +170,7 @@ function findOpenIssue() {
     gh(listArgs);
     return Number.isInteger(simulatedExisting) ? simulatedExisting : null;
   }
-  const numbers = JSON.parse(gh(listArgs) || '[]').map((i) => i.number);
+  const numbers = (JSON.parse(gh(listArgs) || '[]') as { number: number }[]).map((i) => i.number);
   // If more than one is ever open, keep working on the oldest.
   return numbers.length > 0 ? Math.min(...numbers) : null;
 }

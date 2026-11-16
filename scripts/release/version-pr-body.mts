@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Prints the markdown body for the bot's "chore: version packages" pull request.
 //
-//   node scripts/release/version-pr-body.mjs [--ref <git-ref>]
+//   node scripts/release/version-pr-body.mts [--ref <git-ref>]
 //
 // Reads package.json and CHANGELOG.md at <git-ref> (`git show <ref>:<file>`); without --ref it reads
 // the working tree. Also asks npm for the current `latest`; if that fails the row says "unknown".
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { sectionOf } from '../lib/changelog.mjs';
+import { sectionOf } from '../lib/changelog.mts';
 
 const PKG = 'rspack-plugin-svg-sprite';
 const REPO = 'https://github.com/yichenzhu1337/rspack-plugin-svg-sprite';
@@ -17,11 +17,11 @@ const args = process.argv.slice(2);
 const refIndex = args.indexOf('--ref');
 const ref = refIndex === -1 ? null : args[refIndex + 1];
 if (refIndex !== -1 && !ref) {
-  console.error('usage: version-pr-body.mjs [--ref <git-ref>]');
+  console.error('usage: version-pr-body.mts [--ref <git-ref>]');
   process.exit(2);
 }
 
-const read = (file) =>
+const read = (file: string) =>
   ref
     ? execFileSync('git', ['show', `${ref}:${file}`], { encoding: 'utf8' })
     : readFileSync(file, 'utf8');
