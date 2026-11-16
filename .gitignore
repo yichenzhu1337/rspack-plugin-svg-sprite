@@ -10,3 +10,6 @@ _thoughts/
 lefthook-local.yml
 reports/
 .stryker-tmp/
+
+# Built documentation site
+website/doc_build/
