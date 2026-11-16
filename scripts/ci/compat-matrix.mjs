@@ -13,6 +13,8 @@
 //   build    real Rspack 1, Rspack 2 and webpack 5 builds (inline and extract mode, CommonJS and
 //            ESM config files) and Rsbuild 1 and 2 builds; the output bundle is executed against
 //            a small DOM stand-in and the emitted sprite is inspected
+//   bun      the node cells again under `bun --bun`, plus Rspack builds launched with Bun
+//            (needs `bun` on PATH; skipped with a note otherwise)
 //
 // Options:
 //   --baseline <file>   JSON written by an earlier run (`--json`). Every cell that passed there
@@ -20,7 +22,8 @@
 //   --strict            also require the cells marked as goals (fixed in 1.6.0)
 //   --json <file>       write the results as JSON
 //   --keep              keep the temporary project and print its path
-//   --only <groups>     comma-separated subset of node,types,build
+//   --only <groups>     comma-separated subset of node,types,build,bun
+//   --require-bun       fail instead of skipping the bun group when `bun` is not on PATH
 //
 // Exits 1 when a required cell fails.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -65,7 +68,7 @@ if (!target) {
   console.error('usage: compat-matrix.mjs <tarball|spec> [--baseline f] [--json f] [--strict]');
   process.exit(2);
 }
-const only = new Set((option('--only') || 'node,types,build').split(','));
+const only = new Set((option('--only') || 'node,types,build,bun').split(','));
 const baseline = option('--baseline')
   ? new Map(JSON.parse(readFileSync(option('--baseline'), 'utf8')).cells.map((c) => [c.id, c.pass]))
   : null;
@@ -103,7 +106,8 @@ const cells = [];
 function record(group, id, pass, detail, { required = false, goal = false } = {}) {
   cells.push({
     group,
-    id,
+    // The bun group repeats the node cells; the prefix keeps the ids (and the baseline) apart.
+    id: group === 'bun' && !id.startsWith('bun: ') ? `bun: ${id}` : id,
     pass,
     detail: pass ? '' : String(detail || '').slice(0, 400),
     required,
@@ -159,9 +163,11 @@ const ENTRIES = [
 // ---------------------------------------------------------------------------------------------
 // Node: CommonJS and ESM consumers
 
+// `exe`/`args` pick the runtime: Node by default, `bun --bun` for the bun group.
+let runtime = { group: 'node', exe: process.execPath, args: [] };
 function node(code, esm) {
   const file = write(`node-checks/check-${cells.length}.${esm ? 'mjs' : 'cjs'}`, code);
-  const r = spawnSync(process.execPath, [file], { cwd: dir, encoding: 'utf8' });
+  const r = spawnSync(runtime.exe, [...runtime.args, file], { cwd: dir, encoding: 'utf8' });
   return { ok: r.status === 0, out: `${r.stdout}${r.stderr}`.trim() };
 }
 const assertJs = (expr, what) => `if (!(${expr})) throw new Error(${JSON.stringify(what)});\n`;
@@ -172,38 +178,38 @@ function nodeChecks() {
     const named = e.named;
     // CommonJS
     let r = node(`const v = require('${s}');\n${assertJs('v != null', 'empty')}`);
-    record('node', `require ${e.sub}`, r.ok, r.out, { required: true });
+    record(runtime.group, `require ${e.sub}`, r.ok, r.out, { required: true });
     if (e.cjsMain) {
       r = node(
         `const v = require('${s}');\n${assertJs(e.main, 'require(x) is not the entry value')}`,
       );
-      record('node', `require ${e.sub} is the value`, r.ok, r.out, { required: true });
+      record(runtime.group, `require ${e.sub} is the value`, r.ok, r.out, { required: true });
     }
     if (e.main) {
       r = node(`const v = require('${s}').default;\n${assertJs(e.main, '.default is wrong')}`);
-      record('node', `require ${e.sub} .default`, r.ok, r.out, { required: true });
+      record(runtime.group, `require ${e.sub} .default`, r.ok, r.out, { required: true });
     }
     if (named.length) {
       r = node(
         `const { ${named.join(', ')} } = require('${s}');\n` +
           named.map((n) => assertJs(`${n} !== undefined`, `missing ${n}`)).join(''),
       );
-      record('node', `require ${e.sub} named`, r.ok, r.out, { required: true });
+      record(runtime.group, `require ${e.sub} named`, r.ok, r.out, { required: true });
     }
     // ESM
     r = node(`import v from '${s}';\n${assertJs('v != null', 'empty')}`, true);
-    record('node', `import default ${e.sub} loads`, r.ok, r.out);
+    record(runtime.group, `import default ${e.sub} loads`, r.ok, r.out);
     if (e.main) {
       r = node(
         `import v from '${s}';\n${assertJs(e.main, 'default import is not the value')}`,
         true,
       );
-      record('node', `import default ${e.sub} is the value`, r.ok, r.out, { goal: true });
+      record(runtime.group, `import default ${e.sub} is the value`, r.ok, r.out, { goal: true });
       r = node(
         `import d from '${s}';\nconst v = d.default;\n${assertJs(e.main, 'd.default is wrong')}`,
         true,
       );
-      record('node', `import default ${e.sub} .default`, r.ok, r.out);
+      record(runtime.group, `import default ${e.sub} .default`, r.ok, r.out);
     }
     if (named.length) {
       r = node(
@@ -211,13 +217,13 @@ function nodeChecks() {
           named.map((n) => assertJs(`d.${n} !== undefined`, `d.${n} missing`)).join(''),
         true,
       );
-      record('node', `import default ${e.sub} .named`, r.ok, r.out);
+      record(runtime.group, `import default ${e.sub} .named`, r.ok, r.out);
       r = node(
         `import { ${named.join(', ')} } from '${s}';\n` +
           named.map((n) => assertJs(`${n} !== undefined`, `missing ${n}`)).join(''),
         true,
       );
-      record('node', `import { named } ${e.sub}`, r.ok, r.out, { goal: true });
+      record(runtime.group, `import { named } ${e.sub}`, r.ok, r.out, { goal: true });
     }
     r = node(
       `import * as ns from '${s}';\n` +
@@ -225,19 +231,19 @@ function nodeChecks() {
         (e.main ? `const v = ns.default;\n${assertJs(e.main, 'ns.default is not the value')}` : ''),
       true,
     );
-    record('node', `import * as ns ${e.sub}`, r.ok, r.out, { goal: true });
+    record(runtime.group, `import * as ns ${e.sub}`, r.ok, r.out, { goal: true });
   }
   let r = node(`require.resolve('${PKG}/loader');`);
-  record('node', 'require.resolve loader', r.ok, r.out, { required: true });
+  record(runtime.group, 'require.resolve loader', r.ok, r.out, { required: true });
   r = node(`import.meta.resolve('${PKG}/loader');`, true);
-  record('node', 'import.meta.resolve loader', r.ok, r.out);
+  record(runtime.group, 'import.meta.resolve loader', r.ok, r.out);
   r = node(`${assertJs(`require('${PKG}/package.json').name === '${PKG}'`, 'name')}`);
-  record('node', 'require package.json', r.ok, r.out, { goal: true });
+  record(runtime.group, 'require package.json', r.ok, r.out, { goal: true });
   r = node(
     `import p from '${PKG}/package.json' with { type: 'json' };\n${assertJs(`p.name === '${PKG}'`, 'name')}`,
     true,
   );
-  record('node', 'import package.json', r.ok, r.out, { goal: true });
+  record(runtime.group, 'import package.json', r.ok, r.out, { goal: true });
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -491,7 +497,8 @@ const sprite = mode === 'extract' && existsSync(join(out, 'sprite.svg')) ? readF
 console.log(JSON.stringify({ result, sprites: inserted.map((n) => n.html), sprite }));
 `;
 
-function buildChecks() {
+// `bunOnly` limits the matrix to Rspack 1 builds with the shared config shapes.
+function buildChecks(bunOnly = false) {
   write('runner.mjs', RUNNER);
   write('icons/star.svg', STAR);
   write('icons/circle.svg', CIRCLE);
@@ -503,11 +510,15 @@ function buildChecks() {
     return write(`${name}/${configName}`, config);
   };
   const run = (bundler, configFile, mode) => {
-    const r = spawnSync(process.execPath, [join(dir, 'runner.mjs'), bundler, configFile, mode], {
-      cwd: dir,
-      encoding: 'utf8',
-      timeout: 120000,
-    });
+    const r = spawnSync(
+      runtime.exe,
+      [...runtime.args, join(dir, 'runner.mjs'), bundler, configFile, mode],
+      {
+        cwd: dir,
+        encoding: 'utf8',
+        timeout: 120000,
+      },
+    );
     if (r.status !== 0) return { ok: false, out: `${r.stdout}${r.stderr}`.trim() };
     const line = r.stdout.trim().split('\n').pop();
     return { ok: true, data: JSON.parse(line) };
@@ -539,9 +550,22 @@ function buildChecks() {
   const check = (label, bundler, configFile, mode, opts, runtime = false) => {
     const r = run(bundler, configFile, mode);
     const problem = r.ok ? verify(r.data, mode, runtime) : r.out;
-    record('build', label, problem === null, problem, opts);
+    record(runtime.group === 'bun' ? 'bun' : 'build', label, problem === null, problem, opts);
   };
 
+  if (bunOnly) {
+    for (const mode of ['inline', 'extract']) {
+      for (const format of ['cjs', 'mjs']) {
+        const file = project(
+          `bun-${mode}-${format}`,
+          `config.${format}`,
+          webpackConfig(format, mode, 'root'),
+        );
+        check(`bun: rspack1 ${mode} ${format} config`, 'rspack1', file, mode);
+      }
+    }
+    return;
+  }
   for (const bundler of ['rspack1', 'rspack2', 'webpack']) {
     for (const mode of ['inline', 'extract']) {
       for (const format of ['cjs', 'mjs']) {
@@ -603,9 +627,25 @@ function buildChecks() {
 if (only.has('node')) nodeChecks();
 if (only.has('types')) typeChecks();
 if (only.has('build')) buildChecks();
+let bunMissing = false;
+if (only.has('bun')) {
+  const probe = spawnSync('bun', ['--version'], { encoding: 'utf8' });
+  if (probe.status === 0) {
+    console.log(`bun group: bun ${probe.stdout.trim()}`);
+    runtime = { group: 'bun', exe: 'bun', args: ['--bun'] };
+    nodeChecks();
+    buildChecks(true);
+  } else {
+    bunMissing = true;
+    console.log(
+      `NOTE: bun is not on PATH, the bun group is skipped${flag('--require-bun') ? '' : ' (use --require-bun to fail)'}`,
+    );
+  }
+}
 
 const strict = flag('--strict');
-let failedRequired = 0;
+let failedRequired = bunMissing && flag('--require-bun') ? 1 : 0;
+if (failedRequired) console.log('FAIL: --require-bun was given but bun is not on PATH');
 const rows = cells.map((c) => {
   const before = baseline ? baseline.get(c.id) : undefined;
   const required = c.required || before === true || (strict && c.goal);

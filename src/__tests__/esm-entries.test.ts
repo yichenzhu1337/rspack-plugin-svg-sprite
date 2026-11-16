@@ -64,6 +64,18 @@ describe('ESM entry points', () => {
     expect(result).toMatchObject({ status: 0, stdout: 'true rsbuild-plugin-svg-sprite' });
   });
 
+  it('keeps the runtime wrappers browser-safe (no Node built-ins, no require)', () => {
+    for (const file of ['runtime/symbol.mjs', 'runtime/browser-sprite.mjs', 'interop.mjs']) {
+      const code = readFileSync(join(DIST, file), 'utf8')
+        .replace(/\/\/.*$/gm, '')
+        .replace(/\/\*[\s\S]*?\*\//g, '');
+      expect(code).not.toMatch(/node:|createRequire|\brequire\(|await /);
+      for (const [, spec] of code.matchAll(/from '([^']+)'/g)) {
+        expect(spec!.startsWith('.')).toBe(true);
+      }
+    }
+  });
+
   it('exports package.json', () => {
     const result = esm(
       `import { createRequire } from 'node:module';` +
