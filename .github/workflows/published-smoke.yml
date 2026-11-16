@@ -1,0 +1,187 @@
+name: 🔍 Published smoke test
+
+# Installs the package that is on npm right now into the consumer apps, builds and runs them in
+# real browsers, and checks every entry point with the compatibility matrix. It runs every day,
+# on demand, and from the Release workflow right after a publish.
+# A scheduled failure opens (or updates) one `published-smoke-failure` issue, and a green run
+# closes it again.
+on:
+  schedule:
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version or dist-tag of rspack-plugin-svg-sprite to test'
+        type: string
+        default: latest
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version or dist-tag of rspack-plugin-svg-sprite to test'
+        type: string
+        default: latest
+
+permissions: {}
+
+concurrency:
+  group: published-smoke-${{ github.event_name }}-${{ inputs.version || 'latest' }}
+  cancel-in-progress: false
+
+jobs:
+  consumers:
+    name: 🧪 consumers (${{ matrix.browser }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+    env:
+      VERSION: ${{ inputs.version || 'latest' }}
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: ⏳ Wait until npm serves the version
+        run: node e2e/scripts/wait-for-version.mjs "$VERSION"
+
+      - name: 🔍 Read the Playwright version
+        id: playwright
+        working-directory: e2e
+        run: echo "version=$(bun run playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: 💾 Cache the browser
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.browser }}
+
+      - name: 🌐 Install the browser
+        working-directory: e2e
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: bun run playwright install --with-deps "$BROWSER"
+
+      - name: 🧪 Run the tests against the published package
+        env:
+          BROWSER: ${{ matrix.browser }}
+          E2E_SOURCE: npm
+          E2E_VERSION: ${{ env.VERSION }}
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results.json
+        run: bun run test:e2e --project="$BROWSER"
+
+      - name: 📊 Write the summary
+        if: always()
+        working-directory: e2e
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: node scripts/summary.mjs "$BROWSER (published package)" results.json
+
+      - name: 📎 Upload the report and traces
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: published-smoke-${{ matrix.browser }}
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 7
+
+  compat:
+    name: 🧩 compatibility matrix
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ inputs.version || 'latest' }}
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: ⏳ Wait until npm serves the version
+        run: node e2e/scripts/wait-for-version.mjs "$VERSION"
+
+      - name: 🧩 Check every entry point of the published package
+        run: >-
+          node scripts/ci/compat-matrix.mjs "rspack-plugin-svg-sprite@$VERSION"
+          --baseline scripts/ci/compat-baseline-1.5.3.json --strict
+
+  report:
+    name: 📝 report
+    if: ${{ always() && github.event_name == 'schedule' }}
+    needs: [consumers, compat]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: 📝 Open, update or close the issue
+        run: node e2e/scripts/smoke-issue.mjs
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}

@@ -1,92 +1,64 @@
-// Packs the package, installs the tarball into a temp copy of every consumer (outside the
-// workspace, so the apps see exactly what npm users get), and builds each consumer once.
-import { spawn } from 'node:child_process';
+// Installs the package into a temp copy of every consumer (outside the workspace, so the apps
+// see exactly what npm users get), and builds each consumer once.
+//
+// E2E_SOURCE picks where the package comes from:
+//   tarball   (default) the packed tarball of this checkout
+//   registry  the checkout, published to a throwaway local registry and installed by name
+//   npm       the real npm registry, version or dist-tag E2E_VERSION (default latest); nothing
+//             is built locally
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { consumers } from '../consumers.mjs';
-
-const e2eDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const repoRoot = path.resolve(e2eDir, '..');
+import { PACKAGE, buildConsumer, packPackage, resolveVersion } from './lib.mjs';
+import { startRegistry } from './registry.mjs';
 
 export const workDir = process.env.E2E_WORKDIR || path.join(os.tmpdir(), 'svg-sprite-e2e');
 export const manifestPath = path.join(workDir, 'manifest.json');
 
-function run(command, args, cwd, label) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
-    let output = '';
-    child.stdout.on('data', (chunk) => (output += chunk));
-    child.stderr.on('data', (chunk) => (output += chunk));
-    child.on('error', reject);
-    child.on('close', (code) => {
-      if (code === 0) return resolve(output);
-      reject(new Error(`${label} failed with exit code ${code}\n${output.slice(-4000)}`));
-    });
-  });
-}
-
-async function packPackage() {
-  const packDir = path.join(workDir, 'pack');
-  fs.mkdirSync(packDir, { recursive: true });
-  await run('bun', ['run', 'build'], repoRoot, 'bun run build');
-  await run('npm', ['pack', '--pack-destination', packDir], repoRoot, 'npm pack');
-  const tarball = fs.readdirSync(packDir).find((file) => file.endsWith('.tgz'));
-  if (!tarball) throw new Error('npm pack produced no .tgz file');
-  return path.join(packDir, tarball);
-}
-
-async function buildConsumer(consumer, tarball) {
-  const dir = path.join(workDir, consumer.name);
-  const shared = path.join(e2eDir, 'consumers', '_shared');
-  fs.cpSync(shared, dir, { recursive: true });
-  fs.cpSync(path.join(e2eDir, 'consumers', consumer.name), dir, { recursive: true });
-
-  const pkgPath = path.join(dir, 'package.json');
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  pkg.dependencies['rspack-plugin-svg-sprite'] = `file:${tarball}`;
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
-
-  // Each consumer installs and builds with its own package manager. A bundler launched through
-  // `bun run` still runs on Node (its bin has a Node shebang), like for every other user.
-  const pm = consumer.packageManager ?? 'npm';
-  const installs = {
-    npm: ['npm', ['install', '--no-audit', '--no-fund']],
-    bun: ['bun', ['install']],
-    // pnpm's strict node_modules is where missing-dependency bugs surface; the repo itself no
-    // longer uses pnpm, so it is fetched on demand and pinned (bunx cannot run it).
-    pnpm: ['npx', ['--yes', 'pnpm@12.18.0', 'install', '--ignore-workspace']],
-  };
-  const [command, args] = installs[pm];
-  await run(command, args, dir, `${consumer.name}: ${pm} install`);
-  await run(
-    pm === 'bun' ? 'bun' : 'npm',
-    ['run', 'build'],
-    dir,
-    `${consumer.name}: ${pm} run build`,
-  );
-
-  const dist = path.join(dir, 'dist');
-  if (!fs.existsSync(path.join(dist, 'index.html'))) {
-    throw new Error(`${consumer.name}: the build wrote no dist/index.html`);
-  }
-  return dist;
-}
-
 export async function setup() {
   if (process.env.E2E_REUSE === '1' && fs.existsSync(manifestPath)) return;
+  const source = process.env.E2E_SOURCE || 'tarball';
+  if (!['tarball', 'registry', 'npm'].includes(source)) {
+    throw new Error(`E2E_SOURCE must be tarball, registry or npm, not "${source}"`);
+  }
   fs.rmSync(workDir, { recursive: true, force: true });
   fs.mkdirSync(workDir, { recursive: true });
 
   const started = Date.now();
-  const tarball = await packPackage();
-  const dists = await Promise.all(consumers.map((consumer) => buildConsumer(consumer, tarball)));
-  const manifest = Object.fromEntries(consumers.map((c, i) => [c.name, { ...c, dist: dists[i] }]));
-  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-  console.log(
-    `Built ${consumers.length} consumers in ${((Date.now() - started) / 1000).toFixed(1)}s`,
-  );
+  let registry = null;
+  try {
+    let options;
+    if (source === 'npm') {
+      options = { spec: await resolveVersion(process.env.E2E_VERSION || 'latest') };
+    } else {
+      const tarball = await packPackage(path.join(workDir, 'pack'));
+      if (source === 'registry') {
+        registry = await startRegistry(tarball);
+        options = { spec: registry.version, registry: registry.url };
+      } else {
+        options = { spec: `file:${tarball}` };
+      }
+    }
+    const builds = await Promise.all(
+      consumers.map((c) => buildConsumer(c, path.join(workDir, c.name), options)),
+    );
+    const manifest = Object.fromEntries(
+      consumers.map((c, i) => [
+        c.name,
+        { ...c, dist: builds[i].dist, source, installed: builds[i].installed },
+      ]),
+    );
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    const versions = [...new Set(builds.map((b) => b.installed))].join(', ');
+    const seconds = ((Date.now() - started) / 1000).toFixed(1);
+    console.log(
+      `Built ${consumers.length} consumers from ${source} (${PACKAGE}@${versions}) in ${seconds}s`,
+    );
+  } finally {
+    registry?.stop();
+  }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
