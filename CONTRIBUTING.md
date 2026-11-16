@@ -45,7 +45,7 @@ rspack-plugin-svg-sprite/
 │   ├── react-rspack/         # React + Rspack demo — uses this plugin
 │   └── react-webpack/        # React + Webpack demo — uses svg-sprite-loader (for comparison)
 ├── tsconfig.json             # TypeScript config (strict, CommonJS output)
-├── rstest.config.ts          # Test runner config with Istanbul coverage
+├── rstest.config.mts         # Test runner config with Istanbul coverage
 ├── .oxlintrc.json            # Oxlint config
 ├── .oxfmtrc.json             # Oxfmt config (single quotes, trailing commas, 100 char width)
 ├── bun.lock                  # Lockfile (text)
