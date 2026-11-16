@@ -26,6 +26,7 @@
  * pointing the package name at `dist/`. Run `bun run build` first (test:ci does).
  */
 import { describe, it, expect } from '@rstest/core';
+import { DomUtils, parseDocument } from 'htmlparser2';
 import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -111,12 +112,13 @@ interface Classified {
 function classify(block: Block): Classified {
   const code = block.lang === 'diff' ? applyDiff(block.code) : block.code;
   if (block.lang === 'vue') {
-    const m = /<script\b[^>]*>([\s\S]*?)<\/script\s*>/i.exec(code);
-    if (!m) return { kind: null, source: code, ext: 'ts' };
+    // A real HTML parser, not a regex, finds the <script> block of the single-file component.
+    const script = DomUtils.findOne((el) => el.name === 'script', parseDocument(code).children);
+    if (!script) return { kind: null, source: code, ext: 'ts' };
     return {
       kind: 'vue',
-      source: (m[1] as string) + '\nexport {};\n',
-      ext: /lang=["']ts/.test(code) ? 'ts' : 'js',
+      source: DomUtils.textContent(script) + '\nexport {};\n',
+      ext: script.attribs['lang'] === 'ts' ? 'ts' : 'js',
     };
   }
   const trimmed = code.replace(/^(\s*\/\/.*\n)+/, '').trimStart();
