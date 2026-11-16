@@ -7,7 +7,7 @@ A changeset is a short note that says
 what changed for users and whether it is a `patch`, `minor` or `major` change.
 
 ```bash
-pnpm changeset
+bun run changeset
 ```
 
 Commit the generated `.changeset/*.md` file with your change. When changesets land on `main`, a

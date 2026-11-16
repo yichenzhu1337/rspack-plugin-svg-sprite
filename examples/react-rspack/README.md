@@ -9,19 +9,19 @@ This demo shows how to import SVG icons, combine them into a single sprite sheet
 
 ## 🛠️ Setup
 
-From the repository root (recommended — uses pnpm workspaces):
+From the repository root (recommended — uses Bun workspaces):
 
 ```bash
-pnpm install
-pnpm dev:rspack
+bun install
+bun run dev:rspack
 ```
 
 Or from this directory:
 
 ```bash
 cd examples/react-rspack
-pnpm install
-pnpm dev
+bun install
+bun run dev
 ```
 
 > [!TIP]

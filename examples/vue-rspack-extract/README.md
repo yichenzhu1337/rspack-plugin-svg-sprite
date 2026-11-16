@@ -10,13 +10,13 @@ This demo shows the pattern many production apps use: icons are looked up by nam
 From the repository root, install once, then start the dev server from this directory:
 
 ```bash
-pnpm install
+bun install
 cd examples/vue-rspack-extract
-pnpm dev
+bun run dev
 ```
 
 > [!TIP]
-> The dev server starts at **http://localhost:3002**. Use `pnpm build` for a production build.
+> The dev server starts at **http://localhost:3002**. Use `bun run build` for a production build.
 
 ## 🔍 How it works
 

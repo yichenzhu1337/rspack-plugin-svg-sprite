@@ -1,15 +1,15 @@
-# Git hooks. Install with `pnpm exec lefthook install` (runs on `pnpm install` via `prepare`).
+# Git hooks. Install with `bun run lefthook install` (runs on `bun install` via `prepare`).
 # Personal overrides go in lefthook-local.yml, which is git-ignored.
 pre-commit:
   parallel: true
   jobs:
     - name: oxlint
       glob: '*.{ts,tsx}'
-      run: pnpm exec oxlint --fix {staged_files}
+      run: bun run oxlint --fix {staged_files}
       stage_fixed: true
     - name: oxfmt
       glob: '*.{ts,tsx,json,md,yaml,yml}'
-      run: pnpm exec oxfmt {staged_files}
+      run: bun run oxfmt {staged_files}
       stage_fixed: true
 
 # Strips co-author trailers so commits are attributed to the committer only.

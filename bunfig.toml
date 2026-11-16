@@ -1,0 +1,11 @@
+# Bun settings. Bun installs the dependencies and launches the scripts; the code itself runs on
+# Node (rstest, tsc, the Rspack and webpack builds, the release scripts), because that is what
+# users of this package run. `bun run <script>` starts package bins through their Node shebang.
+
+[install]
+# Strict layout: a package can only import what its own package.json declares, like pnpm's
+# default. Undeclared (phantom) dependencies fail instead of resolving by accident.
+linker = "isolated"
+
+# Supply chain: only resolve versions published at least 3 days ago. The value is in seconds.
+minimumReleaseAge = 259200

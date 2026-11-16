@@ -35,20 +35,22 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: ⚙️ Set up pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       # No dependency cache: the output is deployed.
       - name: ⚙️ Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
       - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: 🏗️ Build the package
-        run: pnpm build
+        run: bun run build
       - name: 🏗️ Build the demo with the GitHub Pages base path
-        run: pnpm --filter svg-sprite-consumer-demo build
+        run: bun run --filter svg-sprite-consumer-demo build
         env:
           PUBLIC_PATH: /rspack-plugin-svg-sprite/
       - name: ⚙️ Configure GitHub Pages

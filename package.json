@@ -142,20 +142,20 @@
     "build": "tsc",
     "test": "tsc && rstest run",
     "test:ci": "tsc && rstest run --coverage",
-    "test:mutation": "pnpm dlx @stryker-mutator/core@10.1.1 run",
+    "test:mutation": "bunx @stryker-mutator/core@10.1.1 run",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "lint": "oxlint src/ scripts/",
     "lint:fix": "oxlint src/ scripts/ --fix",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "dev:rspack": "pnpm build && pnpm --filter svg-sprite-consumer-demo dev",
-    "dev:webpack": "pnpm --filter svg-sprite-webpack-demo dev",
-    "prepublishOnly": "pnpm build",
+    "dev:rspack": "bun run build && bun run --filter svg-sprite-consumer-demo dev",
+    "dev:webpack": "bun run --filter svg-sprite-webpack-demo dev",
+    "prepublishOnly": "bun run build",
     "prepare": "node scripts/hooks/install.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "knip": "pnpm build && knip",
-    "test:e2e": "pnpm --filter rspack-plugin-svg-sprite-e2e test",
+    "knip": "bun run build && knip",
+    "test:e2e": "bun run --filter rspack-plugin-svg-sprite-e2e test",
     "check:package": "node scripts/ci/package-check.mjs"
   },
   "peerDependencies": {
@@ -190,5 +190,11 @@
     "typescript": "7.0.2",
     "webpack": "5.105.2"
   },
-  "packageManager": "pnpm@12.18.0"
+  "packageManager": "bun@1.4.4",
+  "workspaces": [
+    ".",
+    "examples/*",
+    "e2e"
+  ],
+  "trustedDependencies": []
 }

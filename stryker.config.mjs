@@ -9,7 +9,7 @@ export default {
   testRunner: 'command',
   commandRunner: {
     command:
-      'pnpm exec rstest run --bail 1 --silent --coverage.enabled=false' +
+      'bun run rstest run --bail 1 --silent --coverage.enabled=false' +
       // Excluded: tests that run full bundler builds or need a built dist/ (too slow per mutant).
       " --exclude 'src/__tests__/integration/**' --exclude 'src/__tests__/esm-interop.test.ts'" +
       " --exclude 'src/__tests__/esm-entries.test.ts' --exclude 'src/__tests__/robustness.test.ts'",

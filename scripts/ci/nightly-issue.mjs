@@ -27,6 +27,7 @@ const NON_BLOCKING = [
   ['canary', 'Rspack and Rsbuild canary'],
   ['peer-floor', 'Peer floor (@rspack/core 0.x)'],
   ['audit', 'Dependency audit'],
+  ['bun-runtime', 'Tests on the Bun runtime'],
 ];
 
 const args = process.argv.slice(2);
@@ -130,7 +131,7 @@ function issueBody() {
   lines.push(
     '### 💡 Next',
     '',
-    '- Open the failed job in the run, and reproduce it locally with `pnpm install --frozen-lockfile && pnpm test`.',
+    '- Open the failed job in the run, and reproduce it locally with `bun install --frozen-lockfile && bun run test`.',
     '- This issue updates itself every night, and closes itself when the blocking jobs pass again.',
     '',
   );

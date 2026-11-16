@@ -60,6 +60,8 @@ npm install rspack-plugin-svg-sprite -D
 pnpm add rspack-plugin-svg-sprite -D
 # or
 yarn add rspack-plugin-svg-sprite -D
+# or
+bun add rspack-plugin-svg-sprite -d
 ```
 
 ### Configure (inline mode)
@@ -455,9 +457,9 @@ The repository includes three runnable demo apps:
 Run locally from the project root:
 
 ```bash
-pnpm install
-pnpm dev:rspack   # http://localhost:3000
-pnpm dev:webpack  # http://localhost:4000
+bun install
+bun run dev:rspack   # http://localhost:3000
+bun run dev:webpack  # http://localhost:4000
 ```
 
 ## 🐛 Troubleshooting
