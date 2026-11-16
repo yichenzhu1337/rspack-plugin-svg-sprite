@@ -11,7 +11,7 @@ import type rsbuild = require('./rsbuild.js');
 import type browserSprite = require('./runtime/browser-sprite.js');
 import type symbol = require('./runtime/symbol.js');
 
-interface CjsView {
+export interface CjsView {
   index: typeof index;
   loader: typeof loader;
   plugin: typeof plugin;
@@ -19,5 +19,3 @@ interface CjsView {
   browserSprite: typeof browserSprite;
   symbol: typeof symbol;
 }
-
-export = CjsView;

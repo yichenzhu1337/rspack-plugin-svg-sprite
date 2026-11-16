@@ -3,7 +3,7 @@
 import * as ns from './symbol.js';
 import { interop } from '../interop.mjs';
 
-import type CjsView from '../cjs-view.cjs';
+import type { CjsView } from '../cjs-view.cjs';
 type Exports = CjsView['symbol'];
 
 // Also carries `.default`, which is what an ESM default import gave before 1.6.0.

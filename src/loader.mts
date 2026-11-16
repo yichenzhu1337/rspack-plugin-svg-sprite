@@ -3,7 +3,7 @@
 import * as ns from './loader.js';
 import { interop } from './interop.mjs';
 
-import type CjsView from './cjs-view.cjs';
+import type { CjsView } from './cjs-view.cjs';
 type Exports = CjsView['loader'];
 const { def, exp } = interop(ns) as { def: Exports['default'] & Exports; exp: Exports };
 

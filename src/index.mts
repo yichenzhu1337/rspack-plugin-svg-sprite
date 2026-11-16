@@ -9,7 +9,7 @@
 import * as ns from './index.js';
 import { interop } from './interop.mjs';
 
-import type CjsView from './cjs-view.cjs';
+import type { CjsView } from './cjs-view.cjs';
 type Exports = CjsView['index'];
 const SvgSpritePlugin: Exports = interop(ns).def;
 
