@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+	<!ENTITY ns_svg "http://www.w3.org/2000/svg">
+	<!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
+	<!ENTITY st0 "fill:#333333">
+]>
+<svg xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;" viewBox="0 0 24 24">
+	<path style="&st0;" d="M4 4h16v16H4z"/>
+	<circle cx="12" cy="12" r="5"/>
+</svg>

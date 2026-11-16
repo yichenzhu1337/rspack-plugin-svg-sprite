@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 40 20">
+  <defs>
+    <path id="shape" d="M0 0h10v10H0z"/>
+  </defs>
+  <use xlink:href="#shape" x="0" y="0" fill="red"/>
+  <use xlink:href="#shape" x="15" y="5" fill="blue"/>
+  <use href="#shape" x="30" y="10" fill="green"/>
+</svg>

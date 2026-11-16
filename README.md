@@ -11,7 +11,7 @@
 [![license](https://npmx.dev/api/registry/badge/license/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 [![renovate](https://img.shields.io/badge/maintained%20with-renovate-1A1F6C?logo=renovate&logoColor=white)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/.github/renovate.json)
 
-**[Documentation](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/)** | **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[Open in StackBlitz](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)**
+**[Documentation](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/)** | **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[Open in StackBlitz](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)** | Listed on the **[Rspack ecosystem page](https://rspack.rs/guide/start/ecosystem#community-plugins)**
 
 ```bash
 npm install rspack-plugin-svg-sprite -D
@@ -348,6 +348,12 @@ module.exports = {
 
 > ✅ **No component changes:** your component code stays the same — the exported symbol object has the identical shape (`id`, `viewBox`, `url`, `content`).
 
+Three differences to check when you migrate:
+
+- **Extract mode `url` target.** `svg-sprite-loader` exports `id: "arrow-usage"` and `url: "sprite.svg#arrow-usage"`, which point at a preview `<use>` element inside the sprite, so `<img src={icon.url}>` and CSS `background: url(...)` render the icon. This package exports `id: "arrow"` and `url: "sprite.svg#arrow"`, which point at the `<symbol>`. That works with `<svg><use href={icon.url} /></svg>` (the recommended usage in both libraries), but browsers do not render a bare symbol as an image. If you used `icon.url` in an `<img>` or in CSS, switch to `<svg><use href={icon.url} /></svg>`.
+- **`class` on the root `<svg>` is not copied to the `<symbol>`.** The loader skips `xmlns`, `version`, `class` and `style` on the root element. `svg-sprite-loader` copies `class`. Put the class on the `<svg>` element where you use the icon.
+- **Preview `<use>` elements in the sprite file use `href`, not `xlink:href`.** `href` in `<use>` needs Safari 12.1 or newer. This only matters when you open the sprite file directly.
+
 ## 🔄 Migrating from `asset/resource`
 
 If you're currently using rspack/webpack's built-in `asset/resource` type to handle SVGs (common in webpack 5+ / rspack projects), you can replace it with this plugin to get proper SVG sprite support:
@@ -555,6 +561,7 @@ If you export an array of configs (a multi-compiler build, for example client an
 
 ### Known limitations
 
+- The preview `<use>` elements in an extracted sprite file use `href`, not `xlink:href`, which needs Safari 12.1 or newer. It only affects opening the sprite file directly.
 - An SVG with no `viewBox` and no numeric `width` and `height` gets `viewBox="0 0 24 24"`. Add a `viewBox` to the source file if that is not its real size.
 - `spriteFilename` is used literally. Placeholders such as `[hash]` or `[chunkname]` are not interpolated.
 - The sprite URL is fixed at build time from the loader's `publicPath` option, or from `output.publicPath` when that is a plain string. `output.publicPath: 'auto'` and function values are not read, so set the loader's `publicPath` in those setups.

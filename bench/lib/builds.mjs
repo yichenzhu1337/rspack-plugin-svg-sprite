@@ -73,23 +73,38 @@ function watchRebuilds(rspack, cfg, dir, runs) {
     const times = [];
     let step = 0;
     let startedAt = 0;
+    // The watcher can report one change twice. Count a rebuild only while a touch is pending,
+    // and never touch the fixture after the run has finished (its directory is deleted then).
+    let pending = false;
+    let done = false;
+    let timer;
     const compiler = rspack(cfg);
     const watching = compiler.watch({ aggregateTimeout: 0 }, (err, stats) => {
+      if (done) return;
       if (err || stats.hasErrors()) {
+        done = true;
+        clearTimeout(timer);
         watching.close(() =>
           reject(err || new Error(stats.toString({ all: false, errors: true }))),
         );
         return;
       }
-      if (step > 0) times.push(performance.now() - startedAt);
+      if (step > 0) {
+        if (!pending) return;
+        pending = false;
+        times.push(performance.now() - startedAt);
+      }
       if (step >= runs + 1) {
+        done = true;
         watching.close(() => resolve(times));
         return;
       }
       step++;
       // Let the watcher settle, then touch one JS file.
-      setTimeout(() => {
+      timer = setTimeout(() => {
+        if (done) return;
         startedAt = performance.now();
+        pending = true;
         writeFileSync(join(dir, 'src', 'touch.js'), `export const touch = ${step};\n`);
       }, 300);
     });
