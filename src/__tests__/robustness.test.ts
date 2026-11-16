@@ -76,7 +76,8 @@ function xmlProblems(xml: string): string[] {
         problems.push(err.message);
       },
     },
-    { xmlMode: true },
+    // Raw attribute text, so an escaped `&lt;` is not reported as a bare `<`.
+    { xmlMode: true, decodeEntities: false },
   );
   parser.write(xml);
   parser.end();
@@ -646,7 +647,7 @@ describe('large inputs', () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// Known defects. Skipped on purpose: each one is a minimal reproduction of a real bug.
+// Former defects. Each one is the minimal reproduction of a bug that is now fixed.
 // ---------------------------------------------------------------------------------------------
 
 function spriteFor(resourcePath: string, content: string): string {
@@ -666,18 +667,18 @@ function runLoaderInto(plugin: any, resourcePath: string, content: string): void
   loader.call(ctx as any, content);
 }
 
-describe('known defects (skipped reproductions)', () => {
+describe('former defects (fixed)', () => {
   // DEFECT 1 (medium). The symbol id is the file name, written into `id="..."` and into the
   // sprite's `<use id href>` without escaping. A file such as `Q&A.svg` produces `id="Q&A"`,
   // which is not well-formed XML, so a browser refuses to parse the whole external sprite and
   // every icon in it disappears.
-  it.skip('a file name with an ampersand keeps the sprite well formed', () => {
+  it('a file name with an ampersand keeps the sprite well formed', () => {
     expect(xmlProblems(spriteFor('/icons/Q&A.svg', TINY))).toEqual([]);
   });
 
   // DEFECT 2 (medium). Same cause with a double quote or `<` in the file name: `a"b.svg` gives
   // `<symbol id="a"b" ...>`, an attribute injection that corrupts the symbol.
-  it.skip('a file name with a quote or angle bracket keeps the sprite well formed', () => {
+  it('a file name with a quote or angle bracket keeps the sprite well formed', () => {
     expect(xmlProblems(spriteFor('/icons/a"b.svg', TINY))).toEqual([]);
     expect(xmlProblems(spriteFor('/icons/a<b.svg', TINY))).toEqual([]);
   });
@@ -685,7 +686,7 @@ describe('known defects (skipped reproductions)', () => {
   // DEFECT 3 (low). Quadratic regex in the v1 fallback. An SVG with a malformed root and many
   // `<svg` occurrences makes `/<svg([^>]*)>/` rescan to the end of the file at every position:
   // 20 000 repetitions (100 KB) take about 8 seconds, 100 000 would take minutes.
-  it.skip('a file that is 20 000 repetitions of "<svg " does not stall the loader', () => {
+  it('a file that is 20 000 repetitions of "<svg " does not stall the loader', () => {
     const started = Date.now();
     runLoader('/x/evil.svg', '<svg '.repeat(20_000), { extract: true });
     expect(Date.now() - started).toBeLessThan(1000);
@@ -694,9 +695,13 @@ describe('known defects (skipped reproductions)', () => {
   // DEFECT 4 (low). A DOCTYPE that declares entities used inside the icon is dropped with the
   // rest of the prolog, so the sprite references an entity it no longer declares and is not
   // well-formed XML. Old Illustrator exports do this.
-  it.skip('entities declared in a DOCTYPE do not leave undeclared references in the sprite', () => {
+  it('entities declared in a DOCTYPE are reported with a build warning naming file and entity', () => {
     const svg =
       '<!DOCTYPE svg [<!ENTITY fill "red">]><svg viewBox="0 0 5 5"><path fill="&fill;" d="M0 0"/></svg>';
-    expect(xmlProblems(spriteFor('/icons/ent.svg', svg))).toEqual([]);
+    const out = runLoader('/icons/ent.svg', svg);
+    expect(out.warnings).toHaveLength(1);
+    expect(out.warnings[0]!.message).toContain('/icons/ent.svg');
+    expect(out.warnings[0]!.message).toContain('&fill;');
+    expect(out.warnings[0]!.message).toContain('DOCTYPE');
   });
 });
