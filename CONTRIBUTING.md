@@ -164,6 +164,10 @@ node e2e/scripts/differential.mjs --baseline latest       # compare the output w
 
 The differential script builds every consumer with a published version and with this checkout, and fails on any difference in the emitted sprites or the exported `{ id, viewBox, url, content }`. A deliberate change goes in `e2e/differential-allow.json` with a reason and the version that introduced it. `published-smoke.yml` runs the `npm` source and the compatibility matrix against the published package every day, and the Release workflow runs it on the new version right after each publish.
 
+### 🔦 Lighthouse
+
+Pull requests that touch the demo (`examples/react-rspack`) or the docs (`website`) run Lighthouse against the built site, and a weekly run catches drift. The thresholds are in `.config/lighthouserc.json`; the workflow is not a required check. To run it locally, build both sites into `_site/` as `.github/workflows/lighthouse.yml` does, then `e2e/node_modules/.bin/lhci autorun --config=.config/lighthouserc.json`.
+
 ## 🧹 Code Style
 
 - **TypeScript** with `strict: true` — source in `src/`, compiled output in `dist/`.

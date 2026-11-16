@@ -1,0 +1,86 @@
+name: Lighthouse
+
+on:
+  pull_request:
+    paths:
+      - 'examples/react-rspack/**'
+      - 'website/**'
+      - '.config/lighthouserc.json'
+      - '.github/workflows/lighthouse.yml'
+  schedule:
+    - cron: '41 4 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: lighthouse-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lighthouse:
+    name: 🔦 Audit the demo and the docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - name: 📥 Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: ⚙️ Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+      - name: 🏗️ Build the package
+        run: bun run build
+      # The same layout as the Pages artifact of deploy.yml, with both base paths at the site
+      # root, so that the audit can serve it from a local directory.
+      - name: 🏗️ Build the demo and the docs
+        run: |
+          set -euo pipefail
+          bun run --filter svg-sprite-consumer-demo build
+          DOCS_BASE=/docs/ bun run --filter rspack-plugin-svg-sprite-docs build
+          mkdir -p _site/docs
+          cp -R examples/react-rspack/dist/. _site/
+          cp -R website/doc_build/. _site/docs/
+          test -f _site/index.html
+          test -f _site/docs/index.html
+      - name: 🔦 Run Lighthouse (3 runs per page, median)
+        run: e2e/node_modules/.bin/lhci autorun --config=.config/lighthouserc.json
+      - name: 📊 Write the scores to the job summary
+        if: always()
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const file = ".lighthouseci/manifest.json";
+            if (!fs.existsSync(file)) process.exit(0);
+            const rows = JSON.parse(fs.readFileSync(file, "utf8")).filter((r) => r.isRepresentativeRun);
+            const pct = (n) => Math.round(n * 100);
+            const out = ["### 🔦 Lighthouse (median of 3 runs)", "", "| Page | Performance | Accessibility | Best practices | SEO |", "| --- | --- | --- | --- | --- |"];
+            for (const r of rows) {
+              const s = r.summary;
+              out.push(`| ${new URL(r.url).pathname} | ${pct(s.performance)} | ${pct(s.accessibility)} | ${pct(s["best-practices"])} | ${pct(s.seo)} |`);
+            }
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
+          '
+      - name: 📦 Upload the reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          if-no-files-found: ignore
+          retention-days: 14
