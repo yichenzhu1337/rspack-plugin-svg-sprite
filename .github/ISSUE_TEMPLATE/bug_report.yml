@@ -76,7 +76,7 @@ body:
     id: reproduction
     attributes:
       label: Minimal reproduction
-      description: A link to a public repository or a StackBlitz project. A small reproduction lets the maintainer see the problem first-hand, which is usually the fastest way to a fix. Issues without one may be closed.
+      description: A link to a public repository or a StackBlitz project. You can start from the StackBlitz starter at https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz. A small reproduction lets the maintainer see the problem first-hand, which is usually the fastest way to a fix. Issues without one may be closed.
       placeholder: 'https://github.com/you/repro or https://stackblitz.com/...'
     validations:
       required: true

@@ -198,7 +198,8 @@
     ".",
     "examples/*",
     "e2e",
-    "bench"
+    "bench",
+    "website"
   ],
   "trustedDependencies": []
 }

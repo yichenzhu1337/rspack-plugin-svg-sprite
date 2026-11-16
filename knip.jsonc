@@ -36,6 +36,11 @@
       "entry": ["compare.mjs"],
       "project": ["**/*.mjs"],
     },
+    "website": {
+      // The Rspress config is read by the rspress CLI, not imported.
+      "entry": ["rspress.config.ts"],
+      "project": ["*.ts"],
+    },
     "examples/*": {
       // svgo-loader requires svgo at runtime as its peer dependency.
       "ignoreDependencies": ["svgo"],
