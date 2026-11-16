@@ -447,6 +447,7 @@ The peer range still accepts `@rspack/core` 0.5 and newer, so existing installs 
 - **CommonJS and ESM.** Every entry (`.`, `/plugin`, `/loader`, `/rsbuild`, `/runtime/*`) works with `require()` and with `import`. From 1.6.0, ESM default imports of the subpaths give the real value, so an ESM config can write `import SvgSpritePlugin from 'rspack-plugin-svg-sprite/plugin'`.
 - **One implementation.** The ESM entry points re-export the CommonJS build, so a page always has exactly one sprite, even when app code imports the runtime directly.
 - **TypeScript.** Types resolve under `moduleResolution` `node16`, `nodenext` and `bundler`, and from 1.6.0 also under the older `node10` setting for every subpath.
+- **TypeScript versions.** The declarations compile on TypeScript 5.3 and newer. CI checks them on 5.3, 5.9 and 7. Older compilers cannot parse the `with` import attribute in the `.d.mts` files.
 
 ## 📚 Examples
 
