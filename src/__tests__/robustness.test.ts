@@ -28,6 +28,32 @@ const XMLNS = 'xmlns="http://www.w3.org/2000/svg"';
 // Well-formedness check (htmlparser2 in XML mode, plus the checks it is too lenient to make)
 // ---------------------------------------------------------------------------------------------
 
+// Drops CDATA sections and comments in one forward scan (no pattern is applied twice).
+function stripCdataAndComments(xml: string): string {
+  const kept: string[] = [];
+  let from = 0;
+  while (from < xml.length) {
+    const open = xml.indexOf('<!', from);
+    if (open === -1) break;
+    const close = xml.startsWith('<![CDATA[', open)
+      ? ']]>'
+      : xml.startsWith('<!--', open)
+        ? '-->'
+        : '';
+    if (!close) {
+      kept.push(xml.slice(from, open + 2));
+      from = open + 2;
+      continue;
+    }
+    kept.push(xml.slice(from, open));
+    const end = xml.indexOf(close, open);
+    if (end === -1) return kept.join('');
+    from = end + close.length;
+  }
+  kept.push(xml.slice(from));
+  return kept.join('');
+}
+
 function xmlProblems(xml: string): string[] {
   const problems: string[] = [];
   const stack: string[] = [];
@@ -56,7 +82,7 @@ function xmlProblems(xml: string): string[] {
   parser.end();
   if (stack.length > 0) problems.push('unclosed: ' + stack.join(','));
 
-  const text = xml.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, '').replace(/<!--[\s\S]*?-->/g, '');
+  const text = stripCdataAndComments(xml);
   const entity = text.match(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)[^\s<]{0,12}/g);
   if (entity) problems.push('bare or undeclared entity: ' + entity.join(' '));
   return problems;
