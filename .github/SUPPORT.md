@@ -19,5 +19,5 @@ Check the Troubleshooting section of the [README](../README.md) and search exist
 - Package version, bundler and version, and whether you use inline or extract mode
 - Node.js version and operating system
 - Your loader rule and plugin config
-- A minimal reproduction (a public repository or StackBlitz project)
+- A minimal reproduction (a public repository, or a fork of the [StackBlitz starter](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz))
 - Build output or console errors

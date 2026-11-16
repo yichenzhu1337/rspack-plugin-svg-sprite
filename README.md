@@ -11,7 +11,7 @@
 [![license](https://npmx.dev/api/registry/badge/license/rspack-plugin-svg-sprite)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/LICENSE)
 [![renovate](https://img.shields.io/badge/maintained%20with-renovate-1A1F6C?logo=renovate&logoColor=white)](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/.github/renovate.json)
 
-**[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)**
+**[Documentation](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/)** | **[Live Demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** | **[Open in StackBlitz](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz)** | **[npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)** | **[npmcharts](https://npmcharts.com/compare/rspack-plugin-svg-sprite?minimal=true)**
 
 ```bash
 npm install rspack-plugin-svg-sprite -D
@@ -453,6 +453,8 @@ The repository includes three runnable demo apps:
 | [`vue-rspack-extract`](examples/vue-rspack-extract/) | Rspack    | `rspack-plugin-svg-sprite` | 3002 | Vue 3 + extract mode with `plainSprite` and external `<use href>` |
 
 **[Live demo (Rspack)](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)** — see the plugin in action.
+
+**[Open the starter in StackBlitz](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz)** — a minimal Rspack project that installs the published package ([`starters/stackblitz`](starters/stackblitz/)).
 
 Run locally from the project root:
 

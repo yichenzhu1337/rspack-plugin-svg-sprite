@@ -1,0 +1,17 @@
+{
+  "name": "svg-sprite-stackblitz-starter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal Rspack project using rspack-plugin-svg-sprite, for StackBlitz and bug reproductions",
+  "scripts": {
+    "dev": "rspack serve",
+    "build": "rspack build"
+  },
+  "dependencies": {
+    "rspack-plugin-svg-sprite": "^1.6.2"
+  },
+  "devDependencies": {
+    "@rspack/cli": "^1.7.6",
+    "@rspack/core": "^1.7.6"
+  }
+}
