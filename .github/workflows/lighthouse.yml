@@ -62,20 +62,7 @@ jobs:
         run: e2e/node_modules/.bin/lhci autorun --config=.config/lighthouserc.json
       - name: 📊 Write the scores to the job summary
         if: always()
-        run: |
-          node -e '
-            const fs = require("node:fs");
-            const file = ".lighthouseci/manifest.json";
-            if (!fs.existsSync(file)) process.exit(0);
-            const rows = JSON.parse(fs.readFileSync(file, "utf8")).filter((r) => r.isRepresentativeRun);
-            const pct = (n) => Math.round(n * 100);
-            const out = ["### 🔦 Lighthouse (median of 3 runs)", "", "| Page | Performance | Accessibility | Best practices | SEO |", "| --- | --- | --- | --- | --- |"];
-            for (const r of rows) {
-              const s = r.summary;
-              out.push(`| ${new URL(r.url).pathname} | ${pct(s.performance)} | ${pct(s.accessibility)} | ${pct(s["best-practices"])} | ${pct(s.seo)} |`);
-            }
-            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
-          '
+        run: node e2e/scripts/lighthouse-summary.mjs
       - name: 📦 Upload the reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
