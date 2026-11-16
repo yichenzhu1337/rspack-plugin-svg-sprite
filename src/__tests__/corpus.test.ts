@@ -163,9 +163,11 @@ describe('real-world corpus', () => {
   }
 
   it('matches the golden output for the whole corpus', async () => {
+    // Carriage returns are written as `\r` so line-ending conversion cannot change the file.
     const golden = FILES.map((file) => {
       const s = runLoader(file);
-      return '=== ' + file + '\n' + s.id + '\n' + s.viewBox + '\n' + s.content + '\n';
+      const content = s.content.replace(/\r/g, '\\r');
+      return '=== ' + file + '\n' + s.id + '\n' + s.viewBox + '\n' + content + '\n';
     }).join('');
     await expect(golden).toMatchFileSnapshot(
       path.resolve(process.cwd(), 'src/__tests__/__snapshots__/corpus.golden.txt'),

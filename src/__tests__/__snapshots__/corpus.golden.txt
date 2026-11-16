@@ -586,11 +586,11 @@ messy--bom-prefixed
 === messy--crlf-line-endings.svg
 messy--crlf-line-endings
 0 0 24 24
-<symbol id="messy--crlf-line-endings" viewBox="0 0 24 24"><g fill="none" stroke="#000">
-    <path d="M4 4
-      L20 4
-      L20 20 Z"/>
-    <rect x="6" y="6" width="4" height="4"/>
+<symbol id="messy--crlf-line-endings" viewBox="0 0 24 24"><g fill="none" stroke="#000">\r
+    <path d="M4 4\r
+      L20 4\r
+      L20 20 Z"/>\r
+    <rect x="6" y="6" width="4" height="4"/>\r
   </g></symbol>
 === messy--doctype-entities.svg
 messy--doctype-entities
