@@ -5,7 +5,14 @@ import { appendFileSync, readFileSync } from 'node:fs';
 
 const line = `${process.env.FAKE_NAME} ${process.argv.slice(2).join(' ')}`;
 if (process.env.FAKE_LOG) appendFileSync(process.env.FAKE_LOG, `${line}\n`);
-const responses = JSON.parse(readFileSync(process.env.FAKE_RESPONSES, 'utf8'));
+interface Fake {
+  out?: string;
+  err?: string;
+  code?: number;
+}
+const responses: Record<string, Fake> = JSON.parse(
+  readFileSync(process.env.FAKE_RESPONSES as string, 'utf8'),
+);
 const key =
   line in responses
     ? line
@@ -14,7 +21,7 @@ if (!key) {
   console.error(`no fake response for: ${line}`);
   process.exit(1);
 }
-const { out = '', err = '', code = 0 } = responses[key];
+const { out = '', err = '', code = 0 } = responses[key] as Fake;
 if (out) process.stdout.write(`${out}\n`);
 if (err) process.stderr.write(`${err}\n`);
 process.exit(code);

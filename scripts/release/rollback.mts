@@ -1,40 +1,40 @@
 #!/usr/bin/env node
 // Rolls the `latest` dist-tag back and deprecates a bad release.
 //
-//   node scripts/release/rollback.mjs <bad-version> [--to <good-version>] [--execute]
+//   node scripts/release/rollback.mts <bad-version> [--to <good-version>] [--execute]
 //
 // Without --execute it only prints what it would do. With --execute it runs the two npm commands,
 // which needs the maintainer's own npm login (`npm whoami` must work, with 2FA when it is on).
 // <good-version> defaults to the highest published, non-prerelease version below <bad-version>.
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
-import { compare, isPrerelease, parse } from '../lib/semver.mjs';
-import { bold, dim, fail, info, ok, warn } from '../lib/output.mjs';
+import { compare, isPrerelease, parse } from '../lib/semver.mts';
+import { bold, dim, fail, info, ok, warn } from '../lib/output.mts';
 
 const PKG = 'rspack-plugin-svg-sprite';
 const REPO = 'https://github.com/yichenzhu1337/rspack-plugin-svg-sprite';
 
 // The highest published release (no prerelease) that is lower than `bad`, or null.
-export function pickGoodVersion(bad, published) {
+export function pickGoodVersion(bad: string, published: string[]): string | null {
   const candidates = published
     .filter((v) => parse(v) && !isPrerelease(v) && compare(v, bad) < 0)
     .sort(compare);
   return candidates.at(-1) ?? null;
 }
 
-export function deprecationMessage(bad, good) {
+export function deprecationMessage(bad: string, good: string): string {
   return `${bad} has a defect and was rolled back. Use ${good} instead.`;
 }
 
 // The two npm commands, as argument lists.
-export function plan(bad, good) {
+export function plan(bad: string, good: string): string[][] {
   return [
     ['dist-tag', 'add', `${PKG}@${good}`, 'latest'],
     ['deprecate', `${PKG}@${bad}`, deprecationMessage(bad, good)],
   ];
 }
 
-export function checklist(bad, good) {
+export function checklist(bad: string, good: string): string[] {
   return [
     `Check from npm: \`npm view ${PKG} dist-tags\` shows latest = ${good}.`,
     `Check the install: \`npm i ${PKG}@latest\` in a scratch folder resolves to ${good}.`,
@@ -45,10 +45,10 @@ export function checklist(bad, good) {
   ];
 }
 
-const shell = (args) =>
-  `npm ${args.map((a) => (/^[\w./:=@-]+$/.test(a) ? a : JSON.stringify(a))).join(' ')}`;
+const shell = (args: string[]) =>
+  `npm ${args.map((a: string) => (/^[\w./:=@-]+$/.test(a) ? a : JSON.stringify(a))).join(' ')}`;
 
-function publishedVersions() {
+function publishedVersions(): string[] {
   const out = execFileSync('npm', ['view', PKG, 'versions', '--json'], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -57,8 +57,14 @@ function publishedVersions() {
   return Array.isArray(parsed) ? parsed : [parsed];
 }
 
-export function parseArgs(argv) {
-  const args = { bad: null, to: null, execute: false };
+interface Args {
+  bad: string | null;
+  to: string | null;
+  execute: boolean;
+}
+
+export function parseArgs(argv: string[]): Args {
+  const args: Args = { bad: null, to: null, execute: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--execute') args.execute = true;
     else if (argv[i] === '--to') args.to = argv[++i] ?? null;
@@ -68,20 +74,20 @@ export function parseArgs(argv) {
   return args;
 }
 
-export function main(argv) {
-  const usage = 'usage: rollback.mjs <bad-version> [--to <good-version>] [--execute]';
-  let args;
+export function main(argv: string[]): number {
+  const usage = 'usage: rollback.mts <bad-version> [--to <good-version>] [--execute]';
+  let args: Args;
   try {
     args = parseArgs(argv);
   } catch (error) {
-    console.error(`${error.message}\n${usage}`);
+    console.error(`${(error as Error).message}\n${usage}`);
     return 2;
   }
   if (!args.bad || !parse(args.bad) || (args.to !== null && !parse(args.to))) {
     console.error(usage);
     return 2;
   }
-  let published;
+  let published: string[];
   try {
     published = publishedVersions();
   } catch {

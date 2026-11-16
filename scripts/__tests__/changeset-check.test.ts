@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@rstest/core';
 import { commit, makeRepo, run, script } from './helpers';
 
-const CHECK = script('ci', 'changeset-check.mjs');
+const CHECK = script('ci', 'changeset-check.mts');
 const PKG = 'rspack-plugin-svg-sprite';
 const PACKAGE_JSON = JSON.stringify({
   name: PKG,

@@ -1,5 +1,5 @@
 // commit-msg hook: strips co-author and "made with" trailers so commits are attributed to the
-// committer only. Usage: node scripts/hooks/strip-trailers.mjs <commit-message-file>
+// committer only. Usage: node scripts/hooks/strip-trailers.mts <commit-message-file>
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const file = process.argv[2];

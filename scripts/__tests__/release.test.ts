@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { fakeTools, git, makeRepo, run, script, tempDir, write } from './helpers';
 
-const RELEASE = script('release', 'release.mjs');
+const RELEASE = script('release', 'release.mts');
 const PKG = 'rspack-plugin-svg-sprite';
 const NIGHTLY =
   'gh run list --workflow nightly.yml --branch main --status completed --limit 1 --json conclusion,url';
@@ -55,7 +55,7 @@ function guards(tools: ReturnType<typeof registry>, env: Record<string, string>,
   });
 }
 
-describe('release.mjs guards', () => {
+describe('release.mts guards', () => {
   it('is ready on a clean main in a dry run and records version, latest and no warnings', () => {
     const result = guards(registry(), { MODE: 'dry-run' });
     expect(result.code).toBe(0);
@@ -192,7 +192,7 @@ describe('release.mjs guards', () => {
   });
 });
 
-describe('release.mjs notes', () => {
+describe('release.mts notes', () => {
   it('prints the changelog section for a version', () => {
     const result = run(RELEASE, ['notes', '1.2.3'], { cwd: project() });
     expect(result.code).toBe(0);
@@ -209,7 +209,7 @@ describe('release.mjs notes', () => {
   });
 });
 
-describe('release.mjs usage', () => {
+describe('release.mts usage', () => {
   it('exits 2 and lists the commands for an unknown command', () => {
     const result = run(RELEASE, ['nope']);
     expect(result.code).toBe(2);
@@ -217,7 +217,7 @@ describe('release.mjs usage', () => {
   });
 });
 
-describe('release.mjs report', () => {
+describe('release.mts report', () => {
   const pack = (files: string[], size: number) =>
     JSON.stringify([
       { files: files.map((path) => ({ path })), unpackedSize: size, entryCount: files.length },
@@ -341,7 +341,7 @@ describe('release.mjs report', () => {
   });
 });
 
-describe('release.mjs verify', () => {
+describe('release.mts verify', () => {
   const served = (extra: Record<string, Fake> = {}) =>
     registry({
       [`npm view ${PKG}@1.2.3 version`]: { out: '1.2.3' },

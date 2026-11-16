@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Consumer compatibility matrix for the published package.
 //
-//   node scripts/ci/compat-matrix.mjs <tarball|spec> [options]
+//   node scripts/ci/compat-matrix.mts <tarball|spec> [options]
 //
 // Installs the package into a fresh temporary project, together with the bundlers and
 // TypeScript, and checks every public entry point the way consumers use it:
@@ -56,8 +56,8 @@ const TOOLS = {
 // Arguments
 
 const argv = process.argv.slice(2);
-const flag = (name) => argv.includes(name);
-const option = (name) => {
+const flag = (name: string) => argv.includes(name);
+const option = (name: string) => {
   const i = argv.indexOf(name);
   return i === -1 ? undefined : argv[i + 1];
 };
@@ -65,19 +65,23 @@ const target = argv.find(
   (a, i) => !a.startsWith('--') && !['--baseline', '--json', '--only'].includes(argv[i - 1]),
 );
 if (!target) {
-  console.error('usage: compat-matrix.mjs <tarball|spec> [--baseline f] [--json f] [--strict]');
+  console.error('usage: compat-matrix.mts <tarball|spec> [--baseline f] [--json f] [--strict]');
   process.exit(2);
 }
 const only = new Set((option('--only') || 'node,types,build,bun').split(','));
 const baseline = option('--baseline')
-  ? new Map(JSON.parse(readFileSync(option('--baseline'), 'utf8')).cells.map((c) => [c.id, c.pass]))
+  ? new Map<string, boolean>(
+      JSON.parse(readFileSync(option('--baseline') as string, 'utf8')).cells.map(
+        (c: { id: string; pass: boolean }): [string, boolean] => [c.id, c.pass],
+      ),
+    )
   : null;
 
 // ---------------------------------------------------------------------------------------------
 // Temporary consumer project
 
 const dir = realpathSync(mkdtempSync(join(tmpdir(), 'svg-sprite-compat-')));
-const write = (rel, text) => {
+const write = (rel: string, text: string) => {
   const abs = join(dir, rel);
   mkdirSync(dirname(abs), { recursive: true });
   writeFileSync(abs, text);
@@ -102,8 +106,22 @@ execFileSync(
 const installed = JSON.parse(readFileSync(join(dir, 'node_modules', PKG, 'package.json'), 'utf8'));
 console.log(`testing ${PKG}@${installed.version}\n`);
 
-const cells = [];
-function record(group, id, pass, detail, { required = false, goal = false } = {}) {
+interface Cell {
+  group: string;
+  id: string;
+  pass: boolean;
+  detail: string;
+  required: boolean;
+  goal: boolean;
+}
+const cells: Cell[] = [];
+function record(
+  group: string,
+  id: string,
+  pass: boolean,
+  detail: unknown,
+  { required = false, goal = false }: { required?: boolean; goal?: boolean } = {},
+) {
   cells.push({
     group,
     // The bun group repeats the node cells; the prefix keeps the ids (and the baseline) apart.
@@ -118,11 +136,16 @@ function record(group, id, pass, detail, { required = false, goal = false } = {}
 // ---------------------------------------------------------------------------------------------
 // Entry points and what consumers expect from them
 
-const S = (sub) => (sub === '.' ? PKG : `${PKG}/${sub.slice(2)}`);
+const S = (sub: string) => (sub === '.' ? PKG : `${PKG}/${sub.slice(2)}`);
 
 // `main` checks the thing an entry is about: what `require(x).default` or an ESM default import
 // should give a consumer. `named` lists the named exports.
-const ENTRIES = [
+const ENTRIES: {
+  sub: string;
+  main: string | null;
+  named: string[];
+  cjsMain?: boolean;
+}[] = [
   {
     sub: '.',
     main: "typeof v === 'function' && typeof new v().apply === 'function'",
@@ -164,13 +187,18 @@ const ENTRIES = [
 // Node: CommonJS and ESM consumers
 
 // `exe`/`args` pick the runtime: Node by default, `bun --bun` for the bun group.
-let runtime = { group: 'node', exe: process.execPath, args: [] };
-function node(code, esm) {
+let runtime: { group: string; exe: string; args: string[] } = {
+  group: 'node',
+  exe: process.execPath,
+  args: [],
+};
+function node(code: string, esm?: boolean) {
   const file = write(`node-checks/check-${cells.length}.${esm ? 'mjs' : 'cjs'}`, code);
   const r = spawnSync(runtime.exe, [...runtime.args, file], { cwd: dir, encoding: 'utf8' });
   return { ok: r.status === 0, out: `${r.stdout}${r.stderr}`.trim() };
 }
-const assertJs = (expr, what) => `if (!(${expr})) throw new Error(${JSON.stringify(what)});\n`;
+const assertJs = (expr: string, what: string) =>
+  `if (!(${expr})) throw new Error(${JSON.stringify(what)});\n`;
 
 function nodeChecks() {
   for (const e of ENTRIES) {
@@ -181,7 +209,7 @@ function nodeChecks() {
     record(runtime.group, `require ${e.sub}`, r.ok, r.out, { required: true });
     if (e.cjsMain) {
       r = node(
-        `const v = require('${s}');\n${assertJs(e.main, 'require(x) is not the entry value')}`,
+        `const v = require('${s}');\n${assertJs(e.main as string, 'require(x) is not the entry value')}`,
       );
       record(runtime.group, `require ${e.sub} is the value`, r.ok, r.out, { required: true });
     }
@@ -301,7 +329,7 @@ const TS_MODES = [
   { name: 'bundler', ext: 'ts', options: { module: 'esnext', moduleResolution: 'bundler' } },
 ];
 
-function tsc(project) {
+function tsc(project: string) {
   const r = spawnSync(
     process.execPath,
     [join(dir, 'node_modules/typescript/bin/tsc'), '-p', project, '--pretty', 'false'],
@@ -390,9 +418,9 @@ const ENTRY_RUNTIME_JS =
   "sprite.add(new SpriteSymbol({ id: 'extra', viewBox: '0 0 1 1', content: '<symbol id=\"extra\"></symbol>' }));\n" +
   'globalThis.__result = { isSymbol: star instanceof SpriteSymbol, icons: [{ id: star.id, url: String(star.url) }] };\n';
 
-function webpackConfig(format, mode, variant) {
+function webpackConfig(format: string, mode: string, variant: string) {
   const extract = mode === 'extract';
-  const lines = [];
+  const lines: string[] = [];
   if (format === 'cjs') {
     lines.push(
       variant === 'subpath'
@@ -442,7 +470,7 @@ function webpackConfig(format, mode, variant) {
   return lines.join('\n') + '\n';
 }
 
-function rsbuildConfig(format, mode) {
+function rsbuildConfig(format: string, mode: string) {
   const head =
     format === 'cjs'
       ? `const { pluginSvgSprite } = require('${PKG}/rsbuild');`
@@ -497,19 +525,29 @@ const sprite = mode === 'extract' && existsSync(join(out, 'sprite.svg')) ? readF
 console.log(JSON.stringify({ result, sprites: inserted.map((n) => n.html), sprite }));
 `;
 
+interface RunData {
+  result: { icons?: { id: string; url: string }[]; isSymbol?: boolean };
+  sprites: string[];
+  sprite: string | null;
+}
+
 // `bunOnly` limits the matrix to Rspack 1 builds with the shared config shapes.
 function buildChecks(bunOnly = false) {
   write('runner.mjs', RUNNER);
   write('icons/star.svg', STAR);
   write('icons/circle.svg', CIRCLE);
-  const project = (name, configName, config, entry = ENTRY_JS) => {
+  const project = (name: string, configName: string, config: string, entry = ENTRY_JS) => {
     write(`${name}/src/icons/star.svg`, STAR);
     write(`${name}/src/icons/circle.svg`, CIRCLE);
     write(`${name}/src/index.js`, ENTRY_JS);
     write(`${name}/src/runtime.js`, entry === ENTRY_JS ? ENTRY_RUNTIME_JS : entry);
     return write(`${name}/${configName}`, config);
   };
-  const run = (bundler, configFile, mode) => {
+  const run = (
+    bundler: string,
+    configFile: string,
+    mode: string,
+  ): { ok: false; out: string } | { ok: true; data: RunData } => {
     const r = spawnSync(
       runtime.exe,
       [...runtime.args, join(dir, 'runner.mjs'), bundler, configFile, mode],
@@ -521,9 +559,9 @@ function buildChecks(bunOnly = false) {
     );
     if (r.status !== 0) return { ok: false, out: `${r.stdout}${r.stderr}`.trim() };
     const line = r.stdout.trim().split('\n').pop();
-    return { ok: true, data: JSON.parse(line) };
+    return { ok: true, data: JSON.parse(line as string) };
   };
-  const verify = (data, mode, runtime) => {
+  const verify = (data: RunData, mode: string, runtime: boolean) => {
     const icons = data.result && data.result.icons;
     if (!icons) return 'bundle did not export the icons';
     const ids = runtime ? ['star'] : ['star', 'circle'];
@@ -547,10 +585,24 @@ function buildChecks(bunOnly = false) {
     }
     return null;
   };
-  const check = (label, bundler, configFile, mode, opts, runtime = false) => {
+  const check = (
+    label: string,
+    bundler: string,
+    configFile: string,
+    mode: string,
+    opts?: { required?: boolean; goal?: boolean },
+    runtime: boolean | { group?: string } = false,
+  ) => {
     const r = run(bundler, configFile, mode);
-    const problem = r.ok ? verify(r.data, mode, runtime) : r.out;
-    record(runtime.group === 'bun' ? 'bun' : 'build', label, problem === null, problem, opts);
+    const problem = r.ok ? verify(r.data, mode, runtime as boolean) : r.out;
+    // `runtime` is the boolean flag here, so `.group` is always undefined and the group is 'build'.
+    record(
+      (runtime as { group?: string }).group === 'bun' ? 'bun' : 'build',
+      label,
+      problem === null,
+      problem,
+      opts,
+    );
   };
 
   if (bunOnly) {
@@ -655,7 +707,7 @@ const rows = cells.map((c) => {
   return { ...c, required, before, change };
 });
 
-const yesNo = (v) => (v === undefined ? '-' : v ? 'pass' : 'FAIL');
+const yesNo = (v: boolean | undefined) => (v === undefined ? '-' : v ? 'pass' : 'FAIL');
 const width = Math.max(...rows.map((r) => r.id.length)) + 2;
 let group = '';
 for (const r of rows) {
@@ -678,7 +730,7 @@ console.log(
 );
 if (option('--json')) {
   writeFileSync(
-    option('--json'),
+    option('--json') as string,
     JSON.stringify({ version: installed.version, cells: rows }, null, 2) + '\n',
   );
 }

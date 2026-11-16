@@ -6,15 +6,15 @@ import {
   parseArgs,
   pickGoodVersion,
   plan,
-} from '../release/rollback.mjs';
+} from '../release/rollback.mts';
 
-const ROLLBACK = script('release', 'rollback.mjs');
+const ROLLBACK = script('release', 'rollback.mts');
 const PKG = 'rspack-plugin-svg-sprite';
 const VERSIONS = ['1.5.0', '1.6.0', '1.6.1-rc.1', '1.6.1', '1.6.2', '1.7.0-rc.1'];
 const registry = (extra = {}) =>
   fakeTools({ [`npm view ${PKG} versions --json`]: { out: JSON.stringify(VERSIONS) }, ...extra });
 
-describe('rollback.mjs helpers', () => {
+describe('rollback.mts helpers', () => {
   it('picks the highest release below the bad version, skipping prereleases', () => {
     expect(pickGoodVersion('1.6.2', VERSIONS)).toBe('1.6.1');
     expect(pickGoodVersion('1.6.1', VERSIONS)).toBe('1.6.0');
@@ -41,7 +41,7 @@ describe('rollback.mjs helpers', () => {
   });
 });
 
-describe('rollback.mjs', () => {
+describe('rollback.mts', () => {
   it('prints a dry run by default and runs nothing', () => {
     const tools = registry();
     const result = run(ROLLBACK, ['1.6.2', '--to', '1.6.0'], { bin: tools.dir });

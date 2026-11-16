@@ -1,6 +1,6 @@
 // The CHANGELOG.md section for one version, or null when there is none.
 // Plain line scan: the version is compared as text, never compiled into a pattern.
-export function sectionOf(text, version) {
+export function sectionOf(text: string, version: string): string | null {
   const lines = text.split(/\r?\n/);
   const start = lines.findIndex((line) => line === `## ${version}`);
   if (start === -1) return null;

@@ -106,7 +106,7 @@ Run **Release** with `release-candidate` to try a build in real projects before 
 
 If a published version is bad, from a maintainer's machine (it needs your own npm login, with 2FA):
 
-1. Rehearse: `node scripts/release/rollback.mjs <bad-version> [--to <good-version>]`. It prints the exact commands and changes nothing. Without `--to` it picks the highest non-prerelease version below the bad one.
+1. Rehearse: `node scripts/release/rollback.mts <bad-version> [--to <good-version>]`. It prints the exact commands and changes nothing. Without `--to` it picks the highest non-prerelease version below the bad one.
 2. Run it for real: add `--execute`. It runs `npm dist-tag add rspack-plugin-svg-sprite@<good> latest`, then `npm deprecate rspack-plugin-svg-sprite@<bad> "<message>"`.
 3. Work through the checklist it prints: check `npm view rspack-plugin-svg-sprite dist-tags`, mark the GitHub release, open an issue, then fix forward with a changeset and a new patch release.
 
@@ -130,7 +130,7 @@ Before changing `exports` in `package.json`, pack the package and run the compat
 
 ```bash
 bun run build && npm pack
-node scripts/ci/compat-matrix.mjs rspack-plugin-svg-sprite-*.tgz --baseline scripts/ci/compat-baseline-1.5.3.json --strict
+node scripts/ci/compat-matrix.mts rspack-plugin-svg-sprite-*.tgz --baseline scripts/ci/compat-baseline-1.5.3.json --strict
 ```
 
 ## 🧪 Testing

@@ -2,23 +2,26 @@
 // Builds and packs the same commit twice, each in its own clean copy, and requires the two
 // tarballs to be byte-identical. A mismatch lists the files whose content differs.
 //
-//   node scripts/ci/determinism-check.mjs
+//   node scripts/ci/determinism-check.mts
 //
 // Each copy holds the tracked files of the working tree (plus untracked, non-ignored ones), gets its
 // own `bun install --frozen-lockfile`, `bun run build` and `npm pack`.
 import { execFileSync } from 'node:child_process';
+import type { ExecFileSyncOptions } from 'node:child_process';
+
+type RunOptions = Omit<ExecFileSyncOptions, 'encoding'>;
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { cp } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { differingFiles } from '../lib/package-diff.mjs';
-import { detail, fail, info, ok, summary, table } from '../lib/output.mjs';
+import { differingFiles } from '../lib/package-diff.mts';
+import { detail, fail, info, ok, summary, table } from '../lib/output.mts';
 
-const sha256 = (buffer) => createHash('sha256').update(buffer).digest('hex');
+const sha256 = (buffer: Buffer) => createHash('sha256').update(buffer).digest('hex');
 
-function run(cmd, args, options = {}) {
+function run(cmd: string, args: string[], options: RunOptions = {}) {
   return execFileSync(cmd, args, {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -27,11 +30,11 @@ function run(cmd, args, options = {}) {
 }
 
 // { path: sha256 } of every file inside a tarball.
-function tarballContents(tarball, dir) {
+function tarballContents(tarball: string, dir: string) {
   mkdirSync(dir, { recursive: true });
   run('tar', ['-xzf', tarball, '-C', dir]);
-  const hashes = {};
-  const walk = (current) => {
+  const hashes: Record<string, string> = {};
+  const walk = (current: string) => {
     for (const entry of readdirSync(current, { withFileTypes: true })) {
       const full = join(current, entry.name);
       if (entry.isDirectory()) walk(full);
@@ -42,7 +45,7 @@ function tarballContents(tarball, dir) {
   return hashes;
 }
 
-async function buildCopy(root, label, work) {
+async function buildCopy(root: string, label: string, work: string) {
   const copy = join(work, label);
   mkdirSync(copy);
   const files = run('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
