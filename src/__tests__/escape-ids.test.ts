@@ -305,7 +305,12 @@ function buildNames(bundler: (typeof ALL_BUNDLERS)[number], extract: boolean, na
   );
 }
 
-const REAL_NAMES = ['Q&A', 'a<b', 'a>b', 'a"b', "it's", 'plain'];
+// Windows does not allow < > " in file names, so those cases only run as real files elsewhere.
+// The loader-level tests above cover them on every platform.
+const WINDOWS_FORBIDDEN = /[<>:"/\\|?*]/;
+const REAL_NAMES = ['Q&A', 'a<b', 'a>b', 'a"b', "it's", 'plain'].filter(
+  (name) => process.platform !== 'win32' || !WINDOWS_FORBIDDEN.test(name),
+);
 
 describe('file names with markup characters in real builds', () => {
   for (const bundler of ALL_BUNDLERS) {
