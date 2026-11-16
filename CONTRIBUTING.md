@@ -166,6 +166,10 @@ The differential script builds every consumer with a published version and with 
 
 `canaries.yml` proves the drop-in claim on real projects once a week. `e2e/canaries.mjs` lists a few open-source apps that use `svg-sprite-loader`, each pinned to a commit and with the small patch (the loader and plugin paths) that swaps in this package. `node e2e/scripts/canary.mjs [--project <name>]` builds each one as it is, builds it again with the packed tarball of this checkout, and fails when the sprite symbols (ids and viewBoxes) differ. A failing scheduled run opens one `canary-failure` issue. It does not run on pull requests and is not a required check. To add a project, pin a commit and list its patches; to accept a real difference, set `expectedDiff` with the reason.
 
+### 🔦 Lighthouse
+
+Pull requests that touch the demo (`examples/react-rspack`) or the docs (`website`) run Lighthouse against the built site, and a weekly run catches drift. The thresholds are in `.config/lighthouserc.json`; the workflow is not a required check. To run it locally, build both sites into `_site/` as `.github/workflows/lighthouse.yml` does, then `e2e/node_modules/.bin/lhci autorun --config=.config/lighthouserc.json`.
+
 ## 🧹 Code Style
 
 - **TypeScript** with `strict: true` — source in `src/`, compiled output in `dist/`.

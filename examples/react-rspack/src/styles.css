@@ -190,7 +190,7 @@ section h2 a {
 .token.prolog,
 .token.doctype,
 .token.cdata {
-  color: #6b7280;
+  color: #94a3b8;
 }
 
 .token.punctuation {
@@ -266,7 +266,7 @@ section h2 a {
 .btn {
   display: inline-block;
   padding: 10px 24px;
-  background: var(--accent);
+  background: #2563eb;
   color: #fff;
   border-radius: 6px;
   text-decoration: none;
@@ -277,7 +277,7 @@ section h2 a {
 
 @media (hover: hover) {
   .btn:hover {
-    background: var(--accent-hover);
+    background: #1d4ed8;
   }
 }
 
