@@ -1,0 +1,147 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'bench/**'
+      - 'bun.lock'
+      - 'bunfig.toml'
+      - '.github/workflows/bench.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: bench-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  compare:
+    name: 📊 Compare with base
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: 📥 Check out the head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 📥 Check out the base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.repository.default_branch }}
+          path: base
+          persist-credentials: false
+
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: 📦 Install the head
+        run: bun install --frozen-lockfile
+
+      - name: 📦 Install the base
+        working-directory: base
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: 🏗️ Build the base
+        working-directory: base
+        run: bun run build
+
+      - name: 🏗️ Build the head
+        run: bun run build
+
+      # The base and the head run back to back on this runner, with the benchmark code of the
+      # head against each compiled dist/, to keep machine noise out of the comparison.
+      - name: 📊 Benchmark the base
+        env:
+          BENCH_DIST: ${{ github.workspace }}/base/dist
+          BENCH_OUT: ${{ runner.temp }}/base.json
+        run: node bench/run.mjs --no-summary
+
+      - name: 📊 Benchmark the head
+        env:
+          BENCH_OUT: ${{ runner.temp }}/head.json
+        run: node bench/run.mjs --no-summary
+
+      # Report only: a regression never fails the job. Add --fail-on-regression to enforce it.
+      - name: 🔍 Compare
+        env:
+          BASE_JSON: ${{ runner.temp }}/base.json
+          HEAD_JSON: ${{ runner.temp }}/head.json
+        run: node bench/compare.mjs "$BASE_JSON" "$HEAD_JSON"
+
+      - name: 📤 Upload the results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: benchmark-results
+          path: |
+            ${{ runner.temp }}/base.json
+            ${{ runner.temp }}/head.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  codspeed:
+    name: ⚡ CodSpeed
+    # Skipped, not failed, until the maintainer enables the CodSpeed app and sets the
+    # repository variable CODSPEED_ENABLED to true.
+    if: ${{ vars.CODSPEED_ENABLED == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🏗️ Build
+        run: bun run build
+
+      # The real-build benchmarks spawn many threads and are skipped here: instrumented runs
+      # measure CPU instructions of the micro-benchmarks only.
+      - name: ⚡ Run under CodSpeed
+        uses: CodSpeedHQ/action@af75f77f17a054769abefaa42fe8dc2975469b5f # v5.6.3
+        with:
+          mode: simulation
+          run: bun run --filter svg-sprite-bench bench:codspeed

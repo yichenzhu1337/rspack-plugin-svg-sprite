@@ -1,0 +1,15 @@
+{
+  "name": "svg-sprite-bench",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Benchmarks for rspack-plugin-svg-sprite, run against the compiled dist/",
+  "scripts": {
+    "bench": "node run.mjs",
+    "bench:codspeed": "BENCH_SKIP_BUILDS=1 node run.mjs"
+  },
+  "dependencies": {
+    "@codspeed/tinybench-plugin": "6.1.1",
+    "@rspack/core": "^1.7.6",
+    "tinybench": "6.2.3"
+  }
+}
