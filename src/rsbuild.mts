@@ -3,7 +3,8 @@
 // `moduleResolution: bundler`. The namespace's `default` is `module.exports` all the same.
 import * as ns from './rsbuild.js';
 
-type Exports = typeof import('./rsbuild.js', { with: { 'resolution-mode': 'require' } });
+import type { CjsView } from './cjs-view.cjs';
+type Exports = CjsView['rsbuild'];
 // Node and Bun give the exports object as the default; a host that applies Babel-style interop to
 // an `__esModule` file without a default export has no `default`, so the namespace stands in.
 const loose = ns as unknown as { default?: Exports } & Exports;
