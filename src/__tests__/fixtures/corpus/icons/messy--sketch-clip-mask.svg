@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
+    <title>icon/clip</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <clipPath id="clip-1"><rect x="2" y="2" width="16" height="16" rx="4"/></clipPath>
+        <mask id="mask-2" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
+            <rect x="0" y="0" width="20" height="20" fill="#FFFFFF"/>
+            <circle cx="10" cy="10" r="4" fill="#000000"/>
+        </mask>
+    </defs>
+    <g id="icon/clip" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g clip-path="url(#clip-1)">
+            <rect id="Rectangle" fill="#4A90E2" mask="url(#mask-2)" x="0" y="0" width="20" height="20"/>
+        </g>
+    </g>
+</svg>

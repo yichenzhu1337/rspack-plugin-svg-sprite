@@ -28,7 +28,8 @@
       "entry": ["scripts/*.mjs"],
       "project": ["**/*.{ts,mjs}", "!consumers/**"],
       // Started as a child process (the local registry of E2E_SOURCE=registry), never imported.
-      "ignoreDependencies": ["verdaccio"],
+      // @lhci/cli is run by .github/workflows/lighthouse.yml with .config/lighthouserc.json.
+      "ignoreDependencies": ["verdaccio", "@lhci/cli"],
       // The system `diff`, used to print the unified diff of the differential test.
       "ignoreBinaries": ["diff"],
     },

@@ -13,3 +13,7 @@ reports/
 
 # Built documentation site
 website/doc_build/
+
+# Lighthouse run
+_site/
+.lighthouseci/
