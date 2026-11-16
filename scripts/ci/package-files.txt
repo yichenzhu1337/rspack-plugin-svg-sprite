@@ -2,6 +2,9 @@ CHANGELOG.md
 LICENSE
 README.md
 client.d.ts
+dist/cjs-view.cjs
+dist/cjs-view.cjs.map
+dist/cjs-view.d.cts
 dist/index.d.mts
 dist/index.d.ts
 dist/index.js

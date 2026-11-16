@@ -3,7 +3,8 @@
 import * as ns from './loader.js';
 import { interop } from './interop.mjs';
 
-type Exports = typeof import('./loader.js', { with: { 'resolution-mode': 'require' } });
+import type CjsView from './cjs-view.cjs';
+type Exports = CjsView['loader'];
 const { def, exp } = interop(ns) as { def: Exports['default'] & Exports; exp: Exports };
 
 // The default export is the loader function. Before 1.6.0 an ESM default import gave the whole

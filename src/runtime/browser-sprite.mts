@@ -3,7 +3,8 @@
 import * as ns from './browser-sprite.js';
 import { interop } from '../interop.mjs';
 
-type Exports = typeof import('./browser-sprite.js', { with: { 'resolution-mode': 'require' } });
+import type CjsView from '../cjs-view.cjs';
+type Exports = CjsView['browserSprite'];
 
 // Also carries `.default`, which is what an ESM default import gave before 1.6.0.
 const sprite: Exports['default'] & Exports = interop(ns).def;
