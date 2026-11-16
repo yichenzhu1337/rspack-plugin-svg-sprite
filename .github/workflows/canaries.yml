@@ -1,0 +1,102 @@
+name: 🐤 Downstream canaries
+
+# Builds real open-source projects that use `svg-sprite-loader` (pinned to a commit in
+# e2e/canaries.mjs), first as they are and then with the packed tarball of this commit swapped in,
+# and compares the sprite symbols of the two builds. It runs every week and on demand, never on
+# pull requests, and is not a required check.
+# A scheduled failure opens (or updates) one `canary-failure` issue, and a green run closes it.
+on:
+  schedule:
+    - cron: '41 5 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: canaries-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  canary:
+    name: 🐤 ${{ matrix.project }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [hotaru-theme, static-html-boilerplate, rgaa-checker]
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: ⚙️ Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: 📦 Cache Bun's install cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🐤 Build the project with and without this package
+        env:
+          PROJECT: ${{ matrix.project }}
+        shell: bash
+        run: node e2e/scripts/canary.mjs --project "$PROJECT" | tee canary.md
+
+      - name: 📊 Write the summary
+        if: always()
+        run: cat canary.md >> "$GITHUB_STEP_SUMMARY"
+
+  report:
+    name: 📝 report
+    if: ${{ always() && github.event_name == 'schedule' }}
+    needs: [canary]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: 🔒 Harden the runner
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - name: 📥 Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 🟢 Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: 📝 Open, update or close the issue
+        run: node e2e/scripts/canary-issue.mjs
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
