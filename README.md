@@ -449,7 +449,7 @@ The repository includes three runnable demo apps:
 
 | Example                                              | Bundler   | Plugin                     | Port | Description                                                       |
 | ---------------------------------------------------- | --------- | -------------------------- | ---- | ----------------------------------------------------------------- |
-| [`react-rspack`](examples/react-rspack/)             | Rspack    | `rspack-plugin-svg-sprite` | 3000 | Extract mode with icon gallery, sidebar, and buttons              |
+| [`react-rspack`](examples/react-rspack/)             | Rspack    | `rspack-plugin-svg-sprite` | 3000 | Extract mode: 265 flags in one sprite, light and dark theme       |
 | [`react-webpack`](examples/react-webpack/)           | Webpack 5 | `svg-sprite-loader`        | 4000 | Same UI using the original loader (for comparison)                |
 | [`vue-rspack-extract`](examples/vue-rspack-extract/) | Rspack    | `rspack-plugin-svg-sprite` | 3002 | Vue 3 + extract mode with `plainSprite` and external `<use href>` |
 

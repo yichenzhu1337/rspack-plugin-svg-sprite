@@ -3,14 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>rspack-plugin-svg-sprite — SVG Sprite Loader & Plugin for Rspack</title>
+    <script>
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <title>rspack-plugin-svg-sprite: every flag in the world, one SVG sprite</title>
     <meta
       name="description"
-      content="Drop-in svg-sprite-loader replacement for Rspack. Compile SVGs into a single sprite sheet with inline or extract mode. Works with Rspack and Webpack 5."
+      content="Every flag in the world in one SVG sprite. rspack-plugin-svg-sprite combines your SVG files into a single sprite at build time: a drop-in svg-sprite-loader replacement for Rspack, Rsbuild and webpack 5."
     />
     <meta
       name="keywords"
-      content="rspack, svg sprite, svg-sprite-loader, rspack plugin, rspack loader, svg icon, sprite sheet, webpack svg, extract mode, inline mode"
+      content="rspack, svg sprite, svg-sprite-loader, rspack plugin, rspack loader, rsbuild, webpack 5, svg icon, sprite sheet, extract mode, inline mode"
     />
     <meta name="author" content="Yichen Zhu" />
     <link
@@ -19,15 +25,16 @@
     />
     <link rel="canonical" href="https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/" />
 
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1117" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="rspack-plugin-svg-sprite" />
-    <meta property="og:title" content="rspack-plugin-svg-sprite — SVG Sprite Loader for Rspack" />
+    <meta property="og:title" content="Every flag in the world. One SVG sprite." />
     <meta
       property="og:description"
-      content="Drop-in svg-sprite-loader replacement for Rspack. Compile SVGs into a single sprite sheet with inline or extract mode."
+      content="rspack-plugin-svg-sprite combines your SVG files into one sprite at build time. A drop-in svg-sprite-loader replacement for Rspack, Rsbuild and webpack 5."
     />
     <meta property="og:url" content="https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/" />
     <meta
@@ -37,10 +44,10 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="rspack-plugin-svg-sprite — SVG Sprite Loader for Rspack" />
+    <meta name="twitter:title" content="Every flag in the world. One SVG sprite." />
     <meta
       name="twitter:description"
-      content="Drop-in svg-sprite-loader replacement for Rspack. Compile SVGs into a single sprite sheet with inline or extract mode."
+      content="rspack-plugin-svg-sprite combines your SVG files into one sprite at build time. A drop-in svg-sprite-loader replacement for Rspack, Rsbuild and webpack 5."
     />
     <meta
       name="twitter:image"
@@ -53,11 +60,12 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "rspack-plugin-svg-sprite",
-        "description": "Drop-in svg-sprite-loader replacement for Rspack. Compile SVGs into a single sprite sheet with inline or extract mode.",
+        "description": "Drop-in svg-sprite-loader replacement for Rspack, Rsbuild and webpack 5. Combines SVG files into a single sprite sheet with inline or extract mode.",
         "url": "https://github.com/yichenzhu1337/rspack-plugin-svg-sprite",
+        "sameAs": ["https://www.npmjs.com/package/rspack-plugin-svg-sprite"],
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Cross-platform",
-        "softwareRequirements": "Rspack >= 0.5.0 or Webpack 5",
+        "softwareRequirements": "Rspack >= 0.5.0, Rsbuild >= 1.0.0 or webpack 5",
         "author": {
           "@type": "Person",
           "name": "Yichen Zhu",
@@ -73,6 +81,168 @@
     </script>
   </head>
   <body>
-    <div id="app"></div>
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <a class="logo" href="./"><span class="long">rspack-plugin-</span>svg-sprite</a>
+        <nav aria-label="Site">
+          <a href="docs/">Docs</a>
+          <a class="with-icon" href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite"
+            ><svg class="icon" aria-hidden="true"><use href="sprite.svg#icon-github" /></svg
+            >GitHub</a
+          >
+          <a href="https://www.npmjs.com/package/rspack-plugin-svg-sprite">npm</a>
+        </nav>
+        <button type="button" class="icon-btn" id="theme-toggle" hidden>
+          <svg class="icon" aria-hidden="true"><use href="sprite.svg#icon-moon" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero wrap">
+        <h1>Every flag in the world. One SVG sprite.</h1>
+        <p class="lead">
+          <strong>rspack-plugin-svg-sprite</strong> combines your <code>.svg</code> files into one
+          sprite at build time. Each import gives you <code>{ id, viewBox, url }</code> for
+          <code>&lt;use&gt;</code>. A drop-in replacement for <code>svg-sprite-loader</code> on
+          Rspack, Rsbuild and webpack 5.
+        </p>
+        <div class="install">
+          <code id="install-cmd">npm i -D rspack-plugin-svg-sprite</code>
+          <button
+            type="button"
+            class="icon-btn"
+            id="install-copy"
+            hidden
+            aria-label="Copy install command"
+          >
+            <svg class="icon" aria-hidden="true"><use href="sprite.svg#icon-copy" /></svg>
+          </button>
+        </div>
+        <p class="actions">
+          <a class="btn" href="docs/getting-started">Get started</a>
+          <a class="btn btn-quiet" href="docs/migrating">Migrate from svg-sprite-loader</a>
+        </p>
+        <p class="sr-only" id="install-status" role="status"></p>
+      </section>
+
+      <section class="wrap" aria-label="In numbers">
+        <dl class="stats">
+          <div>
+            <dt>SVG files</dt>
+            <dd>265</dd>
+          </div>
+          <div>
+            <dt><a href="sprite.svg">sprite.svg</a> <span id="sprite-size"></span></dt>
+            <dd>1</dd>
+          </div>
+          <div>
+            <dt>HTTP request</dt>
+            <dd>1</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- The intro video goes here (a later change adds it). -->
+
+      <section class="wrap" id="demo" aria-labelledby="demo-title">
+        <h2 id="demo-title">Try it: 265 flags, one sprite</h2>
+        <p class="section-lead">
+          Every flag below is an <code>&lt;svg&gt;&lt;use&gt;</code> that points into the same
+          <code>sprite.svg</code>. Pick one to see what the import gives you.
+        </p>
+        <div id="flag-wall">
+          <noscript>
+            <p class="note">
+              The flag wall needs JavaScript. The sprite itself is a plain file:
+              <a href="sprite.svg">open sprite.svg</a>.
+            </p>
+          </noscript>
+        </div>
+      </section>
+
+      <section class="wrap" aria-labelledby="how-title">
+        <h2 id="how-title">How it works</h2>
+        <figure class="flow">
+          <ol>
+            <li>
+              <span class="flow-title">Your files</span>
+              <code>DE.svg FR.svg JP.svg …</code>
+            </li>
+            <li>
+              <span class="flow-title">Loader + plugin</span>
+              <code>build time</code>
+            </li>
+            <li>
+              <span class="flow-title">One sprite</span>
+              <code>&lt;symbol id="flag-DE"&gt;</code>
+            </li>
+            <li>
+              <span class="flow-title">Your markup</span>
+              <code>&lt;use href="sprite.svg#flag-DE"/&gt;</code>
+            </li>
+          </ol>
+          <figcaption class="sr-only">
+            SVG files go through the loader and plugin, which write one sprite.svg. Your markup
+            references a symbol in it with use.
+          </figcaption>
+        </figure>
+        <p>This is the real config of this page: one rule for the flags, one for the UI icons.</p>
+        <pre><code class="language-js"><span class="c">// rspack.config.js</span>
+const {
+  SvgSpritePlugin,
+} = require('rspack-plugin-svg-sprite');
+
+const sprite = {
+  extract: true,
+  spriteFilename: 'sprite.svg',
+  esModule: false,
+};
+
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.svg$/,
+        include: flagsDir,
+        <span class="c">// = country-flag-icons/3x2</span>
+        type: 'javascript/auto',
+        loader: 'rspack-plugin-svg-sprite/loader',
+        options: {
+          ...sprite,
+          symbolId: 'flag-[name]',
+        },
+      },
+      <span class="c">// a second rule, with symbolId 'icon-[name]',</span>
+      <span class="c">// handles the UI icons: same sprite.svg</span>
+    ],
+  },
+  plugins: [new SvgSpritePlugin()],
+};</code></pre>
+        <p>
+          Extract mode, as on this page. Inline mode needs no plugin:
+          <a href="docs/modes">see Modes</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <nav aria-label="Footer">
+          <a href="docs/">Docs</a>
+          <a href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite">GitHub</a>
+          <a href="https://www.npmjs.com/package/rspack-plugin-svg-sprite">npm</a>
+          <a href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/CHANGELOG.md"
+            >Changelog</a
+          >
+          <a href="llms.txt">llms.txt</a>
+        </nav>
+        <p>
+          Flags:
+          <a href="https://gitlab.com/catamphetamine/country-flag-icons">country-flag-icons</a>
+          (MIT). Icons: <a href="https://feathericons.com/">Feather</a> (MIT).
+        </p>
+      </div>
+    </footer>
   </body>
 </html>

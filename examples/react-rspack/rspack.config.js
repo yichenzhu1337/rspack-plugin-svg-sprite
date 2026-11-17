@@ -1,9 +1,18 @@
+const fs = require('fs');
 const path = require('path');
-const { HtmlRspackPlugin } = require('@rspack/core');
+const { CopyRspackPlugin, HtmlRspackPlugin } = require('@rspack/core');
 const { SvgSpritePlugin } = require('rspack-plugin-svg-sprite');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 
 const isDev = process.env.NODE_ENV === 'development';
+
+// country-flag-icons does not export its SVG files, so the alias
+// points at the folder. realpath: Rspack resolves symlinks (Bun
+// installs packages behind them) and `include` matches that path.
+const flagsDir = fs.realpathSync(
+  path.join(path.dirname(require.resolve('country-flag-icons/package.json')), '3x2'),
+);
+const sprite = { extract: true, spriteFilename: 'sprite.svg', esModule: false };
 
 /** @type {import('@rspack/cli').Configuration} */
 module.exports = {
@@ -37,14 +46,17 @@ module.exports = {
       },
       {
         test: /\.svg$/,
+        include: flagsDir,
         type: 'javascript/auto',
         loader: 'rspack-plugin-svg-sprite/loader',
-        options: {
-          extract: true,
-          symbolId: 'icon-[name]',
-          spriteFilename: 'sprite.svg',
-          esModule: false,
-        },
+        options: { ...sprite, symbolId: 'flag-[name]' },
+      },
+      {
+        test: /\.svg$/,
+        exclude: flagsDir,
+        type: 'javascript/auto',
+        loader: 'rspack-plugin-svg-sprite/loader',
+        options: { ...sprite, symbolId: 'icon-[name]' },
       },
       {
         test: /\.css$/,
@@ -55,9 +67,10 @@ module.exports = {
   plugins: [
     new HtmlRspackPlugin({
       template: './src/index.html',
-      title: 'SVG Sprite Demo — React',
+      title: 'rspack-plugin-svg-sprite: every flag, one SVG sprite',
     }),
     new SvgSpritePlugin(),
+    new CopyRspackPlugin({ patterns: [{ from: 'public' }] }),
     isDev && new ReactRefreshPlugin(),
   ].filter(Boolean),
   experiments: {
@@ -65,6 +78,7 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.jsx'],
+    alias: { '@flags': flagsDir },
   },
   devServer: {
     port: 3000,
