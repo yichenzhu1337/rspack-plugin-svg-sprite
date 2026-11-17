@@ -21,8 +21,11 @@ const headRef = process.env.HEAD_REF || '';
 const labels: string[] = JSON.parse(process.env.LABELS || '[]');
 if (!base) throw new Error('BASE_SHA is not set');
 
-const changed = lines(git('diff', '--name-only', `${base}...HEAD`));
-const added = lines(git('diff', '--name-only', '--diff-filter=A', `${base}...HEAD`));
+// --no-renames lists both sides of a rename, so moving a src/ file elsewhere still counts.
+const changed = lines(git('diff', '--name-only', '--no-renames', `${base}...HEAD`));
+const added = lines(
+  git('diff', '--name-only', '--no-renames', '--diff-filter=A', `${base}...HEAD`),
+);
 const changesets = added.filter(
   (f) => /^\.changeset\/[^/]+\.md$/.test(f) && f !== '.changeset/README.md',
 );

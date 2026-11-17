@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@rstest/core';
-import { commit, makeRepo, run, script } from './helpers';
+import { commit, git, makeRepo, run, script } from './helpers';
 
 const CHECK = script('ci', 'changeset-check.mts');
 const PKG = 'rspack-plugin-svg-sprite';
@@ -31,6 +31,18 @@ describe('changeset-check', () => {
     expect(result.code).toBe(1);
     expect(result.out).toContain('adds no changeset');
     expect(result.summary).toContain('How to fix');
+  });
+
+  it('needs a changeset when a src/ file is renamed to a path outside the package', () => {
+    const { dir, base } = makeRepo({
+      'package.json': PACKAGE_JSON,
+      'src/loader.ts': 'export const loader = 1;\n',
+    });
+    git(dir, 'mv', 'src/loader.ts', 'notes.md');
+    git(dir, 'commit', '-q', '-m', 'rename');
+    const result = run(CHECK, [], { cwd: dir, env: { BASE_SHA: base, HEAD_REF: 'feature/x' } });
+    expect(result.code).toBe(1);
+    expect(result.out).toContain('src/loader.ts');
   });
 
   it('needs a changeset when client.d.ts changes', () => {
