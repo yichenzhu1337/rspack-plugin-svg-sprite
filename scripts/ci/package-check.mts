@@ -53,8 +53,9 @@ const COMPILERS = [
 // Budgets in bytes, about 20% above the values measured when they were set
 // (25,247 packed and 88,666 unpacked). Raise them on purpose, in a reviewed change.
 const BUDGET = {
-  packed: Number(process.env.PACKAGE_BUDGET_PACKED) || 50_000,
-  unpacked: Number(process.env.PACKAGE_BUDGET_UNPACKED) || 180_000,
+  // Raised for 1.7.0 (50,140 / 179,005 measured: three features, and CHANGELOG.md ships in the tarball).
+  packed: Number(process.env.PACKAGE_BUDGET_PACKED) || 55_000,
+  unpacked: Number(process.env.PACKAGE_BUDGET_UNPACKED) || 195_000,
 };
 
 const update = process.argv.includes('--update');
