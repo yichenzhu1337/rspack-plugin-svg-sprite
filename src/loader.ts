@@ -29,22 +29,34 @@ function legacyRootTagText(svgContent: string): string | null {
   return close === -1 ? null : svgContent.slice(open.index + 4, close);
 }
 
-function legacyParseViewBox(svgContent: string): string {
+const FALLBACK_VIEWBOX = '0 0 24 24';
+
+interface ResolvedViewBox {
+  viewBox: string;
+  /** True when neither a viewBox nor a width and height gave a size, so the default was used. */
+  fallback: boolean;
+}
+
+function legacyResolveViewBox(svgContent: string): ResolvedViewBox {
   // Extract the root <svg> opening tag to avoid matching attributes on child elements
   const svgTagText = legacyRootTagText(svgContent);
   const svgTag = svgTagText !== null ? svgTagText : '';
 
   const match = svgTag.match(/viewBox=["']([^"']+)["']/);
-  if (match) return match[1]!;
+  if (match) return { viewBox: match[1]!, fallback: false };
 
   // Derive viewBox from width/height attributes on the root <svg> tag only
   const widthMatch = svgTag.match(/\bwidth=["'](\d+(?:\.\d+)?)(?:px)?["']/);
   const heightMatch = svgTag.match(/\bheight=["'](\d+(?:\.\d+)?)(?:px)?["']/);
   if (widthMatch && heightMatch) {
-    return '0 0 ' + widthMatch[1] + ' ' + heightMatch[1];
+    return { viewBox: '0 0 ' + widthMatch[1] + ' ' + heightMatch[1], fallback: false };
   }
 
-  return '0 0 24 24';
+  return { viewBox: FALLBACK_VIEWBOX, fallback: true };
+}
+
+function legacyParseViewBox(svgContent: string): string {
+  return legacyResolveViewBox(svgContent).viewBox;
 }
 
 function legacyExtractSvgInner(svgContent: string): string {
@@ -154,20 +166,24 @@ function firstAttr(root: RootTag, name: string): string | undefined {
 
 const DIMENSION = /^(\d+(?:\.\d+)?)(?:px)?$/;
 
-export function parseViewBox(svgContent: string): string {
+function resolveViewBox(svgContent: string): ResolvedViewBox {
   const root = parseRootTag(svgContent);
-  if (!root) return legacyParseViewBox(svgContent);
+  if (!root) return legacyResolveViewBox(svgContent);
 
   const viewBox = firstAttr(root, 'viewBox');
-  if (viewBox) return viewBox;
+  if (viewBox) return { viewBox, fallback: false };
 
   const widthMatch = DIMENSION.exec(firstAttr(root, 'width') || '');
   const heightMatch = DIMENSION.exec(firstAttr(root, 'height') || '');
   if (widthMatch && heightMatch) {
-    return '0 0 ' + widthMatch[1] + ' ' + heightMatch[1];
+    return { viewBox: '0 0 ' + widthMatch[1] + ' ' + heightMatch[1], fallback: false };
   }
 
-  return '0 0 24 24';
+  return { viewBox: FALLBACK_VIEWBOX, fallback: true };
+}
+
+export function parseViewBox(svgContent: string): string {
+  return resolveViewBox(svgContent).viewBox;
 }
 
 export function extractSvgInner(svgContent: string): string {
@@ -400,7 +416,21 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
 
   const resourcePath = this.resourcePath;
   const symbolId = generateSymbolId(resourcePath, options);
-  const viewBox = parseViewBox(content);
+  const resolved = resolveViewBox(content);
+  const viewBox = resolved.viewBox;
+  if (resolved.fallback && this.emitWarning) {
+    this.emitWarning(
+      new Error(
+        '[rspack-plugin-svg-sprite] ' +
+          resourcePath +
+          ' has no viewBox and no numeric width and height on its root <svg>, so the fallback' +
+          ' viewBox="' +
+          FALLBACK_VIEWBOX +
+          '" is used and the icon may render cropped or mis-scaled.\n' +
+          'Add the real viewBox to the root <svg>, or add numeric width and height attributes.',
+      ),
+    );
+  }
   const innerContent = extractSvgInner(content);
   const svgAttrs = readSvgAttrs(content, true);
   const extract = options.extract || false;
