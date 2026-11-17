@@ -5,7 +5,8 @@
   "description": "React demo app consuming rspack-plugin-svg-sprite",
   "scripts": {
     "dev": "rspack serve",
-    "build": "rspack build"
+    "build": "rspack build",
+    "video": "node video/render.mjs"
   },
   "dependencies": {
     "country-flag-icons": "1.6.20",
@@ -17,6 +18,8 @@
     "@rspack/cli": "^1.7.6",
     "@rspack/core": "^1.7.6",
     "@rspack/plugin-react-refresh": "^1.6.1",
+    "country-flag-icons": "1.6.20",
+    "playwright-core": "1.65.0",
     "react-refresh": "^0.14.2"
   }
 }

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Intro video scene</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --panel: #161b22;
+        --panel-2: #1c2128;
+        --border: #30363d;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --blue: #58a6ff;
+        --green: #3fb950;
+        --red: #f85149;
+        --ui:
+          system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial,
+          sans-serif;
+        --mono: ui-monospace, 'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--ui);
+      }
+      #stage {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      .scene,
+      .abs {
+        position: absolute;
+      }
+      .scene {
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+      }
+      .mono {
+        font-family: var(--mono);
+      }
+      .caption {
+        position: absolute;
+        left: 0;
+        top: 900px;
+        width: 1920px;
+        text-align: center;
+        font-size: 56px;
+        font-weight: 600;
+        line-height: 80px;
+        letter-spacing: -0.01em;
+      }
+      .caption code {
+        font-family: var(--mono);
+        font-weight: 500;
+        font-size: 0.9em;
+        color: var(--blue);
+        background: rgba(88, 166, 255, 0.12);
+        border-radius: 10px;
+        padding: 2px 14px;
+      }
+      .panel {
+        position: absolute;
+        background: var(--panel);
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      }
+      .bar {
+        position: relative;
+        height: 64px;
+        background: var(--panel-2);
+        border-bottom: 2px solid var(--border);
+        font-family: var(--mono);
+        font-size: 26px;
+        line-height: 64px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .bar i {
+        position: absolute;
+        top: 22px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #3b434d;
+      }
+      .tile {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 48px;
+        height: 38px;
+        box-sizing: border-box;
+        border: 2px solid #3b434d;
+        border-radius: 6px;
+        background: var(--panel-2);
+        font-family: var(--mono);
+        font-size: 15px;
+        line-height: 34px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .row {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        box-sizing: border-box;
+        padding: 0 24px;
+        font-family: var(--mono);
+        font-size: 24px;
+        line-height: 40px;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .k {
+        color: #ff7b72;
+      }
+      .s {
+        color: #a5d6ff;
+      }
+      .p {
+        color: #79c0ff;
+      }
+      .c {
+        color: var(--muted);
+      }
+      .f {
+        color: #d2a8ff;
+      }
+      .t {
+        color: #7ee787;
+      }
+      .n {
+        color: var(--text);
+      }
+      .pill {
+        position: absolute;
+        border-radius: 999px;
+        font-weight: 700;
+      }
+      .flag {
+        position: absolute;
+        display: block;
+        left: 0;
+        top: 0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .flag svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .cursor {
+        display: inline-block;
+        width: 0.5em;
+        height: 1em;
+        margin-left: 2px;
+        margin-right: -0.5em;
+        vertical-align: -0.12em;
+        background: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <script src="data.js"></script>
+    <script src="scene.js"></script>
+  </body>
+</html>
