@@ -1,4 +1,5 @@
 import { describe, it, expect } from '@rstest/core';
+import { createHash } from 'crypto';
 import SvgSpritePlugin, { FallbackRawSource, resolveRawSource } from '../plugin';
 
 interface MockSource {
@@ -607,7 +608,48 @@ describe('FallbackRawSource', () => {
   });
 });
 
+describe('FallbackRawSource#updateHash', () => {
+  const digest = (content: string) => {
+    const hash = createHash('sha256');
+    new (FallbackRawSource as any)(content).updateHash(hash);
+    return hash.digest('hex');
+  };
+
+  it('feeds the content into the hash', () => {
+    expect(digest('a')).toBe(digest('a'));
+    expect(digest('a')).not.toBe(digest('b'));
+  });
+});
+
 describe('resolveRawSource', () => {
+  it('uses compiler.webpack.sources.RawSource when compiler.rspack is absent', () => {
+    const WebpackRawSource = class {};
+    const compiler = { webpack: { sources: { RawSource: WebpackRawSource } } };
+    const failingRequire = () => {
+      throw new Error('should not be called');
+    };
+    expect(resolveRawSource(compiler, failingRequire)).toBe(WebpackRawSource);
+  });
+
+  it('prefers compiler.rspack over compiler.webpack', () => {
+    const RspackRawSource = class {};
+    const WebpackRawSource = class {};
+    const compiler = {
+      rspack: { sources: { RawSource: RspackRawSource } },
+      webpack: { sources: { RawSource: WebpackRawSource } },
+    };
+    expect(resolveRawSource(compiler)).toBe(RspackRawSource);
+  });
+
+  it('prefers compiler.webpack over requireFn', () => {
+    const WebpackRawSource = class {};
+    const OtherRawSource = class {};
+    const compiler = { webpack: { sources: { RawSource: WebpackRawSource } } };
+    expect(resolveRawSource(compiler, () => ({ RawSource: OtherRawSource }))).toBe(
+      WebpackRawSource,
+    );
+  });
+
   it('returns rspack RawSource when compiler.rspack.sources is available', () => {
     const MockRawSource = class {};
     const compiler = { rspack: { sources: { RawSource: MockRawSource } } };
