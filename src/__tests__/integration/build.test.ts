@@ -1,6 +1,7 @@
 import { describe, it, expect } from '@rstest/core';
 import fs from 'fs';
 import path from 'path';
+import vm from 'vm';
 import {
   ALL_BUNDLERS,
   LOADER,
@@ -113,6 +114,45 @@ describe('real builds', () => {
         expect(sprites[2]).toBe(sprites[0]);
       },
       90000,
+    );
+
+    it(
+      name + ': extract mode resolves output.publicPath "auto" at runtime',
+      async () => {
+        const dir = project(ALL_ICONS);
+        try {
+          const cfg = config(dir, true);
+          cfg.target = 'web';
+          cfg.output.publicPath = 'auto';
+          const result = await build(impl, cfg);
+          expect(result.hasErrors).toBe(false);
+          expect(result.warnings).toEqual([]);
+
+          const code = fs.readFileSync(path.join(dir, 'out', 'bundle.js'), 'utf8');
+          const sandbox: any = {
+            module: { exports: {} },
+            document: {
+              currentScript: { tagName: 'SCRIPT', src: 'https://cdn.example.com/assets/bundle.js' },
+            },
+          };
+          sandbox.exports = sandbox.module.exports;
+          vm.runInNewContext(code, sandbox);
+          const mod = sandbox.module.exports;
+          const icons = mod.default || mod;
+          expect(typeof icons.star.url).toBe('string');
+          expect(icons.star.url).toBe('https://cdn.example.com/assets/sprite.svg#icon-star');
+          expect(icons.star.id).toBe('icon-star');
+          expect(icons.circle.viewBox).toBe('0 0 100 100');
+          expect(symbolIds(path.join(dir, 'out', 'sprite.svg'))).toEqual([
+            'icon-arrow',
+            'icon-circle',
+            'icon-star',
+          ]);
+        } finally {
+          removeProject(dir);
+        }
+      },
+      60000,
     );
 
     it(

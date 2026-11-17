@@ -426,10 +426,14 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
   if (extract) {
     const spriteFilename = options.spriteFilename || 'sprite.svg';
     let publicPath = options.publicPath || '';
+    // 'auto' and function values cannot be read at build time, so the bundler runtime resolves them.
+    let runtimePublicPath = false;
     if (!publicPath && this._compiler && this._compiler.options && this._compiler.options.output) {
       const outputPublicPath = this._compiler.options.output.publicPath;
       if (typeof outputPublicPath === 'string' && outputPublicPath !== 'auto') {
         publicPath = outputPublicPath;
+      } else if (outputPublicPath === 'auto' || typeof outputPublicPath === 'function') {
+        runtimePublicPath = true;
       }
     }
     if (publicPath && !publicPath.endsWith('/')) {
@@ -457,14 +461,19 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
       );
     }
 
-    const url = publicPath + spriteFilename + '#' + encodeFragment(symbolId);
+    const fragment = spriteFilename + '#' + encodeFragment(symbolId);
 
     let runtime = interopRequire('SpriteSymbol', symbolModulePath);
     runtime +=
       'var symbol = new SpriteSymbol(' +
       JSON.stringify({ id: symbolId, viewBox: viewBox, content: symbolContent }) +
       ');\n';
-    runtime += 'symbol.url = ' + JSON.stringify(url) + ';\n';
+    runtime +=
+      'symbol.url = ' +
+      (runtimePublicPath
+        ? '__webpack_public_path__ + ' + JSON.stringify(fragment)
+        : JSON.stringify(publicPath + fragment)) +
+      ';\n';
     runtime += (esModule ? 'export default' : 'module.exports =') + ' symbol;\n';
 
     return runtime;
