@@ -4,6 +4,18 @@ const { CopyRspackPlugin, HtmlRspackPlugin } = require('@rspack/core');
 const { SvgSpritePlugin } = require('rspack-plugin-svg-sprite');
 const ReactRefreshPlugin = require('@rspack/plugin-react-refresh');
 
+// The chapters of the intro video (video/chapters.json) become the text list under the player.
+const chapters = require('./video/chapters.json');
+const escapeHtml = (text) =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const videoChapters = chapters
+  .map(({ t, title, caption, summary }) => {
+    const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+    const text = escapeHtml(summary || caption).replace(/`([^`]+)`/g, '<code>$1</code>');
+    return `<li><span class="ts" data-t="${t}">${time}</span> <strong>${escapeHtml(title)}.</strong> ${text}</li>`;
+  })
+  .join('\n            ');
+
 const isDev = process.env.NODE_ENV === 'development';
 
 // country-flag-icons does not export its SVG files, so the alias
@@ -67,6 +79,7 @@ module.exports = {
   plugins: [
     new HtmlRspackPlugin({
       template: './src/index.html',
+      templateParameters: { videoChapters },
       title: 'rspack-plugin-svg-sprite: every flag, one SVG sprite',
     }),
     new SvgSpritePlugin(),

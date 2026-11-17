@@ -664,3 +664,59 @@ main p a,
     padding: 12px;
   }
 }
+
+/* Intro video */
+.intro-video {
+  margin: 24px 0 0;
+}
+
+.intro-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #0d1117;
+}
+
+.chapters {
+  display: grid;
+  gap: 8px 32px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 720px) {
+  .chapters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.chapters strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.chapters .ts {
+  display: inline-block;
+  min-width: 3.25em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+button.ts {
+  min-height: 24px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
