@@ -1,7 +1,7 @@
 # Intro video
 
-A 43-second, silent, 1920x1080 intro video. Every frame is a pure function of time: `scene.js` draws it in
-headless Chrome, `render.mjs` pipes the PNG frames into ffmpeg. Nothing is typed by hand that could drift from
+A 30-second 1920x1080 intro video with music. Every frame is a pure function of time: `scene.js` draws it in
+headless Chrome, `render.mjs` pipes the PNG frames into ffmpeg, together with the music that `music.mjs` synthesizes (also from code). Nothing is typed by hand that could drift from
 the product: `render.mjs` first builds the 265 flags of `country-flag-icons` with the plugin (extract mode)
 and reads the symbol ids, the `sprite.svg` size and gzip size, the 265 file sizes and the import result
 `{ id, viewBox, url }` from that build. The flags in the video are drawn with `<use href="sprite.svg#flag-XX">`
@@ -17,7 +17,7 @@ cd examples/react-rspack
 FFMPEG=/path/to/ffmpeg bun run video
 ```
 
-Outputs: `public/intro.mp4` (H.264, yuv420p, faststart, at most 2 MB, 43 s) and `public/intro-poster.webp`
+Outputs: `public/intro.mp4` (H.264, yuv420p, faststart, AAC audio, at most 2 MB, 30 s) and `public/intro-poster.webp`
 (at most 60 KB, the full flag wall with the "1 request" badge).
 
 Other modes (output goes to a scratch directory, `--out <dir>` to choose it):
@@ -33,7 +33,10 @@ the quality of the final render.
 
 ## Files
 
-- `chapters.json`: the chapters (start time, title, caption). The captions are drawn into the video.
+- `chapters.json`: the chapters (start time in the final video, title, caption). The captions are drawn into the
+  video. The scenes themselves are timed on a 43-second source timeline (`SRC` in `scene.js`), so changing a
+  chapter's start speeds that scene up or slows it down.
+- `music.mjs`: the music, synthesized from code (120 BPM; no samples, nothing to license).
 - `scene.html`, `scene.js`: the stage and the scenes. System font stacks only, so no fonts to bundle.
 - `flag-order.mjs`: the 265 flags, most populous first (the order the flag wall fills in).
 - `render.mjs`: build, collect, draw, encode.

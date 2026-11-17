@@ -9,10 +9,9 @@ const chapters = require('./video/chapters.json');
 const escapeHtml = (text) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const videoChapters = chapters
-  .map(({ t, title, caption, summary }) => {
-    const time = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+  .map(({ title, caption, summary }) => {
     const text = escapeHtml(summary || caption).replace(/`([^`]+)`/g, '<code>$1</code>');
-    return `<li><span class="ts" data-t="${t}">${time}</span> <strong>${escapeHtml(title)}.</strong> ${text}</li>`;
+    return `<li><strong>${escapeHtml(title)}.</strong> ${text}</li>`;
   })
   .join('\n            ');
 
