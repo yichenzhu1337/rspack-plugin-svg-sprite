@@ -229,11 +229,21 @@ export function FallbackRawSource(this: any, str: string) {
   this.buffer = () => Buffer.from(str);
   this.map = () => null;
   this.sourceAndMap = () => ({ source: str, map: null });
+  // webpack hashes every asset source when an output name has a content hash or the cache is on.
+  this.updateHash = (hash: { update(data: string | Buffer): unknown }) => {
+    hash.update('RawSource');
+    hash.update(Buffer.from(str));
+  };
 }
 
 export function resolveRawSource(compiler: any, requireFn: (id: string) => any = require): any {
   if (compiler.rspack && compiler.rspack.sources) {
     return compiler.rspack.sources.RawSource;
+  }
+  // webpack 5's documented way for a plugin to reach `webpack-sources`. Unlike `require`, it
+  // works under pnpm, Yarn PnP and Bun, where this package cannot resolve `webpack-sources`.
+  if (compiler.webpack && compiler.webpack.sources) {
+    return compiler.webpack.sources.RawSource;
   }
   try {
     return requireFn('webpack-sources').RawSource;
