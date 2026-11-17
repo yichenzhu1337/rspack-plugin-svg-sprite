@@ -82,7 +82,7 @@ Older versions lowercased attribute names on the root `<svg>`, which turned `pre
 
 ## Known limitations
 
-- An SVG with no `viewBox` and no numeric `width` and `height` gets `viewBox="0 0 24 24"`. Add a `viewBox` to the source file if that is not its real size.
+- An SVG with no `viewBox` and no numeric `width` and `height` gets `viewBox="0 0 24 24"`. The build prints a warning that names the file. Add a `viewBox` (or numeric `width` and `height`) to the root `<svg>` if that is not its real size.
 - `spriteFilename` is used literally. Placeholders such as `[hash]` or `[chunkname]` are not interpolated.
 - The Rsbuild plugin replaces Rsbuild's built-in SVG rule. `./icon.svg?url`, `?inline` and `?raw` therefore also return a sprite symbol, and SVGs outside the plugin's `include` / `exclude` scope are left without Rsbuild's default handling.
 - In extract mode, Safari (WebKit) does not resolve `url(#id)` references inside an external sprite file. An icon that uses a gradient, pattern, filter, mask or clip-path paints blank there. Chrome and Firefox are not affected. Use inline mode for those icons, or flatten the effect to solid fills.
