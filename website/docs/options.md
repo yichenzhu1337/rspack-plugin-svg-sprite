@@ -2,7 +2,7 @@
 description: 'Every loader, plugin and Rsbuild plugin option, with types and defaults.'
 ---
 
-# Options reference
+# Options
 
 ## Loader options
 

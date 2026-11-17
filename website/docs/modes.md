@@ -4,7 +4,7 @@ description: 'Inline mode injects a hidden sprite into the DOM; extract mode emi
 
 # Inline vs extract mode
 
-|                  | Inline (default)                                      | Extract                                         |
+| Aspect           | Inline (default)                                      | Extract                                         |
 | ---------------- | ----------------------------------------------------- | ----------------------------------------------- |
 | Where symbols go | A hidden `<svg>` in `document.body`, added at runtime | An external `.svg` sprite file emitted at build |
 | Plugin needed    | No                                                    | Yes, `SvgSpritePlugin`                          |

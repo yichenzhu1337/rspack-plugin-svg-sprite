@@ -2,13 +2,11 @@
 description: 'Install rspack-plugin-svg-sprite and import SVG files as sprite symbols in Rspack, Rsbuild or webpack 5.'
 ---
 
-# Getting started
+# Installation
 
-`rspack-plugin-svg-sprite` lets you import `.svg` files in an Rspack, Rsbuild or webpack 5 project and combines them into an SVG sprite, either inlined in the DOM or extracted as an external `.svg` file. Icons are referenced with `<use href="#id" />`: one request, no duplicated markup, full CSS styling.
+Try it first without installing anything: [open the starter on StackBlitz](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz).
 
-Try it without installing anything: [open the starter on StackBlitz](https://stackblitz.com/github/yichenzhu1337/rspack-plugin-svg-sprite/tree/main/starters/stackblitz), or look at the [live demo](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/).
-
-## Install
+## Install the package
 
 ```bash
 npm install rspack-plugin-svg-sprite -D

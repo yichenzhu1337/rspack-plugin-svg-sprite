@@ -1,0 +1,169 @@
+/* A compact reading layout: smaller type, tighter headings, a grouped sidebar and a quiet outline.
+   Rspress styles the doc with :where() selectors, so these plain selectors win without !important. */
+
+/* Rspress's light link colour (#07f) is about 4:1 on white; its darker brand shade passes 4.5:1. */
+html:not(.dark) {
+  --rp-c-link: var(--rp-c-brand-darker);
+  --shiki-token-comment: #6e7781; /* default #b6b4b4 is 2:1 */
+}
+
+html:not(.dark) .rp-edit-link,
+html:not(.dark) .rp-edit-link a {
+  color: var(--rp-c-brand-darker);
+}
+
+html .rp-prev-next-page__item .rp-prev-next-page__item__desc {
+  color: var(--rp-c-text-2);
+}
+
+html:not(.dark) {
+  /* Callout titles: the defaults are 3.9 to 4.4:1 on their tinted backgrounds. */
+  --rp-container-warning-text: #6b5a1f;
+  --rp-container-info-text: #0056b3;
+  --rp-container-tip-text: #0f6e3e;
+  --rp-container-important-text: #6639ba;
+  --rp-container-danger-text: #b42318;
+}
+
+:root {
+  --rp-nav-height: 56px;
+  --rp-content-max-width: 760px;
+  --rp-sidebar-width: 248px;
+}
+
+/* ---- Body text (the sidebar labels are .rp-doc spans too, so scope to the page body) */
+.rp-doc-layout__doc .rp-doc {
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.rp-doc :not(pre) > code {
+  padding: 1px 5px;
+}
+
+/* Rspress draws a divider with a 48px gap before the first h2; a docs page reads better without it. */
+.rp-doc h2:first-of-type::before {
+  display: none;
+}
+
+.rp-llms-container {
+  margin-bottom: 12px;
+}
+
+.rp-doc-layout__doc-container {
+  padding-top: 32px;
+}
+
+.rp-doc p,
+.rp-doc ul,
+.rp-doc ol {
+  margin: 0 0 14px;
+}
+
+.rp-doc li + li {
+  margin-top: 4px;
+}
+
+/* ---- Headings */
+.rp-doc h1 {
+  margin: 0 0 16px;
+  font-size: 30px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.rp-doc h2 {
+  margin: 36px 0 10px;
+  font-size: 21px;
+  line-height: 1.35;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.rp-doc h3 {
+  margin: 28px 0 8px;
+  font-size: 17px;
+  line-height: 1.4;
+  font-weight: 650;
+}
+
+/* The page actions under the title (copy as Markdown) and the rule after them. */
+.rp-doc h1 + * {
+  margin-top: 0;
+}
+
+.rp-doc hr {
+  margin: 20px 0;
+}
+
+/* ---- Code and tables */
+.rp-doc .rp-codeblock,
+.rp-doc div[class*='language-'] {
+  margin: 12px 0 18px;
+}
+
+.rp-doc pre,
+.rp-doc pre code {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.rp-doc table {
+  font-size: 14px;
+}
+
+.rp-doc th,
+.rp-doc td {
+  padding: 6px 10px;
+}
+
+/* ---- Callouts */
+.rp-callout {
+  margin: 14px 0;
+  font-size: 14px;
+}
+
+/* ---- Left sidebar: small uppercase group titles, compact items, a light indent */
+.rp-sidebar-group {
+  margin-top: 18px;
+}
+
+.rp-sidebar-group:first-child {
+  margin-top: 0;
+}
+
+.rp-sidebar-group .rp-doc {
+  color: var(--rp-c-text-1);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rp-sidebar-item--group-item {
+  margin-left: 12px !important; /* Rspress sets 24px inline */
+}
+
+.rp-sidebar-item--group-item .rp-doc {
+  font-size: 14px;
+  font-weight: 450;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ---- Right outline */
+.rp-outline {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.rp-outline__title {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+/* ---- Top bar */
+.rp-nav-menu__item {
+  font-size: 14px;
+}

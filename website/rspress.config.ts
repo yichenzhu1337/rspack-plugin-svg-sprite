@@ -16,7 +16,9 @@ export default defineConfig({
   description,
   icon: '/favicon.svg',
   logo: '/favicon.svg',
+  logoText: 'rspack-plugin-svg-sprite',
   outDir: 'doc_build',
+  globalStyles: path.join(__dirname, 'theme/styles.css'),
   // Emit llms.txt, llms-full.txt and a .md twin of every page for AI agents.
   llms: true,
   markdown: {
@@ -24,13 +26,38 @@ export default defineConfig({
   },
   themeConfig: {
     darkMode: true,
-    nav: [
-      { text: 'Getting started', link: '/getting-started' },
-      { text: 'Options', link: '/options' },
-      { text: 'Migrating', link: '/migrating' },
-      { text: 'FAQ', link: '/faq' },
-      { text: 'Live demo', link: `${ORIGIN}/rspack-plugin-svg-sprite/` },
-    ],
+    // Laravel-style layout: a short top bar, every page in a grouped left sidebar.
+    nav: [{ text: 'Demo', link: `${ORIGIN}/rspack-plugin-svg-sprite/` }],
+    sidebar: {
+      '/': [
+        {
+          text: 'Getting started',
+          collapsible: false,
+          items: [
+            { text: 'Introduction', link: '/' },
+            { text: 'Installation', link: '/getting-started' },
+            { text: 'Migrating', link: '/migrating' },
+          ],
+        },
+        {
+          text: 'Guides',
+          collapsible: false,
+          items: [
+            { text: 'Inline vs extract', link: '/modes' },
+            { text: 'Frameworks', link: '/frameworks' },
+          ],
+        },
+        {
+          text: 'Reference',
+          collapsible: false,
+          items: [
+            { text: 'Options', link: '/options' },
+            { text: 'Troubleshooting', link: '/faq' },
+            { text: 'Guarantees', link: '/guarantees' },
+          ],
+        },
+      ],
+    },
     socialLinks: [
       { icon: 'github', mode: 'link', content: REPO },
       {
