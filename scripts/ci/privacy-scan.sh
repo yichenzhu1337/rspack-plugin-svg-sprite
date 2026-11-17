@@ -47,8 +47,11 @@ done
 
 added=$(mktemp)
 git diff -U0 --no-color "$BASE_SHA...HEAD" | awk '
-  /^\+\+\+ / { file = substr($0, 7); next }
-  /^@@/      { split($3, range, ","); line = substr(range[1], 2) + 0; next }
+  # "+++ " is a file header only between "diff --git" and the first "@@" of that file; after that
+  # it is an added line whose text starts with "++ ".
+  /^diff --git / { header = 1; next }
+  header && /^\+\+\+ / { file = substr($0, 7); next }
+  /^@@/      { header = 0; split($3, range, ","); line = substr(range[1], 2) + 0; next }
   /^\+/      { print file ":" line ":" substr($0, 2); line++ }
 ' > "$added"
 while IFS= read -r location; do
