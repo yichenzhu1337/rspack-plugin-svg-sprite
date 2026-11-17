@@ -76,6 +76,14 @@ describe('lib/semver', () => {
     expect(compare('1.2.3-rc.1', '1.2.3-rc.1')).toBe(0);
   });
 
+  it('orders numeric prerelease identifiers numerically', () => {
+    expect(compare('1.2.3-rc.9', '1.2.3-rc.10')).toBeLessThan(0);
+    expect(compare('1.2.3-rc.10', '1.2.3-rc.9')).toBeGreaterThan(0);
+    expect(compare('1.2.3-rc.1', '1.2.3-rc.1.1')).toBeLessThan(0);
+    expect(compare('1.2.3-1', '1.2.3-alpha')).toBeLessThan(0);
+    expect(compare('1.2.3-alpha', '1.2.3-beta')).toBeLessThan(0);
+  });
+
   it('picks the next free release candidate number', () => {
     expect(nextRc('1.2.3', [])).toBe('1.2.3-rc.1');
     expect(nextRc('1.2.3', ['1.2.3-rc.1', '1.2.3-rc.4', '1.2.3-rc.x', '1.2.4-rc.9'])).toBe(

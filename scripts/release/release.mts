@@ -22,7 +22,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { sectionOf } from '../lib/changelog.mts';
 import { details, detail, fail, group, info, ok, summary, table, warn } from '../lib/output.mts';
-import { nextRc } from '../lib/semver.mts';
+import { compare, isPrerelease, nextRc, parse } from '../lib/semver.mts';
 import { integrityProblems } from '../lib/verify.mts';
 
 const PKG = 'rspack-plugin-svg-sprite';
@@ -60,6 +60,36 @@ const publishedVersions = (): string[] => {
 const pendingChangesets = () =>
   readdirSync('.changeset').filter((f) => f.endsWith('.md') && f !== 'README.md');
 
+// The version the pending changesets will release, from `changeset status`, or null when that is
+// unavailable (the CLI cannot run, or no changeset is pending).
+function plannedVersion(): string | null {
+  const file = join(mkdtempSync(join(tmpdir(), 'svg-sprite-plan-')), 'status.json');
+  // Pinned to the version package.json develops with; npx uses the local install when there is one.
+  const range = JSON.parse(readFileSync('package.json', 'utf8')).devDependencies?.[
+    '@changesets/cli'
+  ];
+  const result = attempt('npx', [
+    '--yes',
+    `@changesets/cli@${range ?? 'latest'}`,
+    'status',
+    `--output=${file}`,
+  ]);
+  if (!result.ok || !existsSync(file)) return null;
+  try {
+    const plan = JSON.parse(readFileSync(file, 'utf8'));
+    const release = plan.releases?.find((r: { name: string }) => r.name === PKG);
+    return typeof release?.newVersion === 'string' && parse(release.newVersion)
+      ? release.newVersion
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+// A version a release candidate must not sort below: any published release at or above `base`.
+const isTaken = (base: string, published: string[]) =>
+  isPublished(base) || published.some((v) => parse(v) && !isPrerelease(v) && compare(v, base) >= 0);
+
 // The newest completed run of nightly.yml on main: { red, url } or { unknown } when gh cannot say.
 function nightlyStatus() {
   const result = attempt('gh', [
@@ -88,9 +118,26 @@ function nightlyStatus() {
 
 function guards() {
   const rc = process.env.MODE === 'release-candidate';
-  const version = rc ? nextRc(currentVersion(), publishedVersions()) : currentVersion();
   const problems = [];
   const notes = [];
+  let version = currentVersion();
+  if (rc) {
+    // package.json holds the last release while changesets are pending. `X.Y.Z-rc.N` sorts below
+    // `X.Y.Z`, so when that version is out, base the candidate on the version that comes next.
+    const published = publishedVersions();
+    let base = version;
+    let refused = '';
+    if (isTaken(base, published)) {
+      const planned = plannedVersion();
+      if (!planned) {
+        refused = `${PKG}@${base} is already on npm and the next version could not be read from \`changeset status\` (no pending changeset?), so a release candidate would sort below it`;
+      } else if (isTaken(planned, published)) {
+        refused = `the pending changesets plan ${planned}, which is not above the published versions, so a release candidate would sort below one`;
+      } else base = planned;
+    }
+    if (refused) problems.push(refused);
+    else version = nextRc(base, published);
+  }
   if (process.env.GITHUB_REF !== 'refs/heads/main') {
     problems.push(`releases run from main only; this run is on ${process.env.GITHUB_REF}`);
   }

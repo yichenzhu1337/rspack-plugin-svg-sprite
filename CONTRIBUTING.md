@@ -100,7 +100,7 @@ Guards that stop a `publish` run: not on `main`, unreleased changesets, a versio
 
 ### 🧪 Release candidates
 
-Run **Release** with `release-candidate` to try a build in real projects before it is released. It computes `X.Y.Z-rc.N` from the version in `package.json` (`N` is the next free number on npm), sets that version only inside the workflow's working copy, runs the same checks, and after the same approval publishes with `--tag next --provenance`. It creates no commit, no git tag and no GitHub release, and `latest` does not move. Pending changesets are allowed; the run must be on `main`. Install it with `npm i rspack-plugin-svg-sprite@next`.
+Run **Release** with `release-candidate` to try a build in real projects before it is released. It computes `X.Y.Z-rc.N` (`N` is the next free number on npm). `X.Y.Z` is the version in `package.json`, or, when that version is already on npm (changesets are pending), the version the pending changesets will release, read from `changeset status`. If that cannot be read, the run stops instead of guessing, because a candidate must never sort below a published version. It sets the candidate version only inside the workflow's working copy, runs the same checks, and after the same approval publishes with `--tag next --provenance`. It creates no commit, no git tag and no GitHub release, and `latest` does not move. Pending changesets are allowed; the run must be on `main`. Install it with `npm i rspack-plugin-svg-sprite@next`.
 
 ### ⏪ Rollback
 
