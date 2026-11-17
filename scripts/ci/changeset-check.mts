@@ -2,7 +2,7 @@
 // Pull request check: changes to the published package need a changeset.
 //
 // Needs one: src/ outside src/__tests__/, client.d.ts, and package.json fields other than
-// devDependencies, scripts, packageManager, workspaces, trustedDependencies and version.
+// devDependencies, scripts, packageManager, workspaces, trustedDependencies, resolutions and version.
 // Exempt: everything else (docs, CI, tests, examples), the version PR (branch changeset-release/*),
 // and pull requests labelled `no-changeset`.
 // Also validates every changeset the PR adds.
@@ -59,6 +59,7 @@ if (changed.includes('package.json')) {
       'packageManager',
       'workspaces',
       'trustedDependencies',
+      'resolutions',
       'version',
     ])
       delete pkg[key];
