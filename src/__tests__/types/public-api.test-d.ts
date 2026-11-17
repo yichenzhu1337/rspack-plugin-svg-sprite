@@ -50,7 +50,7 @@ export type LoaderAssertions = [
   Expect<
     Equal<
       keyof LoaderOptions,
-      'symbolId' | 'extract' | 'esModule' | 'spriteFilename' | 'publicPath'
+      'symbolId' | 'extract' | 'esModule' | 'spriteFilename' | 'publicPath' | 'content'
     >
   >,
   Expect<Equal<LoaderOptions['symbolId'], string | ((resourcePath: string) => string) | undefined>>,
@@ -58,11 +58,13 @@ export type LoaderAssertions = [
   Expect<Equal<LoaderOptions['esModule'], boolean | undefined>>,
   Expect<Equal<LoaderOptions['spriteFilename'], string | undefined>>,
   Expect<Equal<LoaderOptions['publicPath'], string | undefined>>,
+  Expect<Equal<LoaderOptions['content'], boolean | undefined>>,
   Expect<IsOptional<LoaderOptions, 'symbolId'>>,
   Expect<IsOptional<LoaderOptions, 'extract'>>,
   Expect<IsOptional<LoaderOptions, 'esModule'>>,
   Expect<IsOptional<LoaderOptions, 'spriteFilename'>>,
   Expect<IsOptional<LoaderOptions, 'publicPath'>>,
+  Expect<IsOptional<LoaderOptions, 'content'>>,
   Expect<Equal<typeof NAMESPACE, 'rspack-plugin-svg-sprite'>>,
   Expect<Equal<typeof loader.NAMESPACE, string>>,
   Expect<Equal<LoaderThis['resourcePath'], string>>,
@@ -132,6 +134,7 @@ export type RsbuildAssertions = [
       | 'esModule'
       | 'spriteFilename'
       | 'publicPath'
+      | 'content'
       | 'plainSprite'
       | 'spriteAttrs'
       | 'include'
@@ -143,6 +146,7 @@ export type RsbuildAssertions = [
   Expect<Equal<SvgSpritePluginOptions['esModule'], boolean | undefined>>,
   Expect<Equal<SvgSpritePluginOptions['spriteFilename'], string | undefined>>,
   Expect<Equal<SvgSpritePluginOptions['publicPath'], string | undefined>>,
+  Expect<Equal<SvgSpritePluginOptions['content'], boolean | undefined>>,
   Expect<Equal<SvgSpritePluginOptions['plainSprite'], boolean | undefined>>,
   Expect<Equal<SvgSpritePluginOptions['spriteAttrs'], Record<string, string> | undefined>>,
   Expect<Equal<SvgSpritePluginOptions['include'], RegExp | string | undefined>>,
@@ -152,6 +156,7 @@ export type RsbuildAssertions = [
   Expect<IsOptional<SvgSpritePluginOptions, 'esModule'>>,
   Expect<IsOptional<SvgSpritePluginOptions, 'spriteFilename'>>,
   Expect<IsOptional<SvgSpritePluginOptions, 'publicPath'>>,
+  Expect<IsOptional<SvgSpritePluginOptions, 'content'>>,
   Expect<IsOptional<SvgSpritePluginOptions, 'plainSprite'>>,
   Expect<IsOptional<SvgSpritePluginOptions, 'spriteAttrs'>>,
   Expect<IsOptional<SvgSpritePluginOptions, 'include'>>,

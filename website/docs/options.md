@@ -8,13 +8,14 @@ description: 'Every loader, plugin and Rsbuild plugin option, with types and def
 
 Set on the rule that uses `rspack-plugin-svg-sprite/loader`.
 
-| Option           | Type                 | Default        | Description                                                                                                                                           |
-| ---------------- | -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `symbolId`       | `string \| function` | `'[name]'`     | Pattern for generating symbol IDs. Supports `[name]`, `[folder]`, `[ext]` placeholders, or a function `(filePath) => id`.                             |
-| `esModule`       | `boolean`            | `true`         | Use ES module export (`export default`) vs CommonJS (`module.exports`).                                                                               |
-| `extract`        | `boolean`            | `false`        | Enable extract mode to emit an external sprite file instead of inlining.                                                                              |
-| `spriteFilename` | `string`             | `'sprite.svg'` | Output filename for the extracted sprite (extract mode only). Symbol ids must be unique within one sprite file.                                       |
-| `publicPath`     | `string`             | `''`           | Public URL prefix for the sprite file (extract mode only). Read from `output.publicPath` if not set; `'auto'` and function values resolve at runtime. |
+| Option           | Type                 | Default        | Description                                                                                                                                                                                   |
+| ---------------- | -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `symbolId`       | `string \| function` | `'[name]'`     | Pattern for generating symbol IDs. Supports `[name]`, `[folder]`, `[ext]` placeholders, or a function `(filePath) => id`.                                                                     |
+| `esModule`       | `boolean`            | `true`         | Use ES module export (`export default`) vs CommonJS (`module.exports`).                                                                                                                       |
+| `extract`        | `boolean`            | `false`        | Enable extract mode to emit an external sprite file instead of inlining.                                                                                                                      |
+| `spriteFilename` | `string`             | `'sprite.svg'` | Output filename for the extracted sprite (extract mode only). Symbol ids must be unique within one sprite file.                                                                               |
+| `publicPath`     | `string`             | `''`           | Public URL prefix for the sprite file (extract mode only). Read from `output.publicPath` if not set; `'auto'` and function values resolve at runtime.                                         |
+| `content`        | `boolean`            | `true`         | Extract mode only: set `false` to leave the `<symbol>` markup out of each module (`icon.content` is then `''`). The sprite file is unchanged. Ignored in inline mode, which needs the markup. |
 
 `include` and `exclude` are not loader options. To limit which SVGs become sprite symbols, use the `include` / `exclude` conditions of the bundler rule itself, or the options of the same name on the Rsbuild plugin (`pluginSvgSprite({ include: /icons/ })`).
 
@@ -29,7 +30,7 @@ Passed to `new SvgSpritePlugin({ ... })`. The plugin is only needed in extract m
 
 ## Rsbuild plugin options
 
-`pluginSvgSprite(options)` from `rspack-plugin-svg-sprite/rsbuild` accepts `symbolId`, `extract`, `esModule`, `spriteFilename`, `publicPath`, `plainSprite`, `spriteAttrs`, `include` and `exclude` (a `RegExp` or a string). The defaults are the ones above.
+`pluginSvgSprite(options)` from `rspack-plugin-svg-sprite/rsbuild` accepts `symbolId`, `extract`, `esModule`, `spriteFilename`, `publicPath`, `content`, `plainSprite`, `spriteAttrs`, `include` and `exclude` (a `RegExp` or a string). The defaults are the ones above.
 
 ## Exported symbol shape
 

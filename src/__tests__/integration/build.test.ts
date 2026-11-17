@@ -117,6 +117,34 @@ describe('real builds', () => {
     );
 
     it(
+      name + ': extract mode with content: false keeps the sprite complete and the module lean',
+      async () => {
+        const dir = project(ALL_ICONS);
+        try {
+          const cfg = config(dir, true);
+          cfg.module.rules[0].options.content = false;
+          const result = await build(impl, cfg);
+          expect(result.hasErrors).toBe(false);
+          expect(result.warnings).toEqual([]);
+
+          const bundle = fs.readFileSync(path.join(dir, 'out', 'bundle.js'), 'utf8');
+          expect(bundle).not.toContain('<symbol');
+          const icons = exported(dir);
+          expect(icons.star.id).toBe('icon-star');
+          expect(icons.star.url).toBe('/assets/sprite.svg#icon-star');
+          expect(icons.star.viewBox).toBe('0 0 32 32');
+          expect(icons.star.content).toBe('');
+
+          const sprite = path.join(dir, 'out', 'sprite.svg');
+          expect(symbolIds(sprite)).toEqual(['icon-arrow', 'icon-circle', 'icon-star']);
+        } finally {
+          removeProject(dir);
+        }
+      },
+      60000,
+    );
+
+    it(
       name + ': extract mode resolves output.publicPath "auto" at runtime',
       async () => {
         const dir = project(ALL_ICONS);
