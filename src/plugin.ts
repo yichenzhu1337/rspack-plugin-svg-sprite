@@ -48,10 +48,16 @@ function merge(target: Required<PluginConfig>, source: PluginConfig): Required<P
   return result;
 }
 
+// Ids only have to be unique inside one sprite document, so the index is keyed by sprite file
+// and id. The default file name is the one `processAssets` emits for symbols without one.
+function symbolKey(spriteFilename: string | undefined, id: string): string {
+  return (spriteFilename || 'sprite.svg') + '\u0000' + id;
+}
+
 class SvgSpritePlugin {
   public config: Required<PluginConfig>;
   public symbols: SymbolData[];
-  // id -> position in `symbols`, so registering an icon is O(1) instead of a scan per icon.
+  // sprite file + id -> position in `symbols`, so registering an icon is O(1), not a scan.
   // `symbols` is public and may be replaced or edited from outside, so the index remembers
   // which array and length it describes and is rebuilt whenever that no longer matches.
   private symbolIndex = new Map<string, number>();
@@ -69,26 +75,32 @@ class SvgSpritePlugin {
 
   private rebuildSymbolIndex(): void {
     this.symbolIndex.clear();
-    this.symbols.forEach((s, i) => this.symbolIndex.set(s.id, i));
+    this.symbols.forEach((s, i) => this.symbolIndex.set(symbolKey(s.spriteFilename, s.id), i));
     this.indexedSymbols = this.symbols;
     this.indexedCount = this.symbols.length;
   }
 
-  private findSymbol(id: string): number {
+  private symbolKeyAt(position: number): string {
+    const s = this.symbols[position]!;
+    return symbolKey(s.spriteFilename, s.id);
+  }
+
+  private findSymbol(key: string): number {
     if (this.indexedSymbols !== this.symbols || this.indexedCount !== this.symbols.length) {
       this.rebuildSymbolIndex();
     }
-    let position = this.symbolIndex.get(id);
-    if (position !== undefined && this.symbols[position]!.id !== id) {
+    let position = this.symbolIndex.get(key);
+    if (position !== undefined && this.symbolKeyAt(position) !== key) {
       // An entry was swapped in place from outside: the index is stale.
       this.rebuildSymbolIndex();
-      position = this.symbolIndex.get(id);
+      position = this.symbolIndex.get(key);
     }
     return position === undefined ? -1 : position;
   }
 
   addSymbol(symbolData: SymbolData): void {
-    const existing = this.findSymbol(symbolData.id);
+    const key = symbolKey(symbolData.spriteFilename, symbolData.id);
+    const existing = this.findSymbol(key);
     if (existing >= 0) {
       const prev = this.symbols[existing]!;
       if (
@@ -112,7 +124,7 @@ class SvgSpritePlugin {
       }
       this.symbols[existing] = symbolData;
     } else {
-      this.symbolIndex.set(symbolData.id, this.symbols.length);
+      this.symbolIndex.set(key, this.symbols.length);
       this.symbols.push(symbolData);
       this.indexedCount = this.symbols.length;
     }
