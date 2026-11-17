@@ -67,14 +67,15 @@ jobs:
             full=true
           fi
           # The pull_request checkout is the merge commit, so HEAD^1 is the base branch tip.
-          if [ "$EVENT" = pull_request ] && files=$(git diff --name-only HEAD^1 HEAD); then
+          if [ "$EVENT" = pull_request ] && files=$(git diff --name-only --no-renames HEAD^1 HEAD); then
             package=false examples=false website=false ci=false docs_only=true count=0
             while IFS= read -r f; do
               [ -n "$f" ] || continue
               count=$((count + 1))
               is_docs=false
               case "$f" in
-                src/* | scripts/* | .github/workflows/*) ;;
+                # Not docs: tests read the README, the docs pages and the guarantees table.
+                src/* | scripts/* | .github/workflows/* | README.md | website/docs/* | .github/GUARANTEES.md) ;;
                 *.md | LICENSE) is_docs=true ;;
               esac
               # The published package: sources, manifests, build config and the shipped docs.
