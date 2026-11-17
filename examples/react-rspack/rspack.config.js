@@ -18,20 +18,36 @@ const videoChapters = chapters
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// The input side of sprite.html: how many SVG files go into the sprite, and their size on disk.
+const svgFiles = (dir) =>
+  fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith('.svg'))
+    .map((f) => fs.statSync(path.join(dir, f)).size);
+
 // country-flag-icons does not export its SVG files, so the alias
 // points at the folder. realpath: Rspack resolves symlinks (Bun
 // installs packages behind them) and `include` matches that path.
 const flagsDir = fs.realpathSync(
   path.join(path.dirname(require.resolve('country-flag-icons/package.json')), '3x2'),
 );
+const flagFiles = svgFiles(flagsDir);
+const iconFiles = svgFiles(path.join(__dirname, 'src/icons'));
+const inputBytes = [...flagFiles, ...iconFiles].reduce((a, b) => a + b, 0);
+const spritePage = {
+  inputCount: String(flagFiles.length + iconFiles.length),
+  flagCount: String(flagFiles.length),
+  iconCount: String(iconFiles.length),
+  inputSize: `${(inputBytes / 1024).toFixed(1)} KB`,
+};
 const sprite = { extract: true, spriteFilename: 'sprite.svg', esModule: false };
 
 /** @type {import('@rspack/cli').Configuration} */
 module.exports = {
-  entry: './src/index.jsx',
+  entry: { main: './src/index.jsx', sprite: './src/sprite-page.js' },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.[contenthash:8].js',
+    filename: '[name].[contenthash:8].js',
     publicPath: process.env.PUBLIC_PATH || '/',
     clean: true,
   },
@@ -81,6 +97,13 @@ module.exports = {
       template: './src/index.html',
       templateParameters: { videoChapters },
       title: 'rspack-plugin-svg-sprite: every flag, one SVG sprite',
+      chunks: ['main'],
+    }),
+    new HtmlRspackPlugin({
+      template: './src/sprite.html',
+      filename: 'sprite.html',
+      templateParameters: spritePage,
+      chunks: ['sprite'],
     }),
     new SvgSpritePlugin(),
     new CopyRspackPlugin({ patterns: [{ from: 'public' }] }),

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <title>sprite.svg: the one file the demo build writes</title>
+    <meta
+      name="description"
+      content="Preview the sprite.svg that rspack-plugin-svg-sprite wrote for the demo: every SVG file merged into one sprite, each symbol drawn with use."
+    />
+    <link rel="icon" href="logo.svg" type="image/svg+xml" />
+    <link
+      rel="canonical"
+      href="https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/sprite.html"
+    />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1117" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <a class="logo" href="./"
+          ><img src="logo.svg" alt="" width="28" height="28" /><span
+            ><span class="long">rspack-plugin-</span>svg-sprite</span
+          ></a
+        >
+        <nav aria-label="Site">
+          <a href="docs/">Docs</a>
+          <a class="with-icon" href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite"
+            ><svg class="icon" aria-hidden="true"><use href="sprite.svg#icon-github" /></svg
+            >GitHub</a
+          >
+          <a href="https://www.npmjs.com/package/rspack-plugin-svg-sprite">npm</a>
+        </nav>
+        <button type="button" class="icon-btn" id="theme-toggle" hidden>
+          <svg class="icon" aria-hidden="true"><use href="sprite.svg#icon-moon" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="wrap sprite-page">
+      <h1>Inside <code>sprite.svg</code></h1>
+      <p class="section-lead">
+        This demo imports <%= inputCount %> SVG files. At build time the plugin merges them into one
+        file, <code>sprite.svg</code>. Opened on its own the file looks blank: a sprite only defines
+        <code>&lt;symbol&gt;</code> elements, and a symbol is drawn where a
+        <code>&lt;use href="sprite.svg#id"&gt;</code> points at it. Below, every symbol is drawn
+        from that one file.
+      </p>
+
+      <ol class="pipeline" aria-label="From many files to one sprite">
+        <li>
+          <span class="pipeline-label">Input</span>
+          <strong><%= inputCount %> SVG files</strong>
+          <span><%= flagCount %> flags + <%= iconCount %> UI icons · <%= inputSize %></span>
+        </li>
+        <li class="pipeline-step">
+          <span class="pipeline-label">Build</span>
+          <strong>rspack-plugin-svg-sprite</strong>
+          <span>loader + plugin, extract mode</span>
+        </li>
+        <li>
+          <span class="pipeline-label">Output</span>
+          <strong>1 file, <span id="out-count">…</span> symbols</strong>
+          <span><span id="out-size"></span> <span id="out-gzip"></span> · 1 request</span>
+        </li>
+      </ol>
+
+      <p class="sprite-actions">
+        <a class="btn" href="sprite.svg">Open the raw file</a>
+        <a class="btn btn-quiet" href="sprite.svg" download>Download sprite.svg</a>
+        <a class="btn btn-quiet" href="./#demo">Back to the demo</a>
+      </p>
+
+      <div class="symbol-toolbar">
+        <label for="symbol-filter" class="sr-only">Filter symbols by id</label>
+        <input
+          id="symbol-filter"
+          type="search"
+          placeholder="Filter by id, e.g. flag-JP"
+          autocomplete="off"
+        />
+        <span id="symbol-count" aria-live="polite">Loading sprite.svg…</span>
+      </div>
+      <p class="sr-only" id="copy-status" role="status"></p>
+      <div class="symbol-grid" id="symbols">
+        <noscript><p class="note">This preview needs JavaScript.</p></noscript>
+      </div>
+
+      <details class="sprite-source">
+        <summary>The start of <code>sprite.svg</code>, as written</summary>
+        <pre><code id="sprite-source"></code></pre>
+      </details>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <nav aria-label="Footer">
+          <a href="docs/">Docs</a>
+          <a href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite">GitHub</a>
+          <a href="https://www.npmjs.com/package/rspack-plugin-svg-sprite">npm</a>
+          <a href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/CHANGELOG.md"
+            >Changelog</a
+          >
+          <a href="llms.txt">llms.txt</a>
+        </nav>
+        <p>
+          Flags:
+          <a href="https://gitlab.com/catamphetamine/country-flag-icons">country-flag-icons</a>
+          (MIT). Icons: <a href="https://feathericons.com/">Feather</a> (MIT).
+        </p>
+        <p class="made">Made for Rspack <span aria-hidden="true">⚡</span></p>
+      </div>
+    </footer>
+  </body>
+</html>

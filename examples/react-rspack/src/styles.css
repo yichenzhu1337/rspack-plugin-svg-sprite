@@ -1032,3 +1032,161 @@ button.ts {
 .hero-text {
   min-width: 0;
 }
+
+/* sprite.html: the preview of the one file the build writes. */
+.sprite-page {
+  padding-block: var(--space-7) var(--space-8);
+}
+
+.sprite-page h1 code {
+  font-size: 0.9em;
+}
+
+.pipeline {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 720px) {
+  .pipeline {
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+  }
+}
+
+.pipeline li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.pipeline .pipeline-step {
+  justify-content: center;
+  border-style: dashed;
+  background: none;
+  text-align: center;
+}
+
+.pipeline strong {
+  font-size: 1.25rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.pipeline span {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pipeline .pipeline-label {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sprite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.symbol-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+.symbol-toolbar input {
+  flex: 1 1 240px;
+  max-width: 360px;
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: var(--space-2);
+}
+
+.symbol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+}
+
+.symbol:hover {
+  border-color: var(--accent);
+}
+
+.symbol[hidden] {
+  display: none;
+}
+
+.symbol svg {
+  width: 48px;
+  height: 32px;
+  color: var(--text);
+}
+
+.symbol code {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: none;
+}
+
+.sprite-source {
+  margin-top: var(--space-6);
+}
+
+.sprite-source summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.sprite-source pre {
+  max-height: 420px;
+  margin-top: var(--space-3);
+  overflow: auto;
+}
+
+.pipeline strong span {
+  color: inherit;
+  font-size: inherit;
+}
+
+.sprite-page h1 {
+  margin-bottom: var(--space-3);
+}
