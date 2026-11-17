@@ -15,6 +15,42 @@ export function check<T>(
   fc.assert(property, { seed: SEED, numRuns, endOnFailure });
 }
 
+/**
+ * Times `run` on `make(size)` and on `make(size * GROWTH)` and returns the ratio of the two
+ * fastest runs. Linear code gives about GROWTH, quadratic code about GROWTH squared. Comparing
+ * two sizes measured back to back cancels machine speed and load, which an absolute time limit
+ * cannot, and taking the minimum of several runs discards the ones a busy machine slowed down.
+ */
+const GROWTH = 8;
+/** Linear is about 8, quadratic about 64. */
+export const MAX_GROWTH_RATIO = 24;
+/** Only a hang guard: the ratio is the real check. */
+export const HANG_LIMIT_MS = 20_000;
+
+export function growthRatio(
+  make: (size: number) => string,
+  run: (input: string) => unknown,
+  size: number,
+  runs = 5,
+): number {
+  const best = (input: string): number => {
+    run(input); // warm up, so JIT and cache effects do not count against the small size
+    let min = Infinity;
+    for (let i = 0; i < runs; i++) {
+      const started = performance.now();
+      run(input);
+      min = Math.min(min, performance.now() - started);
+    }
+    return min;
+  };
+  const small = best(make(size));
+  const large = best(make(size * GROWTH));
+  if (large > HANG_LIMIT_MS)
+    throw new Error('took ' + Math.round(large) + ' ms, expected linear time');
+  // Below one millisecond the small run is mostly timer noise, so do not divide by less.
+  return large / Math.max(small, 1);
+}
+
 const nameStart = fc.constantFrom(
   ...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'.split(''),
 );

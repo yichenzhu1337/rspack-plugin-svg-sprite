@@ -14,6 +14,7 @@ import {
   symbolIds,
 } from './integration/helpers';
 import type { Bundler } from './integration/helpers';
+import { growthRatio, MAX_GROWTH_RATIO } from './property/arbitraries';
 
 /**
  * Robustness corpus. Every case decides the CORRECT outcome from the README: a valid module and
@@ -622,7 +623,8 @@ describe('large inputs', () => {
       const { symbols } = runLoader('/big/x.svg', input, { extract: true });
       expect(symbols[0].content.endsWith('</symbol>')).toBe(true);
     }
-    expect(Date.now() - started).toBeLessThan(5000);
+    // A hang guard only; linearity is checked by growth ratio in property/robustness.test.ts.
+    expect(Date.now() - started).toBeLessThan(60_000);
   });
 
   it('a real extract build with a 6 MB icon and a 60 000 element icon finishes and stays well formed', async () => {
@@ -687,9 +689,12 @@ describe('former defects (fixed)', () => {
   // `<svg` occurrences makes `/<svg([^>]*)>/` rescan to the end of the file at every position:
   // 20 000 repetitions (100 KB) take about 8 seconds, 100 000 would take minutes.
   it('a file that is 20 000 repetitions of "<svg " does not stall the loader', () => {
-    const started = Date.now();
-    runLoader('/x/evil.svg', '<svg '.repeat(20_000), { extract: true });
-    expect(Date.now() - started).toBeLessThan(1000);
+    const ratio = growthRatio(
+      (n) => '<svg '.repeat(n),
+      (input) => runLoader('/x/evil.svg', input, { extract: true }),
+      5_000,
+    );
+    expect(ratio).toBeLessThan(MAX_GROWTH_RATIO);
   });
 
   // DEFECT 4 (low). A DOCTYPE that declares entities used inside the icon is dropped with the
