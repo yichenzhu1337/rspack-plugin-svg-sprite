@@ -212,7 +212,7 @@ import icon from './icon.svg';
 | `symbolId`       | `string \| function` | `'[name]'`     | Pattern for generating symbol IDs. Supports `[name]`, `[folder]`, `[ext]` placeholders, or a function `(filePath) => id`. |
 | `esModule`       | `boolean`            | `true`         | Use ES module export (`export default`) vs CommonJS (`module.exports`).                                                   |
 | `extract`        | `boolean`            | `false`        | Enable extract mode to emit an external sprite file instead of inlining.                                                  |
-| `spriteFilename` | `string`             | `'sprite.svg'` | Output filename for the extracted sprite (extract mode only).                                                             |
+| `spriteFilename` | `string`             | `'sprite.svg'` | Output filename for the extracted sprite (extract mode only). Symbol ids must be unique within one sprite file.           |
 | `publicPath`     | `string`             | `''`           | Public URL prefix for the sprite file (extract mode only). Auto-detected from `output.publicPath` if not set.             |
 
 `include` and `exclude` are not loader options. To limit which SVGs become sprite symbols, use the `include` / `exclude` conditions of the bundler rule itself, or the options of the same name on the Rsbuild plugin (`pluginSvgSprite({ include: /icons/ })`).

@@ -60,3 +60,64 @@ describe('addSymbol keeps one entry per id', () => {
     expect(plugin.symbols[0].content).toBe('new');
   });
 });
+
+describe('ids are unique per sprite file', () => {
+  const inFile = (id: string, spriteFilename: string | undefined, resourcePath: string) => ({
+    id,
+    content: `<symbol id="${id}"/>`,
+    resourcePath,
+    ...(spriteFilename === undefined ? {} : { spriteFilename }),
+  });
+
+  function capture(fn: () => void): unknown[][] {
+    const warn = console.warn;
+    const calls: unknown[][] = [];
+    console.warn = (...args: unknown[]) => void calls.push(args);
+    try {
+      fn();
+    } finally {
+      console.warn = warn;
+    }
+    return calls;
+  }
+
+  it('keeps the same id in different sprite files without a warning', () => {
+    const plugin = new SvgSpritePlugin();
+    const calls = capture(() => {
+      plugin.addSymbol(inFile('home', 'a.svg', '/a/home.svg'));
+      plugin.addSymbol(inFile('home', 'b.svg', '/b/home.svg'));
+    });
+    expect(plugin.symbols.map((s) => s.spriteFilename)).toEqual(['a.svg', 'b.svg']);
+    expect(calls).toEqual([]);
+  });
+
+  it('still warns and overwrites for the same id in the same sprite file', () => {
+    const plugin = new SvgSpritePlugin();
+    const calls = capture(() => {
+      plugin.addSymbol(inFile('home', 'a.svg', '/a/home.svg'));
+      plugin.addSymbol(inFile('home', 'a.svg', '/a2/home.svg'));
+    });
+    expect(plugin.symbols).toHaveLength(1);
+    expect(plugin.symbols[0].resourcePath).toBe('/a2/home.svg');
+    expect(calls).toHaveLength(1);
+  });
+
+  it('treats an undefined spriteFilename and sprite.svg as the same sprite', () => {
+    const plugin = new SvgSpritePlugin();
+    const calls = capture(() => {
+      plugin.addSymbol(inFile('home', undefined, '/a/home.svg'));
+      plugin.addSymbol(inFile('home', 'sprite.svg', '/b/home.svg'));
+    });
+    expect(plugin.symbols).toHaveLength(1);
+    expect(calls).toHaveLength(1);
+  });
+
+  it('keeps the index correct when symbols is replaced from outside', () => {
+    const plugin = new SvgSpritePlugin();
+    plugin.addSymbol(inFile('home', 'a.svg', '/a/home.svg'));
+    plugin.symbols = [inFile('home', 'b.svg', '/b/home.svg')];
+    plugin.addSymbol(inFile('home', 'a.svg', '/a/home.svg'));
+    plugin.addSymbol(inFile('home', 'b.svg', '/b/home.svg'));
+    expect(plugin.symbols.map((s) => s.spriteFilename)).toEqual(['b.svg', 'a.svg']);
+  });
+});
