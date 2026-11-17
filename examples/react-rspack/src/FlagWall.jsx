@@ -62,7 +62,7 @@ function Inspector({ flag }) {
         </div>
       </div>
       <div className="codebox">
-        <pre>
+        <pre tabIndex={0}>
           <code className="language-js">{code}</code>
         </pre>
       </div>

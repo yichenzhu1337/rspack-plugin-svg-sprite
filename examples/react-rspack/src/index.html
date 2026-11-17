@@ -79,6 +79,18 @@
         "license": "https://opensource.org/licenses/MIT"
       }
     </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "rspack-plugin-svg-sprite in 43 seconds",
+        "description": "265 flag SVG files become one sprite.svg at build time, drawn with use from a single HTTP request.",
+        "thumbnailUrl": "https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/intro-poster.webp",
+        "contentUrl": "https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/intro.mp4",
+        "uploadDate": "2026-11-16",
+        "duration": "PT43S"
+      }
+    </script>
   </head>
   <body>
     <header class="topbar">
@@ -143,7 +155,27 @@
         </dl>
       </section>
 
-      <!-- The intro video goes here (a later change adds it). -->
+      <section class="wrap" aria-labelledby="intro-title">
+        <h2 id="intro-title">See it in 43 seconds</h2>
+        <figure class="intro-video">
+          <video
+            src="intro.mp4"
+            poster="intro-poster.webp"
+            width="1920"
+            height="1080"
+            controls
+            muted
+            playsinline
+            preload="none"
+            aria-label="Intro video, no sound. The chapters are listed below."
+          ></video>
+          <figcaption>
+            <ol class="chapters" id="video-chapters">
+              <%= videoChapters %>
+            </ol>
+          </figcaption>
+        </figure>
+      </section>
 
       <section class="wrap" id="demo" aria-labelledby="demo-title">
         <h2 id="demo-title">Try it: 265 flags, one sprite</h2>

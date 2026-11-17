@@ -9,5 +9,10 @@
   },
   { "t": 26, "title": "Use", "caption": "Use any icon with `<use>`. One request for all." },
   { "t": 34, "title": "Migrate", "caption": "Coming from svg-sprite-loader? Change the loader." },
-  { "t": 39, "title": "Install", "caption": "" }
+  {
+    "t": 39,
+    "title": "Install",
+    "caption": "",
+    "summary": "npm install -D rspack-plugin-svg-sprite, then read the docs."
+  }
 ]
