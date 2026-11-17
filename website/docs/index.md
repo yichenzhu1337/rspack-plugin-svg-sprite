@@ -1,4 +1,5 @@
 ---
+title: 'SVG sprites for Rspack, Rsbuild and webpack 5'
 description: 'rspack-plugin-svg-sprite turns the SVG files you import into one SVG sprite, for Rspack, Rsbuild and webpack 5. A drop-in replacement for svg-sprite-loader.'
 ---
 
