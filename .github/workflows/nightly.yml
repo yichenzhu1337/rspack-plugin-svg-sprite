@@ -137,7 +137,8 @@ jobs:
         env:
           RSPACK: ${{ steps.versions.outputs.rspack }}
           RSBUILD: ${{ steps.versions.outputs.rsbuild }}
-        run: bun add --dev "rspack-v2@npm:@rspack/core@$RSPACK" "rsbuild-v2@npm:@rsbuild/core@$RSBUILD"
+        # bunfig.toml holds back releases younger than 3 days; the canary exists to test fresh ones.
+        run: bun add --dev --minimum-release-age=0 "rspack-v2@npm:@rspack/core@$RSPACK" "rsbuild-v2@npm:@rsbuild/core@$RSBUILD"
       - name: 🏗️ Build
         run: bun run build
       - name: 🧪 Integration tests
