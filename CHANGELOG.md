@@ -1,5 +1,11 @@
 # rspack-plugin-svg-sprite
 
+## 1.8.0
+
+### Minor Changes
+
+- [#85](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/85) [`92877ae`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/92877aeb91234df0c3d3cd95f55144f81c0223b6) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - New loader option `content` (default `true`). In extract mode, `content: false` leaves the `<symbol>` markup out of every generated module, so large icon sets are no longer shipped twice (once in the JS bundle and once in the sprite file). `icon.id`, `icon.viewBox` and `icon.url` are unchanged, `icon.content` is `''`, and the sprite file is identical. The option has no effect in inline mode, which needs the markup. Also accepted by the Rsbuild plugin. The default output is unchanged.
+
 ## 1.7.0
 
 ### Minor Changes
