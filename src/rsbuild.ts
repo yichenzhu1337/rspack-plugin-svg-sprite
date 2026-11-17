@@ -8,6 +8,7 @@ export interface SvgSpritePluginOptions {
   esModule?: boolean;
   spriteFilename?: string;
   publicPath?: string;
+  content?: boolean;
   plainSprite?: boolean;
   spriteAttrs?: Record<string, string>;
   include?: RegExp | string;
@@ -56,6 +57,7 @@ export function pluginSvgSprite(options: SvgSpritePluginOptions = {}): RsbuildPl
             esModule: loaderOptions.esModule !== false,
             spriteFilename: loaderOptions.spriteFilename || 'sprite.svg',
             publicPath: loaderOptions.publicPath || '',
+            content: loaderOptions.content !== false,
           },
         };
 

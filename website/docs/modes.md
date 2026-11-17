@@ -71,6 +71,8 @@ How it works:
 2. During the `processAssets` stage, the plugin collects all registered symbols and emits a combined `.svg` sprite file.
 3. The exported JS module contains the external file URL, for example `/sprites/icons.svg#symbolId`.
 
+By default each module also carries the `<symbol>` markup as `icon.content`, so a large icon set ships once in the sprite file and once in the JS bundle. If your code only reads `icon.url`, `icon.id` and `icon.viewBox`, set `content: false` on the loader. The modules then carry `content: ''` and the sprite file is unchanged. The option has no effect in inline mode, which needs the markup.
+
 :::info
 In extract mode the loader opts out of the bundler's module cache, because registering the symbol is a side effect of running the loader. Every icon is read again on each rebuild (roughly 0.05 to 0.1 ms per icon). Inline mode is unaffected and stays cached.
 :::

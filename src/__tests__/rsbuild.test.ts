@@ -27,6 +27,7 @@ describe('pluginSvgSprite (Rsbuild)', () => {
     expect(rule.options.esModule).toBe(true);
     expect(rule.options.spriteFilename).toBe('sprite.svg');
     expect(rule.options.publicPath).toBe('');
+    expect(rule.options.content).toBe(true);
   });
 
   it('passes custom loader options through', () => {
@@ -36,6 +37,7 @@ describe('pluginSvgSprite (Rsbuild)', () => {
       esModule: false,
       spriteFilename: 'icons.svg',
       publicPath: '/assets/',
+      content: false,
     });
     const config: any = { module: { rules: [] }, plugins: [] };
     const api = {
@@ -50,6 +52,7 @@ describe('pluginSvgSprite (Rsbuild)', () => {
     expect(rule.options.esModule).toBe(false);
     expect(rule.options.spriteFilename).toBe('icons.svg');
     expect(rule.options.publicPath).toBe('/assets/');
+    expect(rule.options.content).toBe(false);
   });
 
   it('adds SvgSpritePlugin when extract is true', () => {

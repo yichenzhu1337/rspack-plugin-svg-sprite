@@ -8,6 +8,7 @@ interface LoaderOptions {
   esModule?: boolean;
   spriteFilename?: string;
   publicPath?: string;
+  content?: boolean;
 }
 
 interface LoaderContext {
@@ -496,7 +497,12 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
     let runtime = interopRequire('SpriteSymbol', symbolModulePath);
     runtime +=
       'var symbol = new SpriteSymbol(' +
-      JSON.stringify({ id: symbolId, viewBox: viewBox, content: symbolContent }) +
+      JSON.stringify({
+        id: symbolId,
+        viewBox: viewBox,
+        // The markup is already in the sprite file; `content: false` keeps it out of the bundle.
+        content: options.content === false ? '' : symbolContent,
+      }) +
       ');\n';
     runtime +=
       'symbol.url = ' +

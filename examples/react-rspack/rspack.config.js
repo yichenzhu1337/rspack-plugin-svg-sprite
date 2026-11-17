@@ -39,7 +39,8 @@ const spritePage = {
   iconCount: String(iconFiles.length),
   inputSize: `${(inputBytes / 1024).toFixed(1)} KB`,
 };
-const sprite = { extract: true, spriteFilename: 'sprite.svg', esModule: false };
+// `content: false`: the demo only reads url/id/viewBox, so the markup stays out of the JS bundle.
+const sprite = { extract: true, content: false, spriteFilename: 'sprite.svg', esModule: false };
 
 /** @type {import('@rspack/cli').Configuration} */
 module.exports = {

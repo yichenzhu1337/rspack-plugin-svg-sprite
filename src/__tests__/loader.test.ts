@@ -296,6 +296,45 @@ describe('Loader', () => {
       expect(output).toContain('sprite.svg#star');
     });
 
+    it('content: false leaves the markup out of the module but still registers it', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const added: any[] = [];
+      const ctx = createMockLoaderContext(fullPath, { extract: true, content: false });
+      ctx._compilation[NAMESPACE] = { addSymbol: (data: any) => added.push(data) };
+
+      const output = loader.call(ctx as any, content);
+      expect(output).toContain('"content":""');
+      expect(output).not.toContain('<symbol');
+      expect(added).toHaveLength(1);
+      expect(added[0].content).toContain('<symbol id="star"');
+    });
+
+    it('content: true and the default keep the module output identical', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const run = (options: Record<string, unknown>) => {
+        const ctx = createMockLoaderContext(fullPath, options);
+        ctx._compilation[NAMESPACE] = { addSymbol() {} };
+        return loader.call(ctx as any, content);
+      };
+      const base = run({ extract: true });
+      expect(run({ extract: true, content: true })).toBe(base);
+      expect(base).toContain('<symbol id=');
+    });
+
+    it('content: false has no effect in inline mode', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const inline = loader.call(createMockLoaderContext(fullPath, {}) as any, content);
+      const off = loader.call(
+        createMockLoaderContext(fullPath, { content: false }) as any,
+        content,
+      );
+      expect(off).toBe(inline);
+      expect(off).toContain('<symbol');
+    });
+
     it('auto-reads publicPath from compiler output config', () => {
       const fullPath = path.resolve(FIXTURES, 'star.svg');
       const content = fs.readFileSync(fullPath, 'utf-8');
