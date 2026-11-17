@@ -72,6 +72,16 @@ describe('privacy-scan.sh', () => {
     expect(result.out).toContain('match in src/x.ts:2');
   });
 
+  it('scans an added line that starts with "++ " and names the right file and line', () => {
+    const result = scan({
+      deny: SECRET,
+      change: { 'src/x.ts': `ok\n++ ${SECRET} here\n`, 'src/y.ts': 'fine\n' },
+    });
+    expect(result.code).toBe(1);
+    expect(result.out).toContain('match in src/x.ts:2');
+    expect(result.out).not.toContain(SECRET);
+  });
+
   it('does not flag a removed or untouched line', () => {
     const { dir, base } = makeRepo({ 'a.txt': `${SECRET}\nkeep\n` });
     write(dir, 'a.txt', 'keep\nextra\n');
