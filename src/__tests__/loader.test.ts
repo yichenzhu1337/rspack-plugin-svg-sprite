@@ -356,7 +356,7 @@ describe('Loader', () => {
       expect(output).toContain('/explicit/sprite.svg#star');
     });
 
-    it('ignores compiler publicPath set to "auto"', () => {
+    it('computes the url at runtime when compiler publicPath is "auto"', () => {
       const fullPath = path.resolve(FIXTURES, 'star.svg');
       const content = fs.readFileSync(fullPath, 'utf-8');
       const ctx = createMockLoaderContext(fullPath, { extract: true });
@@ -367,8 +367,40 @@ describe('Loader', () => {
       ctx._compilation[NAMESPACE] = { addSymbol() {} };
 
       const output = loader.call(ctx as any, content);
-      expect(output).toContain('sprite.svg#star');
-      expect(output).not.toContain('auto');
+      expect(output).toContain('symbol.url = __webpack_public_path__ + "sprite.svg#star";');
+      expect(output).not.toContain('"auto');
+      expect(output).toContain('export default symbol;');
+      expect(output).toContain('new SpriteSymbol({"id":"star"');
+    });
+
+    it('computes the url at runtime when compiler publicPath is a function', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const ctx = createMockLoaderContext(fullPath, { extract: true, esModule: false });
+      ctx._compiler = {
+        context: FIXTURES,
+        options: { output: { publicPath: () => '/dyn/' } },
+      } as any;
+      ctx._compilation[NAMESPACE] = { addSymbol() {} };
+
+      const output = loader.call(ctx as any, content);
+      expect(output).toContain('symbol.url = __webpack_public_path__ + "sprite.svg#star";');
+      expect(output).toContain('module.exports = symbol;');
+    });
+
+    it('keeps an explicit publicPath option even when compiler publicPath is "auto"', () => {
+      const fullPath = path.resolve(FIXTURES, 'star.svg');
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const ctx = createMockLoaderContext(fullPath, { extract: true, publicPath: '/explicit/' });
+      ctx._compiler = {
+        context: FIXTURES,
+        options: { output: { publicPath: 'auto' } },
+      };
+      ctx._compilation[NAMESPACE] = { addSymbol() {} };
+
+      const output = loader.call(ctx as any, content);
+      expect(output).toContain('symbol.url = "/explicit/sprite.svg#star";');
+      expect(output).not.toContain('__webpack_public_path__');
     });
 
     it('registers the symbol with the plugin via _compilation', () => {
