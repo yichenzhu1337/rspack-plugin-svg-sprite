@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The site's sitemap index: the demo pages, and the docs sitemap that Rspress writes. -->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/sitemap-demo.xml</loc></sitemap>
+  <sitemap><loc>https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/sitemap.xml</loc></sitemap>
+</sitemapindex>

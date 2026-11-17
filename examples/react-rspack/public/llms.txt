@@ -19,11 +19,13 @@ Minimal config (extract mode):
 
 ## Links
 
-- [Getting started](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/getting-started)
+- [Installation](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/getting-started)
 - [Migrating from svg-sprite-loader](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/migrating)
 - [Modes: inline and extract](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/modes)
 - [Options](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/options)
-- [FAQ](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/faq)
+- [Troubleshooting](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/faq)
 - [README](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite#readme)
 - [npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
 - [Live demo: 265 flags in one sprite](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)
+- [Inside sprite.svg: every symbol of the demo sprite](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/sprite.html)
+- [Full docs for AI agents](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/llms-full.txt)
