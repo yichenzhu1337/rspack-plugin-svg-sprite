@@ -1,5 +1,17 @@
 # rspack-plugin-svg-sprite
 
+## 1.7.0
+
+### Minor Changes
+
+- [#82](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/82) [`7e8f859`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/7e8f85953a956e8b4dc7a1f34feb700e4a6e4445) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - Extract mode now works with `output.publicPath: 'auto'` (the Rspack and webpack 5 default for web targets) and with a function `output.publicPath`. The sprite URL is resolved in the browser from the bundler's public path, so `icon.url` points at the sprite next to your bundle without setting the loader's `publicPath`. A string `output.publicPath` or the loader's `publicPath` option behaves as before, and the generated module for those is unchanged.
+
+  Behaviour change for builds that leave `output.publicPath` unset on a web target: `icon.url` used to be `sprite.svg#id`, resolved against the page URL (so it broke on nested routes such as `/settings/profile`). It is now resolved from the bundle's location, like every other asset. To keep a fixed URL, set the loader's `publicPath` option.
+
+### Patch Changes
+
+- [#83](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/83) [`692f4ed`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/692f4ed5cef4c98f94e786899834c454229843f5) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - An icon whose root `<svg>` has no `viewBox` and no numeric `width` and `height` silently got `viewBox="0 0 24 24"`, which crops or mis-scales icons of any other size. The build now prints a warning that names the file and the fallback it used, and says to add a `viewBox` (or `width` and `height`) to the root `<svg>`. The generated output is unchanged.
+
 ## 1.6.4
 
 ### Patch Changes
