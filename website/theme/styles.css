@@ -37,8 +37,21 @@ html:not(.dark) {
   line-height: 1.65;
 }
 
-.rp-doc :where(:not(pre) > code) {
+.rp-doc :not(pre) > code {
   padding: 1px 5px;
+}
+
+/* Rspress draws a divider with a 48px gap before the first h2; a docs page reads better without it. */
+.rp-doc h2:first-of-type::before {
+  display: none;
+}
+
+.rp-llms-container {
+  margin-bottom: 12px;
+}
+
+.rp-doc-layout__doc-container {
+  padding-top: 32px;
 }
 
 .rp-doc p,
