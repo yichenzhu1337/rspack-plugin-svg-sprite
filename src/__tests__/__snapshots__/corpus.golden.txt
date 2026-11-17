@@ -636,7 +636,7 @@ messy--illustrator-export
 === messy--inkscape-export.svg
 messy--inkscape-export
 0 0 48 48
-<symbol id="messy--inkscape-export" viewBox="0 0 48 48"><sodipodi:namedview
+<symbol id="messy--inkscape-export" viewBox="0 0 48 48" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"><sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
      bordercolor="#666666"

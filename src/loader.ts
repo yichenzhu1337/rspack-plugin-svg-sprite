@@ -198,6 +198,48 @@ function readSvgAttrs(svgContent: string, preserveCase: boolean): Record<string,
   return attrs;
 }
 
+/** Root `xmlns:<prefix>` declarations as `[prefix, uri]` pairs, in source order. */
+function readNamespaceDecls(svgContent: string): Array<[string, string]> {
+  const decls: Array<[string, string]> = [];
+  const root = parseRootTag(svgContent);
+  if (root) {
+    for (const [name, value] of root.attrs) {
+      if (name.startsWith('xmlns:')) decls.push([name.slice(6), value]);
+    }
+    return decls;
+  }
+  const tag = legacyRootTagText(svgContent) || '';
+  const re = /\sxmlns:([\w.-]+)=(?:"([^"]*)"|'([^']*)')/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(tag)) !== null) decls.push([match[1]!, match[2] ?? match[3]!]);
+  return decls;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * The root's namespace declarations that the icon body uses, as an attribute string. The
+ * `<symbol>` does not inherit them, and a used but unbound prefix makes the whole sprite
+ * invalid XML. `xlink` is declared on the sprite root already and `xml` is predefined.
+ */
+function usedNamespaceAttrs(svgContent: string, inner: string): string {
+  // Cheap exit for the common icon, which also keeps huge malformed input off a second parse.
+  if (!svgContent.includes('xmlns:')) return '';
+  let out = '';
+  const seen = new Set<string>();
+  for (const [prefix, uri] of readNamespaceDecls(svgContent)) {
+    if (prefix === 'xlink' || prefix === 'xml' || seen.has(prefix)) continue;
+    seen.add(prefix);
+    const p = escapeRegExp(prefix);
+    if (new RegExp('</?' + p + ':|\\s' + p + ':[^\\s=]+\\s*=').test(inner)) {
+      out += ' xmlns:' + prefix + '="' + escapeMarkupAttr(uri) + '"';
+    }
+  }
+  return out;
+}
+
 /**
  * Root attributes with lowercased names. The lowercasing is the v1 contract of this exported
  * helper and is kept for backwards compatibility. The loader itself uses the case-preserving
@@ -372,6 +414,8 @@ function svgSpriteLoader(this: LoaderContext, content: string): string {
       attrString += ' ' + key + '="' + escapeMarkupAttr(svgAttrs[key]!) + '"';
     }
   });
+
+  attrString += usedNamespaceAttrs(content, innerContent);
 
   const symbolContent = '<symbol ' + attrString + '>' + innerContent + '</symbol>';
 
