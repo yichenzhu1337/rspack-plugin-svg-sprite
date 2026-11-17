@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@rstest/core';
 import { join } from 'node:path';
-import { readFileSync } from 'node:fs';
+import { chmodSync, readFileSync, writeFileSync } from 'node:fs';
 import { fakeTools, git, makeRepo, run, script, tempDir, write } from './helpers';
 
 const RELEASE = script('release', 'release.mts');
@@ -165,9 +165,65 @@ describe('release.mts guards', () => {
       expect(guards(none, { MODE: 'release-candidate' }).outputs.version).toBe('1.2.3-rc.1');
     });
 
-    it('does not mind an existing tag or published base version', () => {
-      const tools = registry({ [`npm view ${PKG}@1.2.3 version`]: { out: '1.2.3' } });
-      expect(guards(tools, { MODE: 'release-candidate' }, project({ tag: true })).code).toBe(0);
+    it('does not mind an existing tag on an unpublished base version', () => {
+      expect(guards(registry(), { MODE: 'release-candidate' }, project({ tag: true })).code).toBe(
+        0,
+      );
+    });
+
+    describe('when package.json already holds a published version', () => {
+      const published = { [`npm view ${PKG}@1.2.3 version`]: { out: '1.2.3' } };
+      // A fake `npx` that answers `changeset status --output=<file>` with PLAN, or fails.
+      function withPlan(plan: unknown, extra: Record<string, Fake> = {}) {
+        const tools = registry({ ...published, ...extra });
+        const shim = join(tools.dir, 'npx');
+        writeFileSync(
+          shim,
+          plan === null
+            ? '#!/bin/sh\necho "changeset not available" >&2\nexit 1\n'
+            : '#!/bin/sh\nfor a in "$@"; do case "$a" in --output=*) printf %s "$PLAN" > "${a#--output=}";; esac; done\n',
+        );
+        chmodSync(shim, 0o755);
+        return { tools, env: { MODE: 'release-candidate', PLAN: JSON.stringify(plan) } };
+      }
+      const release = (newVersion: string) => ({
+        releases: [{ name: PKG, type: 'minor', oldVersion: '1.2.3', newVersion }],
+      });
+
+      it('bases the candidate on the version the pending changesets plan', () => {
+        const { tools, env } = withPlan(release('1.3.0'), {
+          [`npm view ${PKG} versions --json`]: {
+            out: JSON.stringify(['1.2.3', '1.3.0-rc.1', '1.2.4-rc.1']),
+          },
+        });
+        const result = guards(tools, env, project({ changesets: true }));
+        expect(result.code).toBe(0);
+        expect(result.outputs.version).toBe('1.3.0-rc.2');
+      });
+
+      it('refuses when the plan is unavailable, instead of guessing', () => {
+        const { tools, env } = withPlan(null);
+        const result = guards(tools, env, project({ changesets: true }));
+        expect(result.code).toBe(1);
+        expect(result.out).toContain('is already on npm');
+        expect(result.out).toContain('release candidate');
+      });
+
+      it('refuses when no changeset is pending', () => {
+        const { tools, env } = withPlan({ releases: [] });
+        const result = guards(tools, env);
+        expect(result.code).toBe(1);
+        expect(result.out).toContain('is already on npm');
+      });
+
+      it('refuses when the planned version is not above a published one', () => {
+        const { tools, env } = withPlan(release('1.2.3'));
+        expect(guards(tools, env, project({ changesets: true })).code).toBe(1);
+        const newer = withPlan(release('1.2.4'), {
+          [`npm view ${PKG} versions --json`]: { out: JSON.stringify(['1.2.3', '1.2.4']) },
+        });
+        expect(guards(newer.tools, newer.env, project({ changesets: true })).code).toBe(1);
+      });
     });
 
     it('stops when not on main', () => {

@@ -31,7 +31,18 @@ export function compare(a: string, b: string): number {
   if (x.pre === y.pre) return 0;
   if (x.pre === null) return 1;
   if (y.pre === null) return -1;
-  return x.pre < y.pre ? -1 : 1;
+  // Dot-separated identifiers: numbers compare as numbers and sort before text (rc.9 < rc.10).
+  const a1 = x.pre.split('.');
+  const b1 = y.pre.split('.');
+  for (let i = 0; i < Math.min(a1.length, b1.length); i++) {
+    if (a1[i] === b1[i]) continue;
+    const an = /^\d+$/.test(a1[i]);
+    const bn = /^\d+$/.test(b1[i]);
+    if (an && bn) return Number(a1[i]) - Number(b1[i]);
+    if (an !== bn) return an ? -1 : 1;
+    return a1[i] < b1[i] ? -1 : 1;
+  }
+  return a1.length - b1.length;
 }
 
 // The release candidate that comes next for `base`: X.Y.Z-rc.N, N one above the highest taken.
