@@ -24,8 +24,6 @@ export default defineConfig({
   },
   themeConfig: {
     darkMode: true,
-    // Copy-as-Markdown and open-in-ChatGPT/Claude actions below each page title.
-    llmsUI: true,
     nav: [
       { text: 'Getting started', link: '/getting-started' },
       { text: 'Options', link: '/options' },
