@@ -1,3 +1,7 @@
+---
+description: 'Move from svg-sprite-loader or asset/resource: what changes and what stays the same.'
+---
+
 # Migrating
 
 ## From svg-sprite-loader

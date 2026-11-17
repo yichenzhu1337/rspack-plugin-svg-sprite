@@ -1,3 +1,7 @@
+---
+description: 'Inline mode injects a hidden sprite into the DOM; extract mode emits an external sprite.svg file.'
+---
+
 # Inline vs extract mode
 
 |                  | Inline (default)                                      | Extract                                         |

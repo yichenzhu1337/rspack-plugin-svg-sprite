@@ -1,3 +1,7 @@
+---
+description: 'Using SVG sprites with React, Vue, Next.js and Rsbuild.'
+---
+
 # Frameworks
 
 ## React
