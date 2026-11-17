@@ -1,0 +1,29 @@
+# rspack-plugin-svg-sprite
+
+> SVG sprite loader and plugin for Rspack, Rsbuild and webpack 5. A drop-in replacement for svg-sprite-loader. Each SVG import gives { id, viewBox, url } for use with <use>.
+
+Install: npm i -D rspack-plugin-svg-sprite
+
+Minimal config (extract mode):
+
+    const { SvgSpritePlugin } = require('rspack-plugin-svg-sprite');
+    module.exports = {
+      module: { rules: [{
+        test: /\.svg$/,
+        type: 'javascript/auto',
+        loader: 'rspack-plugin-svg-sprite/loader',
+        options: { extract: true, esModule: false },
+      }] },
+      plugins: [new SvgSpritePlugin()],
+    };
+
+## Links
+
+- [Getting started](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/getting-started)
+- [Migrating from svg-sprite-loader](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/migrating)
+- [Modes: inline and extract](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/modes)
+- [Options](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/options)
+- [FAQ](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/docs/faq)
+- [README](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite#readme)
+- [npm](https://www.npmjs.com/package/rspack-plugin-svg-sprite)
+- [Live demo: 265 flags in one sprite](https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/)
