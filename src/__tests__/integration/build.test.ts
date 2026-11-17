@@ -187,6 +187,28 @@ describe('real builds', () => {
     );
 
     it(
+      name + ': warns for an icon without a viewBox and builds the same output',
+      async () => {
+        const dir = makeProject({
+          'icons/nosize.svg':
+            '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h5v5z"/></svg>\n',
+          'index.js': "import icon from './icons/nosize.svg';\nexport default icon;\n",
+        });
+        try {
+          const result = await build(impl, config(dir, false));
+          expect(result.hasErrors).toBe(false);
+          expect(result.warnings).toHaveLength(1);
+          expect(result.warnings[0]).toContain(path.join(dir, 'icons', 'nosize.svg'));
+          expect(result.warnings[0]).toContain('viewBox="0 0 24 24"');
+          expect(exported(dir).viewBox).toBe('0 0 24 24');
+        } finally {
+          removeProject(dir);
+        }
+      },
+      60000,
+    );
+
+    it(
       name + ': stays silent for SVGs that are intentionally assets',
       async () => {
         const dir = project(

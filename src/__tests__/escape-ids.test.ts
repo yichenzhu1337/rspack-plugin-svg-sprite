@@ -207,7 +207,8 @@ describe('DOCTYPE entity warning (unit)', () => {
       emitWarning: (w: Error) => warnings.push(w),
     };
     loader.call(ctx as any, svg);
-    return warnings.map((w) => w.message);
+    // These inputs have no viewBox on purpose, so keep only the entity warnings.
+    return warnings.map((w) => w.message).filter((m) => m.includes('DOCTYPE'));
   }
 
   it('warns once for several used entities, naming each', () => {
