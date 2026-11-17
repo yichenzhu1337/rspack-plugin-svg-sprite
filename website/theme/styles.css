@@ -1,6 +1,30 @@
 /* A compact reading layout: smaller type, tighter headings, a grouped sidebar and a quiet outline.
    Rspress styles the doc with :where() selectors, so these plain selectors win without !important. */
 
+/* Rspress's light link colour (#07f) is about 4:1 on white; its darker brand shade passes 4.5:1. */
+html:not(.dark) {
+  --rp-c-link: var(--rp-c-brand-darker);
+  --shiki-token-comment: #6e7781; /* default #b6b4b4 is 2:1 */
+}
+
+html:not(.dark) .rp-edit-link,
+html:not(.dark) .rp-edit-link a {
+  color: var(--rp-c-brand-darker);
+}
+
+html .rp-prev-next-page__item .rp-prev-next-page__item__desc {
+  color: var(--rp-c-text-2);
+}
+
+html:not(.dark) {
+  /* Callout titles: the defaults are 3.9 to 4.4:1 on their tinted backgrounds. */
+  --rp-container-warning-text: #6b5a1f;
+  --rp-container-info-text: #0056b3;
+  --rp-container-tip-text: #0f6e3e;
+  --rp-container-important-text: #6639ba;
+  --rp-container-danger-text: #b42318;
+}
+
 :root {
   --rp-nav-height: 56px;
   --rp-content-max-width: 760px;
