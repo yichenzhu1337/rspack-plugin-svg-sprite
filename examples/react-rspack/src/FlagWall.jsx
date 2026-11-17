@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { flags } from './flags';
+import { tokenize } from './highlight';
 
 const INITIAL = 40;
 
@@ -63,7 +64,17 @@ function Inspector({ flag }) {
       </div>
       <div className="codebox">
         <pre tabIndex={0}>
-          <code className="language-js">{code}</code>
+          <code className="language-js">
+            {tokenize(code).map((t, i) =>
+              t.type ? (
+                <span key={i} className={`tok-${t.type}`}>
+                  {t.text}
+                </span>
+              ) : (
+                t.text
+              ),
+            )}
+          </code>
         </pre>
       </div>
       {canCopy && (
