@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Social image</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        color: #fff;
+        background: #1b1740;
+      }
+      body::before {
+        content: '';
+        position: absolute;
+        top: -220px;
+        right: -160px;
+        width: 640px;
+        height: 640px;
+        border-radius: 50%;
+        background: #2d2470;
+      }
+      .card {
+        position: relative;
+        height: 100%;
+        padding: 64px 72px;
+        display: flex;
+        flex-direction: column;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 30px;
+        font-weight: 650;
+        color: #d1d7e0;
+      }
+      .brand img {
+        width: 56px;
+        height: 56px;
+      }
+      h1 {
+        margin: 48px 0 0;
+        font-size: 84px;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        font-weight: 700;
+      }
+      h1 span {
+        display: block;
+      }
+      .grad {
+        background: linear-gradient(90deg, #a78bfa, #60a5fa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      p {
+        margin: 24px 0 0;
+        font-size: 30px;
+        color: #9198a1;
+      }
+      .band {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+      }
+      .band img {
+        width: 108px;
+        height: 72px;
+        border-radius: 6px;
+        box-shadow: 0 0 0 1px rgb(255 255 255 / 0.18);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="brand"><img src="../public/logo.svg" alt="" />rspack-plugin-svg-sprite</div>
+      <h1>
+        <span>Every flag in the world.</span>
+        <span class="grad">One SVG sprite.</span>
+      </h1>
+      <p>Drop-in svg-sprite-loader for Rspack, Rsbuild and webpack 5</p>
+      <div class="band"><!--FLAGS--></div>
+    </div>
+  </body>
+</html>

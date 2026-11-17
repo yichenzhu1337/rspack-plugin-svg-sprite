@@ -43,8 +43,9 @@
       "project": ["*.ts"],
     },
     "examples/*": {
-      // The intro video is rendered by hand (`bun run video`), and the browser loads its scene files.
-      "entry": ["video/render.mjs", "video/scene.js"],
+      // The intro video and the social image are rendered by hand (`bun run video`, og/render.mjs),
+      // and the browser loads the video scene files.
+      "entry": ["video/render.mjs", "video/scene.js", "og/*.mjs"],
       // svgo-loader requires svgo at runtime as its peer dependency.
       "ignoreDependencies": ["svgo"],
     },

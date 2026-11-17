@@ -37,9 +37,15 @@
       content="rspack-plugin-svg-sprite combines your SVG files into one sprite at build time. A drop-in svg-sprite-loader replacement for Rspack, Rsbuild and webpack 5."
     />
     <meta property="og:url" content="https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="The rspack-plugin-svg-sprite logo, the headline Every flag in the world. One SVG sprite., and a row of flags."
+    />
     <meta
       property="og:image"
-      content="https://opengraph.githubassets.com/1/yichenzhu1337/rspack-plugin-svg-sprite"
+      content="https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/og.png"
     />
 
     <!-- Twitter Card -->
@@ -51,7 +57,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://opengraph.githubassets.com/1/yichenzhu1337/rspack-plugin-svg-sprite"
+      content="https://yichenzhu1337.github.io/rspack-plugin-svg-sprite/og.png"
     />
 
     <!-- JSON-LD structured data -->
@@ -95,7 +101,11 @@
   <body>
     <header class="topbar">
       <div class="wrap topbar-inner">
-        <a class="logo" href="./"><span class="long">rspack-plugin-</span>svg-sprite</a>
+        <a class="logo" href="./"
+          ><img src="logo.svg" alt="" width="28" height="28" /><span
+            ><span class="long">rspack-plugin-</span>svg-sprite</span
+          ></a
+        >
         <nav aria-label="Site">
           <a href="docs/">Docs</a>
           <a class="with-icon" href="https://github.com/yichenzhu1337/rspack-plugin-svg-sprite"
@@ -112,33 +122,54 @@
 
     <main>
       <section class="hero wrap">
-        <h1>Every flag in the world. One SVG sprite.</h1>
-        <p class="lead">
-          <strong>rspack-plugin-svg-sprite</strong> combines your <code>.svg</code> files into one
-          sprite at build time. Each import gives you <code>{ id, viewBox, url }</code> for
-          <code>&lt;use&gt;</code>. A drop-in replacement for <code>svg-sprite-loader</code> on
-          Rspack, Rsbuild and webpack 5.
-        </p>
-        <div class="install">
-          <code id="install-cmd">npm i -D rspack-plugin-svg-sprite</code>
-          <button
-            type="button"
-            class="icon-btn"
-            id="install-copy"
-            hidden
-            aria-label="Copy install command"
-          >
-            <svg class="icon" aria-hidden="true"><use href="sprite.svg#icon-copy" /></svg>
-          </button>
+        <div class="hero-text">
+          <h1>
+            <span>Every flag in the world.</span>
+            <span class="grad">One SVG sprite.</span>
+          </h1>
+          <p class="lead">
+            <strong>rspack-plugin-svg-sprite</strong> combines your <code>.svg</code> files into one
+            sprite at build time. Each import gives you <code>{ id, viewBox, url }</code> for
+            <code>&lt;use&gt;</code>. A drop-in replacement for <code>svg-sprite-loader</code> on
+            Rspack, Rsbuild and webpack 5.
+          </p>
+          <div class="install">
+            <span class="install-emoji" aria-hidden="true">📦</span>
+            <code id="install-cmd">npm i -D rspack-plugin-svg-sprite</code>
+            <button
+              type="button"
+              class="icon-btn"
+              id="install-copy"
+              hidden
+              aria-label="Copy install command"
+            >
+              <svg class="icon" aria-hidden="true"><use href="sprite.svg#icon-copy" /></svg>
+            </button>
+          </div>
+          <p class="actions">
+            <a class="btn" href="docs/getting-started">Get started</a>
+            <a class="btn btn-quiet" href="docs/migrating">Migrate from svg-sprite-loader</a>
+          </p>
+          <p class="sr-only" id="install-status" role="status"></p>
         </div>
-        <p class="actions">
-          <a class="btn" href="docs/getting-started">Get started</a>
-          <a class="btn btn-quiet" href="docs/migrating">Migrate from svg-sprite-loader</a>
-        </p>
-        <p class="sr-only" id="install-status" role="status"></p>
+
+        <figure class="intro-video">
+          <video
+            src="intro.mp4"
+            poster="intro-poster.webp"
+            width="1920"
+            height="1080"
+            controls
+            muted
+            playsinline
+            preload="none"
+            aria-label="Intro video, no sound. The chapters are listed below."
+          ></video>
+          <figcaption>🎬 A 43-second tour, no sound. Chapters are listed below.</figcaption>
+        </figure>
       </section>
 
-      <section class="wrap" aria-label="In numbers">
+      <section class="wrap highlights" aria-label="Highlights">
         <dl class="stats">
           <div>
             <dt>SVG files</dt>
@@ -153,32 +184,23 @@
             <dd>1</dd>
           </div>
         </dl>
+        <ul class="features">
+          <li><span class="emoji" aria-hidden="true">⚡</span>One request for every icon</li>
+          <li><span class="emoji" aria-hidden="true">🔁</span>Drop-in for svg-sprite-loader</li>
+          <li><span class="emoji" aria-hidden="true">🌓</span>Inline or extract mode</li>
+          <li><span class="emoji" aria-hidden="true">🪶</span>Zero runtime dependencies</li>
+        </ul>
       </section>
 
       <section class="wrap" aria-labelledby="intro-title">
-        <h2 id="intro-title">See it in 43 seconds</h2>
-        <figure class="intro-video">
-          <video
-            src="intro.mp4"
-            poster="intro-poster.webp"
-            width="1920"
-            height="1080"
-            controls
-            muted
-            playsinline
-            preload="none"
-            aria-label="Intro video, no sound. The chapters are listed below."
-          ></video>
-          <figcaption>
-            <ol class="chapters" id="video-chapters">
-              <%= videoChapters %>
-            </ol>
-          </figcaption>
-        </figure>
+        <h2 id="intro-title"><span aria-hidden="true">🎬</span> See it in 43 seconds</h2>
+        <ol class="chapters" id="video-chapters">
+          <%= videoChapters %>
+        </ol>
       </section>
 
       <section class="wrap" id="demo" aria-labelledby="demo-title">
-        <h2 id="demo-title">Try it: 265 flags, one sprite</h2>
+        <h2 id="demo-title"><span aria-hidden="true">🌍</span> Try it: 265 flags, one sprite</h2>
         <p class="section-lead">
           Every flag below is an <code>&lt;svg&gt;&lt;use&gt;</code> that points into the same
           <code>sprite.svg</code>. Pick one to see what the import gives you.
@@ -194,22 +216,56 @@
       </section>
 
       <section class="wrap" aria-labelledby="how-title">
-        <h2 id="how-title">How it works</h2>
+        <h2 id="how-title"><span aria-hidden="true">🧩</span> How it works</h2>
         <figure class="flow">
           <ol>
             <li>
+              <span class="step-num" aria-hidden="true">1</span>
+              <svg class="ill" viewBox="0 0 64 48" aria-hidden="true">
+                <rect x="24" y="4" width="22" height="28" rx="4" />
+                <rect x="17" y="9" width="22" height="28" rx="4" />
+                <rect x="10" y="14" width="22" height="28" rx="4" />
+                <path d="M16 24h10M16 30h6" />
+              </svg>
               <span class="flow-title">Your files</span>
               <code>DE.svg FR.svg JP.svg …</code>
             </li>
             <li>
+              <span class="flow-arrow" aria-hidden="true"
+                ><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg
+              ></span>
+              <span class="step-num" aria-hidden="true">2</span>
+              <svg class="ill" viewBox="0 0 64 48" aria-hidden="true">
+                <circle class="gear-teeth" cx="32" cy="24" r="14" />
+                <circle cx="32" cy="24" r="11" />
+                <circle cx="32" cy="24" r="4" />
+              </svg>
               <span class="flow-title">Loader + plugin</span>
               <code>build time</code>
             </li>
             <li>
+              <span class="flow-arrow" aria-hidden="true"
+                ><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg
+              ></span>
+              <span class="step-num" aria-hidden="true">3</span>
+              <svg class="ill" viewBox="0 0 64 48" aria-hidden="true">
+                <rect x="14" y="4" width="36" height="40" rx="5" />
+                <rect class="fill" x="19" y="9" width="12" height="13" rx="2" />
+                <rect class="fill soft" x="33" y="9" width="12" height="13" rx="2" />
+                <rect class="fill soft" x="19" y="26" width="12" height="13" rx="2" />
+                <rect class="fill" x="33" y="26" width="12" height="13" rx="2" />
+              </svg>
               <span class="flow-title">One sprite</span>
               <code>&lt;symbol id="flag-DE"&gt;</code>
             </li>
             <li>
+              <span class="flow-arrow" aria-hidden="true"
+                ><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg
+              ></span>
+              <span class="step-num" aria-hidden="true">4</span>
+              <svg class="ill" viewBox="0 0 64 48" aria-hidden="true">
+                <path d="M20 14L8 24l12 10M44 14l12 10-12 10M36 10L28 38" />
+              </svg>
               <span class="flow-title">Your markup</span>
               <code>&lt;use href="sprite.svg#flag-DE"/&gt;</code>
             </li>
@@ -220,8 +276,9 @@
           </figcaption>
         </figure>
         <p>This is the real config of this page: one rule for the flags, one for the UI icons.</p>
-        <pre><code class="language-js"><span class="c">// rspack.config.js</span>
-const {
+        <div class="codeblock">
+          <div class="codeblock-bar"><span>rspack.config.js</span></div>
+          <pre><code class="language-js">const {
   SvgSpritePlugin,
 } = require('rspack-plugin-svg-sprite');
 
@@ -237,7 +294,7 @@ module.exports = {
       {
         test: /\.svg$/,
         include: flagsDir,
-        <span class="c">// = country-flag-icons/3x2</span>
+        // = country-flag-icons/3x2
         type: 'javascript/auto',
         loader: 'rspack-plugin-svg-sprite/loader',
         options: {
@@ -245,12 +302,13 @@ module.exports = {
           symbolId: 'flag-[name]',
         },
       },
-      <span class="c">// a second rule, with symbolId 'icon-[name]',</span>
-      <span class="c">// handles the UI icons: same sprite.svg</span>
+      // a second rule, with symbolId 'icon-[name]',
+      // handles the UI icons: same sprite.svg
     ],
   },
   plugins: [new SvgSpritePlugin()],
 };</code></pre>
+        </div>
         <p>
           Extract mode, as on this page. Inline mode needs no plugin:
           <a href="docs/modes">see Modes</a>.
@@ -274,6 +332,7 @@ module.exports = {
           <a href="https://gitlab.com/catamphetamine/country-flag-icons">country-flag-icons</a>
           (MIT). Icons: <a href="https://feathericons.com/">Feather</a> (MIT).
         </p>
+        <p class="made">Made for Rspack <span aria-hidden="true">⚡</span></p>
       </div>
     </footer>
   </body>
