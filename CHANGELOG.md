@@ -1,5 +1,17 @@
 # rspack-plugin-svg-sprite
 
+## 1.6.4
+
+### Patch Changes
+
+- [#60](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/60) [`91ff725`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/91ff725050b66b56c4d44f662befa26c6b1b7648) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - Two icons with the same symbol id in different sprite files (for example `a/home.svg` going to `a.svg` and `b/home.svg` going to `b.svg`) were treated as duplicates: a warning was printed, one sprite got the wrong drawing and the other was never emitted. Ids now only need to be unique within one sprite file.
+
+- [#61](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/61) [`9764199`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/97641993229eb8ab7333018d2b2e49648d5c4baf) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - File and folder names containing `$` sequences such as `$$`, `$&`, `` $` `` or `$'` were altered when inserted into the symbol id through `[name]`, `[folder]` and `[ext]` (for example `price$$.svg` gave `icon-price$`). The names are now inserted exactly as written.
+
+- [#58](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/58) [`ec68414`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/ec68414b0d010423712daf1dd6d607e96289424e) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - Icons exported from Inkscape, Sketch and similar tools use prefixes such as `inkscape:` and `sodipodi:` that their root `<svg>` declares. The extracted sprite lost those declarations, so browsers rejected the whole sprite and every icon in it rendered blank. The loader now copies the namespace declarations an icon actually uses onto its `<symbol>`.
+
+- [#57](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/pull/57) [`bdbdada`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/commit/bdbdada155b45a52075396af28a18e19ce921394) Thanks [@yichenzhu1337](https://github.com/yichenzhu1337)! - Fix webpack 5 builds that failed with "A Source-like object with a 'map' method must also provide an 'updateHash' method" when the output filename has a content hash or the persistent cache is on and `webpack-sources` cannot be resolved from this package (pnpm, Yarn PnP, Bun). The sprite now uses webpack's own `RawSource`.
+
 ## 1.6.3
 
 ### Patch Changes
