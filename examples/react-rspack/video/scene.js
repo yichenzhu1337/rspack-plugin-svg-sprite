@@ -98,9 +98,21 @@
 
   // ---------------------------------------------------------------- scenes
   const ch = D.chapters;
+  // The scenes are timed on a 43-second source timeline (SRC: the start of each scene, then the end).
+  // chapters.json gives where each scene starts in the final video; renderAt maps final time to source
+  // time scene by scene, so a scene plays faster when its chapter is shorter.
+  const SRC = [0, 4, 10, 17, 26, 34, 39, 43];
+  const OUT = [...ch.map((c) => c.t), D.duration];
+  if (SRC.length !== OUT.length)
+    throw new Error('chapters.json and SRC disagree on the scene count');
+  const toSource = (t) => {
+    let i = 0;
+    while (i < OUT.length - 2 && t >= OUT[i + 1]) i++;
+    return SRC[i] + ((t - OUT[i]) / (OUT[i + 1] - OUT[i])) * (SRC[i + 1] - SRC[i]);
+  };
   const scenes = ch.map((c, i) => ({
-    a: c.t,
-    b: i + 1 < ch.length ? ch[i + 1].t : D.duration,
+    a: SRC[i],
+    b: SRC[i + 1],
     caption: c.caption,
     first: i === 0,
     last: i === ch.length - 1,
@@ -608,7 +620,8 @@
     drawScene7,
   ];
 
-  window.renderAt = (t) => {
+  window.renderAt = (time) => {
+    const t = toSource(time);
     scenes.forEach((s, i) => {
       const lt = t - s.a;
       const fadeIn = s.first ? 1 : eInOut(prog(t, s.a - 0.3, s.a + 0.3));

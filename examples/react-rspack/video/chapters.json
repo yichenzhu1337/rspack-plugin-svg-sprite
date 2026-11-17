@@ -1,16 +1,16 @@
 [
   { "t": 0, "title": "What it is", "caption": "SVG sprites for Rspack, Rsbuild and webpack 5" },
-  { "t": 4, "title": "The problem", "caption": "265 SVG files. One request each." },
-  { "t": 10, "title": "Import", "caption": "Import an SVG. Get its id, viewBox and url." },
+  { "t": 3, "title": "The problem", "caption": "265 SVG files. One request each." },
+  { "t": 7, "title": "Import", "caption": "Import an SVG. Get its id, viewBox and url." },
   {
-    "t": 17,
+    "t": 12,
     "title": "Build",
     "caption": "At build time, the plugin merges them into one sprite."
   },
-  { "t": 26, "title": "Use", "caption": "Use any icon with `<use>`. One request for all." },
-  { "t": 34, "title": "Migrate", "caption": "Coming from svg-sprite-loader? Change the loader." },
+  { "t": 18.5, "title": "Use", "caption": "Use any icon with `<use>`. One request for all." },
+  { "t": 24.5, "title": "Migrate", "caption": "Coming from svg-sprite-loader? Change the loader." },
   {
-    "t": 39,
+    "t": 27.5,
     "title": "Install",
     "caption": "",
     "summary": "npm install -D rspack-plugin-svg-sprite, then read the docs."

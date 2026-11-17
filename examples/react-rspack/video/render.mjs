@@ -1,6 +1,6 @@
 // Renders the intro video frame by frame: builds the 265 flags with the plugin, reads the real numbers
 // from the build, draws every frame in headless Chrome (scene.html, a pure function of time) and pipes
-// the PNG frames into ffmpeg.
+// the PNG frames into ffmpeg, with the music from music.mjs.
 //
 //   node video/render.mjs                    final render: public/intro.mp4 and public/intro-poster.webp
 //   node video/render.mjs --draft            960x540 at 15 fps, written to the scratch directory
@@ -19,14 +19,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import zlib from 'node:zlib';
 import { FLAG_ORDER } from './flag-order.mjs';
+import { writeMusic } from './music.mjs';
 
 const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(here, '../public');
 
 const FPS = 30;
-const DURATION = 43;
-const POSTER_T = 33;
+const DURATION = 30;
+// The full flag wall with the "1 request" badge (source time 33 s, see SRC in scene.js).
+const POSTER_T = 23.75;
 
 const { values: args } = (await import('node:util')).parseArgs({
   options: {
@@ -206,7 +208,7 @@ async function launch() {
   });
 }
 
-function encoder(outFile, fps, scale) {
+function encoder(outFile, fps, scale, musicFile) {
   const argv = [
     '-y',
     '-v',
@@ -217,6 +219,12 @@ function encoder(outFile, fps, scale) {
     String(fps),
     '-i',
     '-',
+    '-i',
+    musicFile,
+    '-map',
+    '0:v',
+    '-map',
+    '1:a',
     '-vf',
     `${scale ? `scale=${scale}:flags=lanczos,` : ''}scale=out_color_matrix=bt709:out_range=tv,format=yuv420p`,
     '-c:v',
@@ -237,7 +245,11 @@ function encoder(outFile, fps, scale) {
     'bt709',
     '-movflags',
     '+faststart',
-    '-an',
+    '-c:a',
+    'aac',
+    '-b:a',
+    '96k',
+    '-shortest',
     outFile,
   ];
   const child = spawn(ffmpeg, argv, { stdio: ['pipe', 'inherit', 'inherit'] });
@@ -354,7 +366,9 @@ try {
     const outFile = isFinal ? path.join(publicDir, 'intro.mp4') : path.join(scratch, 'draft.mp4');
     fs.mkdirSync(path.dirname(outFile), { recursive: true });
     const fps = args.draft ? 15 : FPS;
-    const enc = encoder(outFile, fps, args.draft ? '960:540' : null);
+    const musicFile = path.join(scratch, 'music.wav');
+    writeMusic(musicFile, DURATION);
+    const enc = encoder(outFile, fps, args.draft ? '960:540' : null, musicFile);
     const total = DURATION * fps;
     for (let i = 0; i < total; i++) {
       await enc.write(await draw(i / fps));
