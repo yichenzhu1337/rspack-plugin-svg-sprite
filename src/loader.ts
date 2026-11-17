@@ -268,9 +268,9 @@ export function generateSymbolId(resourcePath: string, options: LoaderOptions): 
   const dirBasename = dirParts[dirParts.length - 1] || '';
 
   return pattern
-    .replace(/\[name\]/g, basename)
-    .replace(/\[folder\]/g, dirBasename)
-    .replace(/\[ext\]/g, path.extname(resourcePath).slice(1));
+    .replace(/\[name\]/g, () => basename)
+    .replace(/\[folder\]/g, () => dirBasename)
+    .replace(/\[ext\]/g, () => path.extname(resourcePath).slice(1));
 }
 
 /** Escapes the id for a double-quoted attribute. Ordinary ids, including `>` and `'`, are unchanged. */

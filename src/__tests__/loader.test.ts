@@ -169,6 +169,19 @@ describe('generateSymbolId', () => {
     const id = generateSymbolId(p, { symbolId: '[folder]-[name]' });
     expect(id).toBe('-file');
   });
+
+  it.each(['price$$', 'a$&b', 'x$`y', "it$'s", 'cost$1'])(
+    'inserts the file name %s literally',
+    (name) => {
+      const p = path.join('/icons', name + '.svg');
+      expect(generateSymbolId(p, { symbolId: 'icon-[name]' })).toBe('icon-' + name);
+    },
+  );
+
+  it('inserts a folder name containing $& and $$ literally', () => {
+    const p = path.join('/icons', 'a$&b$$', 'home.svg');
+    expect(generateSymbolId(p, { symbolId: '[folder]-[name]' })).toBe('a$&b$$-home');
+  });
 });
 
 describe('Loader', () => {
