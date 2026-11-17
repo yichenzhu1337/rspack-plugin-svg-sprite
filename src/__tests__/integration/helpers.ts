@@ -66,8 +66,11 @@ export function build(impl: any, config: any): Promise<BuildResult> {
   return new Promise((resolve, reject) => {
     const compiler = impl(config);
     compiler.run((err: Error | null, stats: any) => {
-      compiler.close(() => {
+      // webpack writes its persistent cache while closing, so errors raised there surface only
+      // through this callback.
+      compiler.close((closeErr: Error | null | undefined) => {
         if (err) return reject(err);
+        if (closeErr) return reject(closeErr);
         const json = stats.toJson({ all: false, warnings: true });
         resolve({
           hasErrors: stats.hasErrors(),
@@ -145,9 +148,13 @@ export async function startWatch(impl: any, config: any): Promise<Watcher> {
       await idle;
     },
     close() {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         if (timer) clearTimeout(timer);
-        watching.close(() => compiler.close(() => resolve()));
+        watching.close(() =>
+          compiler.close((closeErr: Error | null | undefined) =>
+            closeErr ? reject(closeErr) : resolve(),
+          ),
+        );
       });
     },
   };
