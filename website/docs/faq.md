@@ -1,3 +1,7 @@
+---
+description: 'Fixes for common problems: missing sprite file, broken icons, build warnings, caching and id clashes.'
+---
+
 # FAQ and troubleshooting
 
 ## Sprite file not emitted / icons not rendering

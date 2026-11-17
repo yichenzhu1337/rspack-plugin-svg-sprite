@@ -1,3 +1,7 @@
+---
+description: 'The public guarantees of the package, each mapped to the test that enforces it.'
+---
+
 # Guarantees
 
 Every public guarantee of the package is mapped to the test that enforces it. The full table is [`.github/GUARANTEES.md`](https://github.com/yichenzhu1337/rspack-plugin-svg-sprite/blob/main/.github/GUARANTEES.md); a test fails when a file or test name in it no longer exists.

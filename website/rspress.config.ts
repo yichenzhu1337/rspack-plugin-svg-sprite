@@ -17,11 +17,15 @@ export default defineConfig({
   icon: '/favicon.svg',
   logo: '/favicon.svg',
   outDir: 'doc_build',
+  // Emit llms.txt, llms-full.txt and a .md twin of every page for AI agents.
+  llms: true,
   markdown: {
     link: { checkDeadLinks: true },
   },
   themeConfig: {
     darkMode: true,
+    // Copy-as-Markdown and open-in-ChatGPT/Claude actions below each page title.
+    llmsUI: true,
     nav: [
       { text: 'Getting started', link: '/getting-started' },
       { text: 'Options', link: '/options' },
